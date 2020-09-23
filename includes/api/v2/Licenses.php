@@ -53,8 +53,9 @@ class Licenses extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base, array(
                 array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'getLicenses'),
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => array($this, 'getLicenses'),
+                    'permission_callback' => array($this, 'permissionCallback')
                 )
             )
         );
@@ -67,9 +68,10 @@ class Licenses extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base . '/(?P<license_key>[\w-]+)', array(
                 array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'getLicense'),
-                    'args'     => array(
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => array($this, 'getLicense'),
+                    'permission_callback' => array($this, 'permissionCallback'),
+                    'args'                => array(
                         'license_key' => array(
                             'description' => 'License Key',
                             'type'        => 'string',
@@ -87,8 +89,9 @@ class Licenses extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base, array(
                 array(
-                    'methods'  => WP_REST_Server::CREATABLE,
-                    'callback' => array($this, 'createLicense'),
+                    'methods'             => WP_REST_Server::CREATABLE,
+                    'callback'            => array($this, 'createLicense'),
+                    'permission_callback' => array($this, 'permissionCallback')
                 )
             )
         );
@@ -101,9 +104,10 @@ class Licenses extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base . '/(?P<license_key>[\w-]+)', array(
                 array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array($this, 'updateLicense'),
-                    'args'     => array(
+                    'methods'             => WP_REST_Server::EDITABLE,
+                    'callback'            => array($this, 'updateLicense'),
+                    'permission_callback' => array($this, 'permissionCallback'),
+                    'args'                => array(
                         'license_key' => array(
                             'description' => 'License Key',
                             'type'        => 'string',
@@ -121,9 +125,10 @@ class Licenses extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base . '/activate/(?P<license_key>[\w-]+)', array(
                 array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'activateLicense'),
-                    'args'     => array(
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => array($this, 'activateLicense'),
+                    'permission_callback' => array($this, 'permissionCallback'),
+                    'args'                => array(
                         'license_key' => array(
                             'description' => 'License Key',
                             'type'        => 'string',
@@ -141,9 +146,10 @@ class Licenses extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base . '/deactivate/(?P<license_key>[\w-]+)', array(
                 array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'deactivateLicense'),
-                    'args'     => array(
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => array($this, 'deactivateLicense'),
+                    'permission_callback' => array($this, 'permissionCallback'),
+                    'args'                => array(
                         'license_key' => array(
                             'description' => 'License Key',
                             'type'        => 'string'
@@ -161,9 +167,10 @@ class Licenses extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base . '/validate/(?P<license_key>[\w-]+)', array(
                 array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'validateLicense'),
-                    'args'     => array(
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => array($this, 'validateLicense'),
+                    'permission_callback' => array($this, 'permissionCallback'),
+                    'args'                => array(
                         'license_key' => array(
                             'description' => 'License Key',
                             'type'        => 'string',

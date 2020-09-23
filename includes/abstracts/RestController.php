@@ -5,6 +5,7 @@ namespace LicenseManagerForWooCommerce\Abstracts;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use WP_Error;
 use WP_REST_Controller;
+use WP_REST_Request;
 use WP_REST_Response;
 
 defined('ABSPATH') || exit;
@@ -107,6 +108,24 @@ class RestController extends WP_REST_Controller
         }
 
         return $status;
+    }
+
+    /**
+     * Callback method for the "permission_callback" argument of the
+     * "register_rest_route" method.
+     *
+     * @param WP_REST_Request $request
+     * @return bool|WP_Error
+     */
+    public function permissionCallback($request)
+    {
+        $error = apply_filters('lmfwc_rest_permission_callback', $request);
+
+        if ($error instanceof WP_Error) {
+            return $error;
+        }
+
+        return true;
     }
 
     /**

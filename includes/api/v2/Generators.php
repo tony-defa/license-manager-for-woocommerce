@@ -51,8 +51,9 @@ class Generators extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base, array(
                 array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'getGenerators'),
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => array($this, 'getGenerators'),
+                    'permission_callback' => array($this, 'permissionCallback')
                 )
             )
         );
@@ -65,9 +66,10 @@ class Generators extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base . '/(?P<generator_id>[\w-]+)', array(
                 array(
-                    'methods'  => WP_REST_Server::READABLE,
-                    'callback' => array($this, 'getGenerator'),
-                    'args'     => array(
+                    'methods'             => WP_REST_Server::READABLE,
+                    'callback'            => array($this, 'getGenerator'),
+                    'permission_callback' => array($this, 'permissionCallback'),
+                    'args'                => array(
                         'generator_id' => array(
                             'description' => 'Generator ID',
                             'type'        => 'integer',
@@ -85,8 +87,9 @@ class Generators extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base, array(
                 array(
-                    'methods'  => WP_REST_Server::CREATABLE,
-                    'callback' => array($this, 'createGenerator'),
+                    'methods'             => WP_REST_Server::CREATABLE,
+                    'callback'            => array($this, 'createGenerator'),
+                    'permission_callback' => array($this, 'permissionCallback')
                 )
             )
         );
@@ -99,9 +102,10 @@ class Generators extends LMFWC_REST_Controller
         register_rest_route(
             $this->namespace, $this->rest_base . '/(?P<generator_id>[\w-]+)', array(
                 array(
-                    'methods'  => WP_REST_Server::EDITABLE,
-                    'callback' => array($this, 'updateGenerator'),
-                    'args'     => array(
+                    'methods'             => WP_REST_Server::EDITABLE,
+                    'callback'            => array($this, 'updateGenerator'),
+                    'permission_callback' => array($this, 'permissionCallback'),
+                    'args'                => array(
                         'generator_id' => array(
                             'description' => 'Generator ID',
                             'type'        => 'integer',
