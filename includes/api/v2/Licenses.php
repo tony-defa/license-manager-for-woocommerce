@@ -2,6 +2,8 @@
 
 namespace LicenseManagerForWooCommerce\API\v2;
 
+use DateTime;
+use DateTimeZone;
 use Exception;
 use LicenseManagerForWooCommerce\Abstracts\RestController as LMFWC_REST_Controller;
 use LicenseManagerForWooCommerce\Enums\LicenseSource;
@@ -628,6 +630,10 @@ class Licenses extends LMFWC_REST_Controller
             );
         }
 
+        if (false !== $licenseExpired = $this->hasLicenseExpired($license)) {
+            return $licenseExpired;
+        }
+
         $timesActivated    = null;
         $timesActivatedMax = null;
 
@@ -743,7 +749,11 @@ class Licenses extends LMFWC_REST_Controller
             );
         }
 
-        $timesActivated   = null;
+        if (false !== $licenseExpired = $this->hasLicenseExpired($license)) {
+            return $licenseExpired;
+        }
+
+        $timesActivated = null;
 
         if ($license->getTimesActivated() !== null) {
             $timesActivated = absint($license->getTimesActivated());
@@ -865,5 +875,33 @@ class Licenses extends LMFWC_REST_Controller
         );
 
         return $this->response(true, $result, 200, 'v2/licenses/validate/{license_key}');
+    }
+
+    /**
+     * Checks if the license has an expiry date and if it has expired already.
+     *
+     * @param LicenseResourceModel $license
+     * @return false|WP_Error
+     */
+    private function hasLicenseExpired($license)
+    {
+        if ($expiresAt = $license->getExpiresAt()) {
+            try {
+                $dateExpiresAt = new DateTime($expiresAt);
+                $dateNow = new DateTime('now', new DateTimeZone('UTC'));
+            } catch (Exception $e) {
+                return new WP_Error('lmfwc_rest_license_expired', $e->getMessage());
+            }
+
+            if ($dateNow > $dateExpiresAt) {
+                return new WP_Error(
+                    'lmfwc_rest_license_expired',
+                    sprintf('The license Key expired on %s (UTC).', $license->getExpiresAt()),
+                    array('status' => 405)
+                );
+            }
+        }
+
+        return false;
     }
 }
