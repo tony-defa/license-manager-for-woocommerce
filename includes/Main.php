@@ -289,6 +289,10 @@ final class Main extends Singleton
             new Integrations\WooCommerce\Controller();
         }
 
+        if ($this->isPluginActive('woocommerce-subscriptions/woocommerce-subscriptions.php')) {
+            new Integrations\WooCommerceSubscriptions\Controller();
+        }
+
         if (Settings::get('lmfwc_allow_duplicates')) {
             add_filter('lmfwc_duplicate', '__return_false', PHP_INT_MAX);
         }

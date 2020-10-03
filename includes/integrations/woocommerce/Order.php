@@ -85,7 +85,15 @@ class Order
             $product = $orderItem->get_product();
 
             // Skip this product because it's not a licensed product.
-            if (!get_post_meta($product->get_id(), 'lmfwc_licensed_product', true)) {
+            if (!lmfwc_is_licensed_product($product->get_id())) {
+                continue;
+            }
+
+            // Instead of generating new license keys, the plugin will extend
+            // the expiration date of existing licenses, if configured.
+            $abortEarly = apply_filters('lmfwc_maybe_skip_subscription_renewals', $orderId, $product->get_id());
+
+            if ($abortEarly === true) {
                 continue;
             }
 

@@ -213,7 +213,7 @@ class ProductData
     {
         // This is not a product.
         if (!array_key_exists('post_type', $_POST)
-            || $_POST['post_type'] != 'product'
+            || $_POST['post_type'] !== 'product'
             || !array_key_exists('lmfwc_edit_flag', $_POST)
         ) {
             return;

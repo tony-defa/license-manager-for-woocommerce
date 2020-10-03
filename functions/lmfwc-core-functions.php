@@ -32,7 +32,7 @@ function lmfwc_duplicate($licenseKey, $licenseKeyId = null)
     }
 
     // Update action
-    elseif ($licenseKeyId !== null && is_numeric($licenseKeyId)) {
+    elseif (is_numeric($licenseKeyId)) {
         $table = LicenseResourceRepository::instance()->getTable();
 
         $query = "
@@ -89,4 +89,18 @@ function lmfwc_rand_hash()
 function lmfwc_camelize($input, $separator = '_')
 {
     return str_replace($separator, '', ucwords($input, $separator));
+}
+
+/**
+ * Checks whether a product is licensed.
+ *
+ * @param int $productId
+ * @return bool
+ */
+function lmfwc_is_licensed_product($productId) {
+    if (get_post_meta($productId, 'lmfwc_licensed_product', true)) {
+        return true;
+    }
+
+    return false;
 }
