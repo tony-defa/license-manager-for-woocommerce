@@ -1,3 +1,11 @@
+##### 2.2.1 - 2020-10-03
+* Update - WordPress 5.5 compatibility
+* Update - WooCommerce 4.5 compatibility
+* Fix - License user ID is no longer being overwritten with the user ID of the currently logged in administrator when manually completing an order in the backend.
+* Fix - The plugin no longer throws a PHP Error when visiting "My Account" if there are licenses assigned to deleted WooCommerce products.
+* Fix - `register_rest_route()` no longer throws a PHP notice.
+* Fix - The plugin now prevents license activation/deactivation if the license key has expired.
+
 ##### 2.2.0 - 2020-04-10
 * Add - Functions for license operations: `lmfwc_add_license()`, `lmfwc_get_license()`, `lmfwc_update_license()`, `lmfwc_delete_license()`, `lmfwc_activate_license()`, and `lmfwc_deactivate_license()`
 * Add - Maximum activation count (`times_activated_max`) now allows for unlimited activations if the value is left empty (`null`)
