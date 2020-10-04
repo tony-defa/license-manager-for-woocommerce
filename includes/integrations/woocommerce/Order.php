@@ -94,7 +94,10 @@ class Order
             $abortEarly = apply_filters('lmfwc_maybe_skip_subscription_renewals', $orderId, $product->get_id());
 
             if ($abortEarly === true) {
+                error_log("LMFWC: (Order #{$orderId}, Product #{$product->get_id()}) Abort early is TRUE");
                 continue;
+            } else {
+                error_log("LMFWC: (Order #{$orderId}, Product #{$product->get_id()}) Abort early is FALSE");
             }
 
             $useStock = get_post_meta($product->get_id(), 'lmfwc_licensed_product_use_stock', true);
