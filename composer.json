@@ -12,6 +12,7 @@
             "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\": "includes/integrations/woocommerce",
             "LicenseManagerForWooCommerce\\Integrations\\WooCommerce\\Emails\\": "includes/integrations/woocommerce/emails",
             "LicenseManagerForWooCommerce\\Integrations\\WooCommerceSubscriptions\\": "includes/integrations/woocommerce-subscriptions",
+            "LicenseManagerForWooCommerce\\Integrations\\WooCommerceSubscriptions\\Lists\\": "includes/integrations/woocommerce-subscriptions/lists",
             "LicenseManagerForWooCommerce\\Interfaces\\": "includes/interfaces",
             "LicenseManagerForWooCommerce\\Lists\\": "includes/lists",
             "LicenseManagerForWooCommerce\\Models\\": "includes/models",
