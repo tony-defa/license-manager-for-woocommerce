@@ -31,26 +31,12 @@ class ProductData
         /**
          * @see https://www.proy.info/woocommerce-admin-custom-product-data-tab/
          */
-        add_filter('woocommerce_product_data_tabs',   array($this, 'simpleProductLicenseManagerTab'));
-        add_action('woocommerce_product_data_panels', array($this, 'simpleProductLicenseManagerPanel'));
-
-        add_action(
-            'woocommerce_product_after_variable_attributes',
-            array($this, 'variableProductLicenseManagerFields'),
-            10,
-            3
-        );
-
-        add_action(
-            'woocommerce_save_product_variation',
-            array($this, 'variableProductLicenseManagerSaveAction'),
-            10,
-            2
-        );
-
-        // Change the product_data_tab icon
-        add_action('admin_head', array($this, 'styleInventoryManagement'));
-        add_action('save_post',  array($this, 'savePost'), 10);
+        add_filter('woocommerce_product_data_tabs',                 array($this, 'simpleProductTab'),          10, 1);
+        add_action('woocommerce_product_data_panels',               array($this, 'simpleProductPanel'),        10, 1);
+        add_action('woocommerce_product_after_variable_attributes', array($this, 'variableProductAttributes'), 10, 3);
+        add_action('woocommerce_save_product_variation',            array($this, 'variableProductSave'),       10, 2);
+        add_action('admin_head',                                    array($this, 'styleTab'),                  10, 1);
+        add_action('save_post',                                     array($this, 'savePost'),                  10, 1);
     }
 
     /**
@@ -60,7 +46,7 @@ class ProductData
      *
      * @return mixed
      */
-    public function simpleProductLicenseManagerTab($tabs)
+    public function simpleProductTab($tabs)
     {
         $tabs[self::ADMIN_TAB_NAME] = array(
             'label'    => __('License Manager', 'license-manager-for-woocommerce'),
@@ -75,7 +61,7 @@ class ProductData
     /**
      * Displays the new fields inside the new product data tab.
      */
-    public function simpleProductLicenseManagerPanel()
+    public function simpleProductPanel()
     {
         global $post;
 
@@ -183,7 +169,7 @@ class ProductData
             __('License key(s) in stock and available for sale', 'license-manager-for-woocommerce')
         );
 
-        do_action('lmfwc_product_data_panel', $post);
+        do_action('lmfwc_simple_product_data_panel', $post);
 
         echo '</div></div>';
     }
@@ -194,7 +180,7 @@ class ProductData
      * @see https://docs.woocommerce.com/document/utilising-the-woocommerce-icon-font-in-your-extensions/
      * @see https://developer.wordpress.org/resource/dashicons/
      */
-    public function styleInventoryManagement()
+    public function styleTab()
     {
         echo sprintf(
             '<style>#woocommerce-product-data ul.wc-tabs li.%s_options a:before { font-family: %s; content: "%s"; }</style>',
@@ -274,7 +260,7 @@ class ProductData
             update_post_meta($postId, 'lmfwc_licensed_product_assigned_generator', 0);
         }
 
-        do_action('lmfwc_product_data_save_post', $postId);
+        do_action('lmfwc_simple_product_save', $postId);
     }
 
     /**
@@ -284,7 +270,7 @@ class ProductData
      * @param array   $variationData
      * @param WP_Post $variation
      */
-    public function variableProductLicenseManagerFields($loop, $variationData, $variation)
+    public function variableProductAttributes($loop, $variationData, $variation)
     {
         /** @var GeneratorResourceModel[] $generators */
         $generators        = GeneratorResourceRepository::instance()->findAll();
@@ -393,6 +379,8 @@ class ProductData
             __('License key(s) in stock and available for sale.', 'license-manager-for-woocommerce')
         );
 
+        do_action('lmfwc_variable_product_data_panel', $loop, $variationData, $variation);
+
         echo '</div></div>';
     }
 
@@ -402,7 +390,7 @@ class ProductData
      * @param int $variationId
      * @param int $i
      */
-    public function variableProductLicenseManagerSaveAction($variationId, $i)
+    public function variableProductSave($variationId, $i)
     {
         // Update licensed product flag, according to checkbox.
         if (array_key_exists('lmfwc_licensed_product', $_POST)
@@ -456,5 +444,7 @@ class ProductData
             update_post_meta($variationId, 'lmfwc_licensed_product_use_generator', 0);
             update_post_meta($variationId, 'lmfwc_licensed_product_assigned_generator', 0);
         }
+
+        do_action('lmfwc_variable_product_save', $variationId, $i);
     }
 }
