@@ -67,7 +67,7 @@ class Order
     public function generateOrderLicenses($orderId)
     {
         // Keys have already been generated for this order.
-        if (get_post_meta($orderId, 'lmfwc_order_complete')) {
+        if (lmfwc_is_order_complete($orderId)) {
             return;
         }
 
@@ -265,21 +265,23 @@ class Order
     public function showBoughtLicenses($order)
     {
         // Return if the order isn't complete.
-        if ($order->get_status() != 'completed'
-            && !get_post_meta($order->get_id(), 'lmfwc_order_complete')
-        ) {
+        if ($order->get_status() !== 'completed' && !lmfwc_is_order_complete($order->get_id())) {
             return;
         }
 
-        $data = apply_filters('lmfwc_get_customer_license_keys', $order);
+        $args = array(
+            'order' => $order,
+            'data'  => null
+        );
 
-        // No license keys found, nothing to do.
-        if (!$data) {
+        $customerLicenseKeys = apply_filters('lmfwc_get_customer_license_keys', $args);
+
+        if (!$customerLicenseKeys['data']) {
             return;
         }
 
         // Add missing style.
-        if (!wp_style_is('lmfwc_admin_css', $list = 'enqueued' )) {
+        if (!wp_style_is('lmfwc_admin_css', 'enqueued' )) {
             wp_enqueue_style('lmfwc_admin_css', LMFWC_CSS_URL . 'main.css');
         }
 
@@ -288,7 +290,7 @@ class Order
             array(
                 'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
                 'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                'data'          => $data,
+                'data'          => $customerLicenseKeys,
                 'date_format'   => get_option('date_format'),
                 'args'          => apply_filters('lmfwc_template_args_myaccount_license_keys', array())
             ),

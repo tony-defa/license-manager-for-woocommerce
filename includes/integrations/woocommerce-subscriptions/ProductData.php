@@ -30,14 +30,14 @@ class ProductData
             return;
         }
 
-        $extendSubscription = get_post_meta($post->ID, 'lmfwc_extend_subscription', true);
+        $extendSubscription = get_post_meta($post->ID, 'lmfwc_license_expiration_extendable_for_subscriptions', true);
         
         echo '</div><div class="options_group">';
 
         // Checkbox "lmfwc_extend_subscription"
         woocommerce_wp_checkbox(
             array(
-                'id'          => 'lmfwc_extend_subscription',
+                'id'          => 'lmfwc_license_expiration_extendable_for_subscriptions',
                 'label'       => __('Extend the subscription', 'license-manager-for-woocommerce'),
                 'description' => __('Extends the expiry date of license keys instead of generating new license keys for each subscription renewal.', 'license-manager-for-woocommerce'),
                 'value'       => $extendSubscription,
@@ -55,12 +55,12 @@ class ProductData
     public function savePost($postId)
     {
         // Update the extend subscription flag, according to checkbox.
-        if (array_key_exists('lmfwc_extend_subscription', $_POST)) {
-            update_post_meta($postId, 'lmfwc_extend_subscription', 1);
+        if (array_key_exists('lmfwc_license_expiration_extendable_for_subscriptions', $_POST)) {
+            update_post_meta($postId, 'lmfwc_license_expiration_extendable_for_subscriptions', 1);
         }
 
         else {
-            update_post_meta($postId, 'lmfwc_extend_subscription', 0);
+            update_post_meta($postId, 'lmfwc_license_expiration_extendable_for_subscriptions', 0);
         }
     }
 }

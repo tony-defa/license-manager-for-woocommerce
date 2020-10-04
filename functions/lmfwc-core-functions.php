@@ -104,3 +104,32 @@ function lmfwc_is_licensed_product($productId) {
 
     return false;
 }
+
+/**
+ * Checks whether a product should have the expiry date of associated licenses
+ * extended.
+ *
+ * @param $productId
+ * @return bool
+ */
+function lmfwc_is_license_expiration_extendable_for_subscriptions($productId) {
+    if (get_post_meta($productId, 'lmfwc_license_expiration_extendable_for_subscriptions', true)) {
+        return true;
+    }
+
+    return false;
+}
+
+/**
+ * Checks whether an order has already been completed or not.
+ *
+ * @param int $orderId
+ * @return bool
+ */
+function lmfwc_is_order_complete($orderId) {
+    if (!get_post_meta($orderId, 'lmfwc_order_complete')) {
+        return false;
+    }
+
+    return true;
+}

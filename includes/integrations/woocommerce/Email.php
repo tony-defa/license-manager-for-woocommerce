@@ -32,13 +32,18 @@ class Email
     public function afterOrderTable($order, $isAdminEmail, $plainText, $email)
     {
         // Return if the order isn't complete.
-        if ($order->get_status() !== 'completed'
-            && !get_post_meta($order->get_id(), 'lmfwc_order_complete')
-        ) {
+        if ($order->get_status() !== 'completed' && !lmfwc_is_order_complete($order->get_id())) {
             return;
         }
 
-        if (!$data = apply_filters('lmfwc_get_customer_license_keys', $order)) {
+        $args = array(
+            'order' => $order,
+            'data'  => null
+        );
+
+        $customerLicenseKeys = apply_filters('lmfwc_get_customer_license_keys', $args);
+
+        if (!$customerLicenseKeys['data']) {
             return;
         }
 
@@ -50,7 +55,7 @@ class Email
                     array(
                         'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
                         'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                        'data'          => $data,
+                        'data'          => $customerLicenseKeys['data'],
                         'date_format'   => get_option('date_format'),
                         'order'         => $order,
                         'sent_to_admin' => $isAdminEmail,
@@ -69,7 +74,7 @@ class Email
                     array(
                         'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
                         'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                        'data'          => $data,
+                        'data'          => $customerLicenseKeys['data'],
                         'date_format'   => get_option('date_format'),
                         'order'         => $order,
                         'sent_to_admin' => $isAdminEmail,

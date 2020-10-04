@@ -8,6 +8,7 @@ use Exception;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use WC_Order;
 use WC_Subscriptions_Product;
+use WC_Subscriptions_Renewal_Order;
 
 defined('ABSPATH') || exit;
 
@@ -39,13 +40,13 @@ class Order
         }
 
         // Return if the product hasn't been configured to extend subscriptions
-        if (!get_post_meta($productId, 'lmfwc_extend_subscription', true)) {
+        if (!lmfwc_is_license_expiration_extendable_for_subscriptions($productId)) {
             error_log("LMFWC: Skipped Order #{$orderId} because product #{$productId} should not be extended.");
             return false;
         }
 
         /** @var WC_Order $parentOrder */
-        $parentOrder = \WC_Subscriptions_Renewal_Order::get_parent_order($orderId);
+        $parentOrder = WC_Subscriptions_Renewal_Order::get_parent_order($orderId);
 
         if (!$parentOrder) {
             error_log("LMFWC: Skipped Order #{$orderId} because parent order could not be found.");
@@ -77,21 +78,21 @@ class Order
             }
 
             // Singular form, i.e. "+1 week"
-            $modify = '+' . $subscriptionInterval . ' ' . $subscriptionPeriod;
+            $modifyString = '+' . $subscriptionInterval . ' ' . $subscriptionPeriod;
 
             // Plural form, i.e. "+3 weeks"
             if ($subscriptionInterval > 1) {
-                $modify .= 's';
+                $modifyString .= 's';
             }
 
             $licenseExpiresAt = $license->getExpiresAt();
 
             error_log("LMFWC: Interval: {$subscriptionInterval}");
             error_log("LMFWC: Period: {$subscriptionPeriod}");
-            error_log("LMFWC: Modify String: {$modify}");
+            error_log("LMFWC: Modify String: {$modifyString}");
             error_log("LMFWC: ExpiresAt OLD - {$licenseExpiresAt}");
 
-            $dateNewExpiresAt->modify($modify);
+            $dateNewExpiresAt->modify($modifyString);
 
             error_log("LMFWC: ExpiresAt NEW - {$dateNewExpiresAt->format('Y-m-d H:i:s')}");
 
