@@ -133,3 +133,72 @@ function lmfwc_is_order_complete($orderId) {
 
     return true;
 }
+
+/**
+ * Returns the configured action to perform on the given product in case of a
+ * WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return string
+ */
+function lmfwc_get_subscription_renewal_action($productId) {
+    $action = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
+
+    if ($action && is_string($action)) {
+        return $action;
+    }
+
+    return 'issue_new_license';
+}
+
+/**
+ * Returns the configured interval for the given product in case of a
+ * WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return string
+ */
+function lmfwc_get_subscription_renewal_interval_type($productId) {
+    $intervalType = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
+
+    if ($intervalType && is_string($intervalType)) {
+        return $intervalType;
+    }
+
+    return 'subscription';
+}
+
+/**
+ * Returns the configured custom interval for the given product in case of a
+ * WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return int
+ */
+function lmfwc_get_subscription_renewal_custom_interval($productId) {
+    $customerInterval = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true);
+
+    if ($customerInterval && is_numeric($customerInterval)) {
+        return intval($customerInterval);
+    }
+
+    return 1;
+}
+
+/**
+ * Returns the configured custom period for the given product in case of a
+ * WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return string
+ */
+function lmfwc_get_subscription_renewal_custom_period($productId) {
+    $intervalType = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
+    $allowedIntervalTypes = array('hour', 'day', 'week', 'month', 'year');
+
+    if ($intervalType && is_string($intervalType) && in_array($intervalType, $allowedIntervalTypes)) {
+        return sanitize_text_field($intervalType);
+    }
+
+    return 'day';
+}

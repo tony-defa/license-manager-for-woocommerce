@@ -103,7 +103,8 @@ class Order
             $useStock = get_post_meta($product->get_id(), 'lmfwc_licensed_product_use_stock', true);
             $useGenerator = get_post_meta($product->get_id(), 'lmfwc_licensed_product_use_generator', true);
 
-            // Skip this product because neither selling from stock or from generators is active.
+            // Skip this product because neither selling from stock or from
+            // generators is active.
             if (!$useStock && !$useGenerator) {
                 continue;
             }

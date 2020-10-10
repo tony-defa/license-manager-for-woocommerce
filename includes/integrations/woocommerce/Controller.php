@@ -171,9 +171,9 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
     public function insertGeneratedLicenseKeys($orderId, $productId, $licenseKeys, $status, $generator)
     {
         $cleanLicenseKeys = array();
-        $cleanOrderId     = $orderId   ? absint($orderId)   : null;
-        $cleanProductId   = $productId ? absint($productId) : null;
-        $cleanStatus      = $status    ? absint($status)    : null;
+        $cleanOrderId     = ($orderId)   ? absint($orderId)   : null;
+        $cleanProductId   = ($productId) ? absint($productId) : null;
+        $cleanStatus      = ($status)    ? absint($status)    : null;
         $userId           = null;
 
         if (!$cleanStatus || !in_array($cleanStatus, LicenseStatus::$status)) {

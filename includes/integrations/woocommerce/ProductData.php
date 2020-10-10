@@ -300,7 +300,7 @@ class ProductData
         // Checkbox "lmfwc_licensed_product"
         woocommerce_wp_checkbox(
             array(
-                'id'          => 'lmfwc_licensed_product',
+                'id'          => sprintf('lmfwc_licensed_product_%d', $loop),
                 'name'        => sprintf('lmfwc_licensed_product[%d]', $loop),
                 'label'       => __('Sell license key(s)', 'license-manager-for-woocommerce'),
                 'description' => __('Sell license keys for this variation', 'license-manager-for-woocommerce'),
@@ -313,7 +313,7 @@ class ProductData
         // Number "lmfwc_licensed_product_deliver_amount"
         woocommerce_wp_text_input(
             array(
-                'id'                => 'lmfwc_licensed_product_delivered_quantity',
+                'id'                => sprintf('lmfwc_licensed_product_delivered_quantity_%d', $loop),
                 'name'              => sprintf('lmfwc_licensed_product_delivered_quantity[%d]', $loop),
                 'label'             => __('Delivered quantity', 'license-manager-for-woocommerce'),
                 'value'             => $deliveredQuantity ? $deliveredQuantity : 1,
@@ -331,7 +331,7 @@ class ProductData
         // Checkbox "lmfwc_licensed_product_use_generator"
         woocommerce_wp_checkbox(
             array(
-                'id'          => 'lmfwc_licensed_product_use_generator',
+                'id'          => sprintf('lmfwc_licensed_product_use_generator_%d', $loop),
                 'name'        => sprintf('lmfwc_licensed_product_use_generator[%d]', $loop),
                 'label'       => __('Generate license keys', 'license-manager-for-woocommerce'),
                 'description' => __('Automatically generate license keys with each sold variation', 'license-manager-for-woocommerce'),
@@ -357,7 +357,7 @@ class ProductData
         // Checkbox "lmfwc_licensed_product_use_stock"
         woocommerce_wp_checkbox(
             array(
-                'id'          => 'lmfwc_licensed_product_use_stock',
+                'id'          => sprintf('lmfwc_licensed_product_use_stock%d', $loop),
                 'name'        => sprintf('lmfwc_licensed_product_use_stock[%d]', $loop),
                 'label'       => __('Sell from stock', 'license-manager-for-woocommerce'),
                 'description' => __('Sell license keys from the available stock.', 'license-manager-for-woocommerce'),

@@ -7,8 +7,8 @@ use DateTime;
 use Exception;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use WC_Order;
+use WC_Subscription;
 use WC_Subscriptions_Product;
-use WC_Subscriptions_Renewal_Order;
 
 defined('ABSPATH') || exit;
 
@@ -40,72 +40,107 @@ class Order
         }
 
         // Return if the product hasn't been configured to extend subscriptions
-        if (!lmfwc_is_license_expiration_extendable_for_subscriptions($productId)) {
+        if (lmfwc_get_subscription_renewal_action($productId) !== 'extend_existing_license') {
             error_log("LMFWC: Skipped Order #{$orderId} because product #{$productId} should not be extended.");
             return false;
         }
 
-        /** @var WC_Order $parentOrder */
-        $parentOrder = WC_Subscriptions_Renewal_Order::get_parent_order($orderId);
+        /** @var WC_Subscription[] $subscriptions */
+        $subscriptions = wcs_get_subscriptions_for_renewal_order($orderId);
 
-        if (!$parentOrder) {
+        if (!$subscriptions) {
             error_log("LMFWC: Skipped Order #{$orderId} because parent order could not be found.");
             return false;
         }
 
-        $subscriptionPeriod   = WC_Subscriptions_Product::get_period($productId);
-        $subscriptionInterval = intval(WC_Subscriptions_Product::get_interval($productId));
+        $subscriptionCount = count($subscriptions);
+        error_log("LMFWC: Number of Subscriptions: {$subscriptionCount}");
 
-        /** @var false|LicenseResourceModel[] $licenses */
-        $licenses = lmfwc_get_licenses(
-            array(
-                'order_id' => $parentOrder->get_id(),
-                'product_id' => $productId
-            )
-        );
+        foreach ($subscriptions as $subscription) {
+            $parentOrderArray = $subscription->get_related_orders('ids', 'parent');
 
-        $licenseCount = count($licenses);
-
-        error_log("LMFWC: License count is: {$licenseCount}");
-
-        /** @var LicenseResourceModel $license */
-        foreach ($licenses as $license) {
-            try {
-                $dateNewExpiresAt = new DateTime($license->getExpiresAt());
-            } catch (Exception $e) {
-                error_log("LMFWC: Exception 1 - " . $e->getMessage());
+            if (!$parentOrderArray || count($parentOrderArray) !== 1) {
+                error_log("LMFWC: Skipped because the parent order could not be found. ");
                 return false;
             }
 
-            // Singular form, i.e. "+1 week"
-            $modifyString = '+' . $subscriptionInterval . ' ' . $subscriptionPeriod;
+            $parentOrderId = intval(reset($parentOrderArray));
 
-            // Plural form, i.e. "+3 weeks"
-            if ($subscriptionInterval > 1) {
-                $modifyString .= 's';
+            error_log("LMFWC: Parent Order ID: #{$parentOrderId}");
+
+            if (!$parentOrderId) {
+                error_log("LMFWC: Skipped because the parent order ID could not be retrieved.");
+                return false;
             }
 
-            $licenseExpiresAt = $license->getExpiresAt();
+            /** @var false|WC_Order $parentOrder */
+            $parentOrder = wc_get_order($parentOrderId);
 
-            error_log("LMFWC: Interval: {$subscriptionInterval}");
-            error_log("LMFWC: Period: {$subscriptionPeriod}");
-            error_log("LMFWC: Modify String: {$modifyString}");
-            error_log("LMFWC: ExpiresAt OLD - {$licenseExpiresAt}");
-
-            $dateNewExpiresAt->modify($modifyString);
-
-            error_log("LMFWC: ExpiresAt NEW - {$dateNewExpiresAt->format('Y-m-d H:i:s')}");
-
-            try {
-                lmfwc_update_license(
-                    $license->getDecryptedLicenseKey(),
-                    array(
-                        'expires_at' => $dateNewExpiresAt->format('Y-m-d H:i:s')
-                    )
-                );
-            } catch (Exception $e) {
-                error_log("LMFWC: Exception 2 - " . $e->getMessage());
+            if (!$parentOrder) {
+                error_log("LMFWC: Skipped because the parent order could not be retrieved.");
                 return false;
+            }
+
+            // Extend the license either by the subscription, or user-defined customer interval/period.
+            if (lmfwc_get_subscription_renewal_interval_type($productId) === 'subscription') {
+                $subscriptionInterval = intval(WC_Subscriptions_Product::get_interval($productId));
+                $subscriptionPeriod   = WC_Subscriptions_Product::get_period($productId);
+            } else {
+                $subscriptionInterval = lmfwc_get_subscription_renewal_custom_interval($productId);
+                $subscriptionPeriod   = lmfwc_get_subscription_renewal_custom_period($productId);
+            }
+
+            /** @var false|LicenseResourceModel[] $licenses */
+            $licenses = lmfwc_get_licenses(
+                array(
+                    'order_id' => $parentOrder->get_id(),
+                    'product_id' => $productId
+                )
+            );
+
+            if (!$licenses) {
+                error_log("LMFWC: Skipped parent Order #{$parentOrderId} because no licenses were found.");
+                return false;
+            }
+
+            $licenseCount = count($licenses);
+            error_log("LMFWC: License count is: {$licenseCount}");
+
+            /** @var LicenseResourceModel $license */
+            foreach ($licenses as $license) {
+                try {
+                    $dateNewExpiresAt = new DateTime($license->getExpiresAt());
+                } catch (Exception $e) {
+                    return false;
+                }
+
+                // Singular form, i.e. "+1 week"
+                $modifyString = '+' . $subscriptionInterval . ' ' . $subscriptionPeriod;
+
+                // Plural form, i.e. "+3 weeks"
+                if ($subscriptionInterval > 1) {
+                    $modifyString .= 's';
+                }
+
+                $licenseExpiresAt = $license->getExpiresAt();
+                $dateNewExpiresAt->modify($modifyString);
+
+                error_log("LMFWC: Interval: {$subscriptionInterval}");
+                error_log("LMFWC: Period: {$subscriptionPeriod}");
+                error_log("LMFWC: Modify String: {$modifyString}");
+                error_log("LMFWC: ExpiresAt OLD - {$licenseExpiresAt}");
+                error_log("LMFWC: ExpiresAt NEW - {$dateNewExpiresAt->format('Y-m-d H:i:s')}");
+
+                try {
+                    lmfwc_update_license(
+                        $license->getDecryptedLicenseKey(),
+                        array(
+                            'expires_at' => $dateNewExpiresAt->format('Y-m-d H:i:s')
+                        )
+                    );
+                } catch (Exception $e) {
+                    return false;
+                }
             }
         }
 
