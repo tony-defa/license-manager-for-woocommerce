@@ -471,7 +471,7 @@ class General
             ),
             array(
                 'id'         => '011',
-                'name'       => 'v2/licenses/{license_key}',
+                'name'       => 'v2/licenses/<b>{license_key}</b>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
@@ -483,25 +483,25 @@ class General
             ),
             array(
                 'id'         => '013',
-                'name'       => 'v2/licenses/{license_key}',
+                'name'       => 'v2/licenses/<b>{license_key}</b>',
                 'method'     => 'PUT',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '014',
-                'name'       => 'v2/licenses/activate/{license_key}',
+                'name'       => 'v2/licenses/activate/<b>{license_key}</b>/<i>{activation_count}</i>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '015',
-                'name'       => 'v2/licenses/deactivate/{license_key}',
+                'name'       => 'v2/licenses/deactivate/<b>{license_key}</b>/<i>{deactivation_count}</i>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '016',
-                'name'       => 'v2/licenses/validate/{license_key}',
+                'name'       => 'v2/licenses/validate/<b>{license_key}</b>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
@@ -513,7 +513,7 @@ class General
             ),
             array(
                 'id'         => '018',
-                'name'       => 'v2/generators/{id}',
+                'name'       => 'v2/generators/<b>{id}</b>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
@@ -525,7 +525,7 @@ class General
             ),
             array(
                 'id'         => '020',
-                'name'       => 'v2/generators/{id}',
+                'name'       => 'v2/generators/<b>{id}</b>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
@@ -570,6 +570,13 @@ class General
             $html .= '</label>';
             $html .= '<br>';
         }
+
+        $html .= sprintf(
+            '<p class="description" style="margin-top: 1em;font-style: normal;">%s</p>',
+            sprintf(
+                __('Bold <b>parameters</b> are required, while <i>cursive</i> are optional.', 'license-manager-for-woocommerce')
+            )
+        );
 
         $html .= sprintf(
             '<p class="description" style="margin-top: 1em;">%s</p>',

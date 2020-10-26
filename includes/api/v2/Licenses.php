@@ -120,12 +120,12 @@ class Licenses extends LMFWC_REST_Controller
         );
 
         /**
-         * GET licenses/activate/{license_key}
+         * GET licenses/activate/{license_key}/{activation_count}
          *
          * Activates a license key
          */
         register_rest_route(
-            $this->namespace, $this->rest_base . '/activate/(?P<license_key>[\w-]+)', array(
+            $this->namespace, $this->rest_base . '/activate/(?P<license_key>[\w-]+)(?:/(?P<activations>[1-9][0-9]?))?', array(
                 array(
                     'methods'             => WP_REST_Server::READABLE,
                     'callback'            => array($this, 'activateLicense'),
@@ -135,18 +135,22 @@ class Licenses extends LMFWC_REST_Controller
                             'description' => 'License Key',
                             'type'        => 'string',
                         ),
+                        'activations' => array(
+                            'description' => 'Activations',
+                            'type'        => 'int',
+                        )
                     ),
                 )
             )
         );
 
         /**
-         * GET licenses/deactivate/{license_key}
+         * GET licenses/deactivate/{license_key}/{deactivation_count}
          *
          * Deactivates a license key
          */
         register_rest_route(
-            $this->namespace, $this->rest_base . '/deactivate/(?P<license_key>[\w-]+)', array(
+            $this->namespace, $this->rest_base . '/deactivate/(?P<license_key>[\w-]+)(?:/(?P<deactivations>[1-9][0-9]?))?', array(
                 array(
                     'methods'             => WP_REST_Server::READABLE,
                     'callback'            => array($this, 'deactivateLicense'),
@@ -155,7 +159,11 @@ class Licenses extends LMFWC_REST_Controller
                         'license_key' => array(
                             'description' => 'License Key',
                             'type'        => 'string'
-                        )
+                        ),
+                        'deactivations' => array(
+                            'description' => 'Deactivations',
+                            'type'        => 'int',
+                        ),
                     )
                 )
             )
@@ -572,7 +580,7 @@ class Licenses extends LMFWC_REST_Controller
     }
 
     /**
-     * Callback for the GET licenses/activate/{license_key} route. This will activate a license key (if possible)
+     * Callback for the GET licenses/activate/{license_key}/{activation_count} route. This will activate a license key (if possible)
      *
      * @param WP_REST_Request $request
      *
@@ -595,6 +603,7 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $licenseKey = sanitize_text_field($request->get_param('license_key'));
+        $activations = intval($request->get_param('activations'));
 
         if (!$licenseKey) {
             return new WP_Error(
@@ -602,6 +611,10 @@ class Licenses extends LMFWC_REST_Controller
                 'License key is invalid.',
                 array('status' => 404)
             );
+        }
+
+        if (!$activations) {
+            $activations = 1;
         }
 
         try {
@@ -645,25 +658,34 @@ class Licenses extends LMFWC_REST_Controller
             $timesActivatedMax = absint($license->getTimesActivatedMax());
         }
 
-        if ($timesActivatedMax && ($timesActivated >= $timesActivatedMax)) {
-            return new WP_Error(
-                'lmfwc_rest_data_error',
-                sprintf(
+        if ($timesActivatedMax) {
+            if ($timesActivated >= $timesActivatedMax) {
+                $errMsg = sprintf(
                     'License Key: %s reached maximum activation count.',
                     $licenseKey
-                ),
-                array('status' => 404)
-            );
+                );
+                $status = array('status' => 404);
+            } else if ($timesActivated + $activations > $timesActivatedMax) {
+                $errMsg = sprintf(
+                    'License Key: %s activations will surpass maximum activation count.',
+                    $licenseKey
+                );
+                $status = array('status' => 409);
+            }
+
+            if (isset($errMsg)) {
+                return new WP_Error('lmfwc_rest_data_error', $errMsg, $status);
+            }
         }
 
         // Activate the license key
         try {
             if (!$timesActivated) {
-                $timesActivatedNew = 1;
+                $timesActivatedNew = $activations;
             }
 
             else {
-                $timesActivatedNew = intval($timesActivated) + 1;
+                $timesActivatedNew = intval($timesActivated) + $activations;
             }
 
             /** @var LicenseResourceModel $updatedLicense */
@@ -687,11 +709,11 @@ class Licenses extends LMFWC_REST_Controller
         unset($licenseData['hash']);
         $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
 
-        return $this->response(true, $licenseData, 200, 'v2/licenses/activate/{license_key}');
+        return $this->response(true, $licenseData, 200, 'v2/licenses/activate/{license_key}/{activation_count}');
     }
 
     /**
-     * Callback for the GET licenses/deactivate/{license_key} route. This will deactivate a license key (if possible)
+     * Callback for the GET licenses/deactivate/{license_key}/{deactivation_count} route. This will deactivate a license key (if possible)
      *
      * @param WP_REST_Request $request
      *
@@ -714,6 +736,7 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $licenseKey = sanitize_text_field($request->get_param('license_key'));
+        $deactivations = intval($request->get_param('deactivations'));
 
         if (!$licenseKey) {
             return new WP_Error(
@@ -721,6 +744,10 @@ class Licenses extends LMFWC_REST_Controller
                 'License key is invalid.',
                 array('status' => 404)
             );
+        }
+
+        if (!$deactivations) {
+            $deactivations = 1;
         }
 
         try {
@@ -770,9 +797,20 @@ class Licenses extends LMFWC_REST_Controller
             );
         }
 
+        if ($timesActivated < $deactivations) {
+            return new WP_Error(
+                'lmfwc_rest_data_error',
+                sprintf(
+                    'License Key: %s has not been activated that many times yet.',
+                    $licenseKey
+                ),
+                array('status' => 409)
+            );
+        }
+
         // Deactivate the license key
         try {
-            $timesActivatedNew = intval($timesActivated) - 1;
+            $timesActivatedNew = intval($timesActivated) - $deactivations;
 
             /** @var LicenseResourceModel $updatedLicense */
             $updatedLicense = LicenseResourceRepository::instance()->update(
@@ -795,7 +833,7 @@ class Licenses extends LMFWC_REST_Controller
         unset($licenseData['hash']);
         $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
 
-        return $this->response(true, $licenseData, 200, 'v2/licenses/deactivate/{license_key}');
+        return $this->response(true, $licenseData, 200, 'v2/licenses/deactivate/{license_key}/{deactivation_count}');
     }
 
     /**
