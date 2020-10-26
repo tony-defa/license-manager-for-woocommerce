@@ -119,6 +119,14 @@ class General
             'lmfwc_license_keys',
             'license_keys_section'
         );
+
+        add_settings_field(
+            'lmfwc_email_notification_consumption',
+            __('Email notification', 'license-manager-for-woocommerce'),
+            array($this, 'fieldEmailNotificationConsumption'),
+            'lmfwc_license_keys',
+            'license_keys_section'
+        );
     }
 
     /**
@@ -325,6 +333,43 @@ class General
                 </p>
             </fieldset>
         ';
+
+        echo $html;
+    }
+
+    /**
+     * Callback for the "lmfwc_email_notification_consumption" field.
+     *
+     * @return void
+     */
+    public function fieldEmailNotificationConsumption()
+    {
+        $field = 'lmfwc_email_notification_consumption';
+        (array_key_exists($field, $this->settings)) ? $value = $this->settings[$field] : $value = '';
+
+        $min = 50;
+        $max = 99;
+
+        $html = '<fieldset>';
+        $html .= sprintf('<label for="%s">', $field);
+        $html .= sprintf(
+            '<input id="%s" type="number" min="%d" max="%d" name="lmfwc_settings_general[%s]" value="%s" />',
+            $field,
+            $min,
+            $max,
+            $field,
+            $value
+        );
+        $html .= sprintf(
+            '<span>%s</span>',
+            __(' %', 'license-manager-for-woocommerce')
+        );
+        $html .= '</label>';
+        $html .= sprintf(
+            '<p class="description">%s</p>',
+            __('Notify customer when the given percentage of activations is reached. Remove value to disable notifications.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</fieldset>';
 
         echo $html;
     }

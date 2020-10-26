@@ -2,6 +2,7 @@
 
 namespace LicenseManagerForWooCommerce\Integrations\WooCommerce;
 
+use LicenseManagerForWooCommerce\Integrations\WooCommerce\Emails\CustomerConsumptionNotification;
 use LicenseManagerForWooCommerce\Integrations\WooCommerce\Emails\CustomerDeliverLicenseKeys;
 use LicenseManagerForWooCommerce\Integrations\WooCommerce\Emails\CustomerPreorderComplete;
 use LicenseManagerForWooCommerce\Integrations\WooCommerce\Emails\Templates;
@@ -123,8 +124,9 @@ class Email
         new Templates();
 
         $pluginEmails = array(
-            //'LMFWC_Customer_Preorder_Complete'    => new CustomerPreorderComplete(),
-            'LMFWC_Customer_Deliver_License_Keys' => new CustomerDeliverLicenseKeys()
+            // 'LMFWC_Customer_Preorder_Complete'          => new CustomerPreorderComplete(),
+            'LMFWC_Customer_Deliver_License_Keys'       => new CustomerDeliverLicenseKeys(),
+            'LMFWC_Customer_Consumption_Notification'   => new CustomerConsumptionNotification()
         );
 
         return array_merge($emails, $pluginEmails);

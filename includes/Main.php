@@ -16,6 +16,7 @@ use LicenseManagerForWooCommerce\Abstracts\Singleton;
 use LicenseManagerForWooCommerce\Controllers\ApiKey as ApiKeyController;
 use LicenseManagerForWooCommerce\Controllers\Generator as GeneratorController;
 use LicenseManagerForWooCommerce\Controllers\License as LicenseController;
+use LicenseManagerForWooCommerce\Schedules\NotifySchedule;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 
 defined('ABSPATH') || exit;
@@ -283,6 +284,7 @@ final class Main extends Singleton
         new LicenseController();
         new GeneratorController();
         new ApiKeyController();
+        new NotifySchedule();
         new API\Setup();
 
         if ($this->isPluginActive('woocommerce/woocommerce.php')) {

@@ -14,8 +14,9 @@ class Templates
      */
     function __construct()
     {
-        add_action('lmfwc_email_order_details',      array($this, 'addOrderDetails'),     10, 4);
-        add_action('lmfwc_email_order_license_keys', array($this, 'addOrderLicenseKeys'), 10, 4);
+        add_action('lmfwc_email_order_details',        array($this, 'addOrderDetails'),         10, 4);
+        add_action('lmfwc_email_order_license_keys',   array($this, 'addOrderLicenseKeys'),     10, 4);
+        add_action('lmfwc_email_consumption_details',  array($this, 'addConsumptionDetails'),   10, 6);
     }
 
     /**
@@ -97,6 +98,53 @@ class Templates
                     'data'          => apply_filters('lmfwc_get_customer_license_keys', $order),
                     'date_format'   => get_option('date_format'),
                     'order'         => $order,
+                    'sent_to_admin' => false,
+                    'plain_text'    => false,
+                    'email'         => $email,
+                    'args'          => apply_filters('lmfwc_template_args_emails_order_license_keys', array())
+                ),
+                '',
+                LMFWC_TEMPLATES_DIR
+            );
+        }
+    }
+
+    /**
+     * Adds consumption info to the email body.
+     *
+     * @param WP_User  $user            WordPress User
+     * @param int      $licenseCount    Number of licenses that are over the threshold
+     * @param int      $threshold       The threshold
+     * @param bool     $sentToAdmin     Determines if the email is sent to the admin
+     * @param bool     $plainText       Determines if a plain text or HTML email will be sent
+     * @param WC_Email $email           WooCommerce Email
+     */
+    public function addConsumptionDetails($user, $licenseCount, $threshold, $sentToAdmin, $plainText, $email)
+    {
+        if ($plainText) {
+            echo wc_get_template(
+                'emails/plain/lmfwc-email-consumption-details.php',
+                array(
+                    'user'          => $user,
+                    'license_count' => $licenseCount,
+                    'threshold'     => $threshold,
+                    'sent_to_admin' => false,
+                    'plain_text'    => false,
+                    'email'         => $email,
+                    'args'          => apply_filters('lmfwc_template_args_emails_order_license_keys', array())
+                ),
+                '',
+                LMFWC_TEMPLATES_DIR
+            );
+        }
+
+        else {
+            echo wc_get_template_html(
+                'emails/lmfwc-email-consumption-details.php',
+                array(
+                    'user'          => $user,
+                    'license_count' => $licenseCount,
+                    'threshold'     => $threshold,
                     'sent_to_admin' => false,
                     'plain_text'    => false,
                     'email'         => $email,
