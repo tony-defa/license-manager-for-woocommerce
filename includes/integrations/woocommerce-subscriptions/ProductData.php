@@ -34,7 +34,7 @@ class ProductData
 
         $renewalAction       = get_post_meta($post->ID, 'lmfwc_subscription_renewal_action', true);
         $renewalIntervalType = get_post_meta($post->ID, 'lmfwc_subscription_renewal_interval_type', true);
-        $customInterval      = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true);
+        $customInterval      = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod        = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
 
         echo '</div><div class="options_group">';
@@ -156,7 +156,7 @@ class ProductData
 
         $renewalAction       = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
         $renewalIntervalType = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
-        $customInterval      = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true);
+        $customInterval      = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod        = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
 
         echo '</div><div class="options_group">';
