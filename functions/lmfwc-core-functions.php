@@ -152,6 +152,23 @@ function lmfwc_get_subscription_renewal_action($productId) {
 }
 
 /**
+ * Returns the configured reset action to perform on the given product in case of a
+ * WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return string
+ */
+function lmfwc_get_subscription_renewal_reset_action($productId) {
+    $action = get_post_meta($productId, 'lmfwc_subscription_renewal_reset_action', true);
+
+    if ($action && is_string($action)) {
+        return $action;
+    }
+
+    return 'do_not_reset_on_renewal';
+}
+
+/**
  * Returns the configured interval for the given product in case of a
  * WooCommerce Subscriptions renewal order.
  *

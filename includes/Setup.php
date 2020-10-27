@@ -142,6 +142,7 @@ class Setup
                 `status` TINYINT(1) UNSIGNED NOT NULL,
                 `times_activated` INT(10) UNSIGNED NULL DEFAULT NULL,
                 `times_activated_max` INT(10) UNSIGNED NULL DEFAULT NULL,
+                `times_activated_overall` INT(10) UNSIGNED NULL DEFAULT NULL,
                 `created_at` DATETIME NULL,
                 `created_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
                 `updated_at` DATETIME NULL DEFAULT NULL,

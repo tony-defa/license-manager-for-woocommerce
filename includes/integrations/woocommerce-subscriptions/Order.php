@@ -131,12 +131,29 @@ class Order
                 error_log("LMFWC: ExpiresAt OLD - {$licenseExpiresAt}");
                 error_log("LMFWC: ExpiresAt NEW - {$dateNewExpiresAt->format('Y-m-d H:i:s')}");
 
+                $arr = array (
+                    'expires_at' => $dateNewExpiresAt->format('Y-m-d H:i:s')
+                );
+
+                if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal' && $license->getTimesActivatedMax() !== 0) {
+                    $oldTimesActivated = $license->getTimesActivated();
+                    $newTimesActivated = 0;
+                    $oldTimesActivatedOverall = intval($license->getTimesActivatedOverall());
+                    $newTimesActivatedOverall = $oldTimesActivatedOverall + $oldTimesActivated;
+
+                    error_log("LMFWC: TimesActivated OLD - {$oldTimesActivated}");
+                    error_log("LMFWC: TimesActivated NEW - {$newTimesActivated}");
+                    error_log("LMFWC: TimesActivatedOverall OLD - {$oldTimesActivatedOverall}");
+                    error_log("LMFWC: TimesActivatedOverall NEW - {$newTimesActivatedOverall}");
+
+                    $arr['times_activated'] = intval($newTimesActivated);
+                    $arr['times_activated_overall'] = intval($newTimesActivatedOverall);
+                }
+
                 try {
                     lmfwc_update_license(
                         $license->getDecryptedLicenseKey(),
-                        array(
-                            'expires_at' => $dateNewExpiresAt->format('Y-m-d H:i:s')
-                        )
+                        $arr
                     );
                 } catch (Exception $e) {
                     return false;

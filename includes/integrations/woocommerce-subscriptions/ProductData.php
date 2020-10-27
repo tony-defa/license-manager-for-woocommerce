@@ -32,10 +32,11 @@ class ProductData
             return;
         }
 
-        $renewalAction       = get_post_meta($post->ID, 'lmfwc_subscription_renewal_action', true);
-        $renewalIntervalType = get_post_meta($post->ID, 'lmfwc_subscription_renewal_interval_type', true);
-        $customInterval      = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
-        $customPeriod        = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
+        $renewalAction          = get_post_meta($post->ID, 'lmfwc_subscription_renewal_action', true);
+        $renewalResetAction     = get_post_meta($post->ID, 'lmfwc_subscription_renewal_reset_action', true);
+        $renewalIntervalType    = get_post_meta($post->ID, 'lmfwc_subscription_renewal_interval_type', true);
+        $customInterval         = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
+        $customPeriod           = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
 
         echo '</div><div class="options_group">';
 
@@ -49,6 +50,19 @@ class ProductData
                     'extend_existing_license' => __('Extend the existing license on each subscription renewal', 'license-manager-for-woocommerce')
                 ),
                 'value' => $renewalAction
+            )
+        );
+
+        // Dropdown "lmfwc_subscription_renewal_reset_action"
+        woocommerce_wp_select(
+            array(
+                'id'      => 'lmfwc_subscription_renewal_reset_action',
+                'label'   => __('Reset times activated', 'license-manager-for-woocommerce'),
+                'options' => array(
+                    'do_not_reset_on_renewal'   => __('Do no reset times activated on key with maximum activations', 'license-manager-for-woocommerce'),
+                    'reset_license_on_renewal'  => __('Reset times activated to 0 on keys that have a maximum activation count', 'license-manager-for-woocommerce')
+                ),
+                'value' => $renewalResetAction
             )
         );
 
@@ -117,6 +131,13 @@ class ProductData
             sanitize_text_field($_POST['lmfwc_subscription_renewal_action'])
         );
 
+        // Update the subscription renewal reset action
+        update_post_meta(
+            $postId,
+            'lmfwc_subscription_renewal_reset_action',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'])
+        );
+
         // Update the subscription renewal interval type
         update_post_meta(
             $postId,
@@ -155,6 +176,7 @@ class ProductData
         }
 
         $renewalAction       = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
+        $renewalResetAction  = get_post_meta($productId, 'lmfwc_subscription_renewal_reset_action', true);
         $renewalIntervalType = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
         $customInterval      = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod        = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
@@ -172,6 +194,20 @@ class ProductData
                     'extend_existing_license' => __('Extend the existing license on each subscription renewal', 'license-manager-for-woocommerce')
                 ),
                 'value' => $renewalAction
+            )
+        );
+
+        // Dropdown "lmfwc_subscription_renewal_reset_action"
+        woocommerce_wp_select(
+            array(
+                'id'      => sprintf('lmfwc_subscription_renewal_reset_action_%d', $loop),
+                'name'    => sprintf('lmfwc_subscription_renewal_reset_action[%d]', $loop),
+                'label'   => __('Reset times activated', 'license-manager-for-woocommerce'),
+                'options' => array(
+                    'do_not_reset_on_renewal'   => __('Do no reset times activated on key with maximum activations', 'license-manager-for-woocommerce'),
+                    'reset_license_on_renewal'  => __('Reset times activated to 0 on keys that have a maximum activation count', 'license-manager-for-woocommerce')
+                ),
+                'value' => $renewalResetAction
             )
         );
 
@@ -235,6 +271,13 @@ class ProductData
             $variationId,
             'lmfwc_subscription_renewal_action',
             sanitize_text_field($_POST['lmfwc_subscription_renewal_action'][$i])
+        );
+    
+        // Update the subscription renewal reset action
+        update_post_meta(
+            $variationId,
+            'lmfwc_subscription_renewal_reset_action',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'][$i])
         );
 
         // Update the subscription renewal interval type

@@ -569,6 +569,12 @@ class LicensesList extends WP_List_Table
             $timesActivatedMax = intval($item['times_activated_max']);
         }
 
+        if ($item['times_activated_overall'] === null) {
+            $timesActivatedOverall = null;
+        } else {
+            $timesActivatedOverall = intval($item['times_activated_overall']);
+        }
+
         if ($item['times_activated'] === null) {
             $timesActivated = null;
         } else {
@@ -592,12 +598,25 @@ class LicensesList extends WP_List_Table
             $status = 'activation pending';
         }
 
+        $productId = intval($item['product_id']);
+        if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal' 
+                && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license' 
+                && $timesActivatedMax !== 0) {
+            $overall = sprintf(
+                ' <i>(%d)</i>',
+                $timesActivatedOverall + $timesActivated
+            );
+        } else {
+            $overall = '';
+        }
+
         if ($timesActivated || $timesActivatedMax) {
             $html = sprintf(
-                '<div class="lmfwc-status %s">%s <small>%d</small> / <b>%d</b></div>',
+                '<div class="lmfwc-status %s">%s <small>%d%s</small> / <b>%d</b></div>',
                 $status,
                 $icon,
                 $timesActivated,
+                $overall,
                 $timesActivatedMax
             );
         }

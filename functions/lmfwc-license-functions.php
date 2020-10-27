@@ -251,6 +251,15 @@ function lmfwc_update_license($licenseKey, $licenseData)
         }
     }
 
+    // Times activated overall
+    if (array_key_exists('times_activated_overall', $licenseData)) {
+        if ($licenseData['times_activated_overall'] === null) {
+            $updateData['times_activated_overall'] = null;
+        } else {
+            $updateData['times_activated_overall'] = intval($licenseData['times_activated_overall']);
+        }
+    }
+
     // Update the stock
     if ($oldLicense->getProductId() !== null && $oldLicense->getStatus() === LicenseStatusEnum::ACTIVE) {
         apply_filters('lmfwc_stock_decrease', $oldLicense->getProductId());

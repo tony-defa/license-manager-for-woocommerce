@@ -27,17 +27,18 @@ class License extends AbstractResourceRepository implements ResourceRepositoryIn
         $this->primaryKey = 'id';
         $this->model      = LicenseResourceModel::class;
         $this->mapping    = array(
-            'order_id'            => ColumnTypeEnum::BIGINT,
-            'product_id'          => ColumnTypeEnum::BIGINT,
-            'user_id'             => ColumnTypeEnum::BIGINT,
-            'license_key'         => ColumnTypeEnum::LONGTEXT,
-            'hash'                => ColumnTypeEnum::LONGTEXT,
-            'expires_at'          => ColumnTypeEnum::DATETIME,
-            'valid_for'           => ColumnTypeEnum::INT,
-            'source'              => ColumnTypeEnum::TINYINT,
-            'status'              => ColumnTypeEnum::TINYINT,
-            'times_activated'     => ColumnTypeEnum::INT,
-            'times_activated_max' => ColumnTypeEnum::INT,
+            'order_id'                  => ColumnTypeEnum::BIGINT,
+            'product_id'                => ColumnTypeEnum::BIGINT,
+            'user_id'                   => ColumnTypeEnum::BIGINT,
+            'license_key'               => ColumnTypeEnum::LONGTEXT,
+            'hash'                      => ColumnTypeEnum::LONGTEXT,
+            'expires_at'                => ColumnTypeEnum::DATETIME,
+            'valid_for'                 => ColumnTypeEnum::INT,
+            'source'                    => ColumnTypeEnum::TINYINT,
+            'status'                    => ColumnTypeEnum::TINYINT,
+            'times_activated'           => ColumnTypeEnum::INT,
+            'times_activated_max'       => ColumnTypeEnum::INT,
+            'times_activated_overall'   => ColumnTypeEnum::INT,
         );
     }
 }
