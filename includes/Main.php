@@ -191,6 +191,13 @@ final class Main extends Singleton
             wp_enqueue_script('lmfwc_settings_page_js', LMFWC_JS_URL . 'settings_page.js');
         }
 
+        // edit licensed product page
+        if ($hook === 'post.php' && isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['post'])) {
+            if (lmfwc_is_licensed_product($_GET['post'])) {
+                wp_enqueue_script('lmfwc_edit_product_js', LMFWC_JS_URL . 'edit_product.js');
+            }
+        }
+
         // Script localization
         wp_localize_script(
             'lmfwc_admin_js',
