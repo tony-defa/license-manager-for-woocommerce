@@ -135,7 +135,7 @@ class Order
                     'expires_at' => $dateNewExpiresAt->format('Y-m-d H:i:s')
                 );
 
-                if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal' && $license->getTimesActivatedMax() !== 0) {
+                if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal') {
                     $oldTimesActivated = $license->getTimesActivated();
                     $newTimesActivated = 0;
                     $oldTimesActivatedOverall = intval($license->getTimesActivatedOverall());

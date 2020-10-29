@@ -600,8 +600,7 @@ class LicensesList extends WP_List_Table
 
         $productId = intval($item['product_id']);
         if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal' 
-                && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license' 
-                && $timesActivatedMax !== 0) {
+                && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license') {
             $overall = sprintf(
                 ' <i>(%d)</i>',
                 $timesActivatedOverall + $timesActivated
@@ -610,7 +609,7 @@ class LicensesList extends WP_List_Table
             $overall = '';
         }
 
-        if ($timesActivated || $timesActivatedMax) {
+        if ($timesActivated || $timesActivatedOverall || $timesActivatedMax) {
             $html = sprintf(
                 '<div class="lmfwc-status %s">%s <small>%d%s</small> / <b>%d</b></div>',
                 $status,
