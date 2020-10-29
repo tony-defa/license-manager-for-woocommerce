@@ -169,6 +169,23 @@ function lmfwc_get_subscription_renewal_reset_action($productId) {
 }
 
 /**
+ * Returns the configured cost per activation action to perform on the given product 
+ * in case of a WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return string
+ */
+function lmfwc_get_subscription_cost_per_activation_action($productId) {
+    $action = get_post_meta($productId, 'lmfwc_subscription_cost_per_activation_action', true);
+
+    if ($action && is_string($action)) {
+        return $action;
+    }
+
+    return 'cost_per_activation';
+}
+
+/**
  * Returns the configured interval for the given product in case of a
  * WooCommerce Subscriptions renewal order.
  *

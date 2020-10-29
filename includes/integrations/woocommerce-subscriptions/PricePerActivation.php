@@ -44,6 +44,7 @@ class PricePerActivation
             }
 
             if (!lmfwc_is_licensed_product($productId)
+                    || lmfwc_get_subscription_cost_per_activation_action($productId) === 'cost_per_activation'
                     || lmfwc_get_subscription_renewal_action($productId) === 'issue_new_license'
                     || lmfwc_get_subscription_renewal_reset_action($productId) === 'do_not_reset_on_renewal') {
                 error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");

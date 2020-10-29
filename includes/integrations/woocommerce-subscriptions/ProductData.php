@@ -32,11 +32,12 @@ class ProductData
             return;
         }
 
-        $renewalAction          = get_post_meta($post->ID, 'lmfwc_subscription_renewal_action', true);
-        $renewalResetAction     = get_post_meta($post->ID, 'lmfwc_subscription_renewal_reset_action', true);
-        $renewalIntervalType    = get_post_meta($post->ID, 'lmfwc_subscription_renewal_interval_type', true);
-        $customInterval         = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
-        $customPeriod           = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
+        $renewalAction              = get_post_meta($post->ID, 'lmfwc_subscription_renewal_action', true);
+        $renewalResetAction         = get_post_meta($post->ID, 'lmfwc_subscription_renewal_reset_action', true);
+        $renewalCostPerActivation   = get_post_meta($post->ID, 'lmfwc_subscription_cost_per_activation_action', true);
+        $renewalIntervalType        = get_post_meta($post->ID, 'lmfwc_subscription_renewal_interval_type', true);
+        $customInterval             = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
+        $customPeriod               = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
 
         $disableOnRenewalActionNewLicense = array();
         if ($renewalAction === 'issue_new_license') {
@@ -69,6 +70,20 @@ class ProductData
                 ),
                 'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalResetAction
+            )
+        );
+
+        // Dropdown "lmfwc_subscription_cost_per_activation_action"
+        woocommerce_wp_select(
+            array(
+                'id'      => 'lmfwc_subscription_cost_per_activation_action',
+                'label'   => __('Price per activation', 'license-manager-for-woocommerce'),
+                'options' => array(
+                    'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined above.', 'license-manager-for-woocommerce'),
+                    'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period.', 'license-manager-for-woocommerce')
+                ),
+                'custom_attributes' => $disableOnRenewalActionNewLicense,
+                'value' => $renewalCostPerActivation
             )
         );
 
@@ -148,6 +163,15 @@ class ProductData
             );
         }
 
+        // Update the cost per activation action
+        if (isset($_POST['lmfwc_subscription_cost_per_activation_action'])) {
+            update_post_meta(
+                $postId,
+                'lmfwc_subscription_cost_per_activation_action',
+                sanitize_text_field($_POST['lmfwc_subscription_cost_per_activation_action'])
+            );
+        }
+
         // Update the subscription renewal interval type
         if (isset($_POST['lmfwc_subscription_renewal_interval_type'])) {
             update_post_meta(
@@ -191,11 +215,12 @@ class ProductData
             return;
         }
 
-        $renewalAction       = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
-        $renewalResetAction  = get_post_meta($productId, 'lmfwc_subscription_renewal_reset_action', true);
-        $renewalIntervalType = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
-        $customInterval      = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
-        $customPeriod        = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
+        $renewalAction              = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
+        $renewalResetAction         = get_post_meta($productId, 'lmfwc_subscription_renewal_reset_action', true);
+        $renewalCostPerActivation   = get_post_meta($post->ID, 'lmfwc_subscription_cost_per_activation_action', true);
+        $renewalIntervalType        = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
+        $customInterval             = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
+        $customPeriod               = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
 
         $disableOnRenewalActionNewLicense = array();
         if ($renewalAction === 'issue_new_license') {
@@ -230,6 +255,21 @@ class ProductData
                 ),
                 'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalResetAction
+            )
+        );
+
+        // Dropdown "lmfwc_subscription_cost_per_activation_action"
+        woocommerce_wp_select(
+            array(
+                'id'      => sprintf('lmfwc_subscription_cost_per_activation_action_%d', $loop),
+                'name'    => sprintf('lmfwc_subscription_cost_per_activation_action[%d]', $loop),
+                'label'   => __('Price per activation', 'license-manager-for-woocommerce'),
+                'options' => array(
+                    'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined above.', 'license-manager-for-woocommerce'),
+                    'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period.', 'license-manager-for-woocommerce')
+                ),
+                'custom_attributes' => $disableOnRenewalActionNewLicense,
+                'value' => $renewalCostPerActivation
             )
         );
 
@@ -303,6 +343,15 @@ class ProductData
                 $variationId,
                 'lmfwc_subscription_renewal_reset_action',
                 sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'][$i])
+            );
+        }
+    
+        // Update the cost per activation action
+        if (isset($_POST['lmfwc_subscription_cost_per_activation_action'][$i])) {
+            update_post_meta(
+                $variationId,
+                'lmfwc_subscription_cost_per_activation_action',
+                sanitize_text_field($_POST['lmfwc_subscription_cost_per_activation_action'][$i])
             );
         }
 
