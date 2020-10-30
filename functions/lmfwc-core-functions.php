@@ -182,7 +182,7 @@ function lmfwc_get_subscription_cost_per_activation_action($productId) {
         return $action;
     }
 
-    return 'cost_per_activation';
+    return 'cost_per_subscription_period';
 }
 
 /**
