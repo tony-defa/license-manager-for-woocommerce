@@ -125,7 +125,7 @@ class Licenses extends LMFWC_REST_Controller
          * Activates a license key
          */
         register_rest_route(
-            $this->namespace, $this->rest_base . '/activate/(?P<license_key>[\w-]+)(?:/(?P<activations>[1-9][0-9]?))?', array(
+            $this->namespace, $this->rest_base . '/activate/(?P<license_key>[\w-]+)(?:/(?P<activations>[1-9][0-9]*))?', array(
                 array(
                     'methods'             => WP_REST_Server::READABLE,
                     'callback'            => array($this, 'activateLicense'),
@@ -150,7 +150,7 @@ class Licenses extends LMFWC_REST_Controller
          * Deactivates a license key
          */
         register_rest_route(
-            $this->namespace, $this->rest_base . '/deactivate/(?P<license_key>[\w-]+)(?:/(?P<deactivations>[1-9][0-9]?))?', array(
+            $this->namespace, $this->rest_base . '/deactivate/(?P<license_key>[\w-]+)(?:/(?P<deactivations>[1-9][0-9]*))?', array(
                 array(
                     'methods'             => WP_REST_Server::READABLE,
                     'callback'            => array($this, 'deactivateLicense'),
