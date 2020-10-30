@@ -226,7 +226,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     'valid_for'           => $generator->getExpiresIn(),
                     'source'              => LicenseSource::GENERATOR,
                     'status'              => $cleanStatus,
-                    'times_activated_max' => $generator->getTimesActivatedMax()
+                    'times_activated_max' => $generator->getTimesActivatedMax() ?: null
                 )
             );
         }
