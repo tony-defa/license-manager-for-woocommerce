@@ -79,8 +79,8 @@ class ProductData
                 'id'      => 'lmfwc_subscription_cost_per_activation_action',
                 'label'   => __('Price per activation', 'license-manager-for-woocommerce'),
                 'options' => array(
-                    'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined above.', 'license-manager-for-woocommerce'),
-                    'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period.', 'license-manager-for-woocommerce')
+                    'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined in the general section', 'license-manager-for-woocommerce'),
+                    'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period', 'license-manager-for-woocommerce')
                 ),
                 'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalCostPerActivation
@@ -217,7 +217,7 @@ class ProductData
 
         $renewalAction              = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
         $renewalResetAction         = get_post_meta($productId, 'lmfwc_subscription_renewal_reset_action', true);
-        $renewalCostPerActivation   = get_post_meta($post->ID, 'lmfwc_subscription_cost_per_activation_action', true);
+        $renewalCostPerActivation   = get_post_meta($productId, 'lmfwc_subscription_cost_per_activation_action', true);
         $renewalIntervalType        = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
         $customInterval             = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod               = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
@@ -265,8 +265,8 @@ class ProductData
                 'name'    => sprintf('lmfwc_subscription_cost_per_activation_action[%d]', $loop),
                 'label'   => __('Price per activation', 'license-manager-for-woocommerce'),
                 'options' => array(
-                    'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined above.', 'license-manager-for-woocommerce'),
-                    'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period.', 'license-manager-for-woocommerce')
+                    'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined in the general section', 'license-manager-for-woocommerce'),
+                    'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period', 'license-manager-for-woocommerce')
                 ),
                 'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalCostPerActivation
