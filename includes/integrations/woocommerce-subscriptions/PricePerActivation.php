@@ -28,57 +28,63 @@ class PricePerActivation
         add_filter('wcs_new_order_created', array($this, 'maybeChangeSubscriptionOrderQuantities'), 10, 3);                                 // intercepts the newly created order
     }
 
-    function maybeCreateSubscriptionsProductPriceString($subscription_string, $product, $include) {
-        if (!$productId = $product->get_id()) { // variation id
-            $productId = $product->get_parent_id(); // product id
+    function maybeCreateSubscriptionsProductPriceString($subscriptionString, $product, $include)
+    {
+        $productId = $product->get_id(); // product id or variation id
+        $productString = $product->get_parent_id() === 0;
+
+        // get the variation id with the lowest price in case this is called for product with variations
+        if ($productString && strpos($subscriptionString, '<span class="from">') !== false) {
+            $minMaxVarData = get_post_meta($productId, '_min_max_variation_data', true);
+            $productId = $minMaxVarData['min']['variation_id'];
         }
 
         if (!$this->isCostPerActivationProduct($productId)) {
-            return $subscription_string;
+            return $subscriptionString;
         }
 
-		$base_price          = WC_Subscriptions_Product::get_price( $product );
-        $sign_up_fee         = WC_Subscriptions_Product::get_sign_up_fee( $product );
-		$billing_interval    = WC_Subscriptions_Product::get_interval( $product );
-		$billing_period      = WC_Subscriptions_Product::get_period( $product );
-		$subscription_length = WC_Subscriptions_Product::get_length( $product );
-		$trial_length        = WC_Subscriptions_Product::get_trial_length( $product );
-        $trial_period        = WC_Subscriptions_Product::get_trial_period( $product );
+        $signUpFee          = WC_Subscriptions_Product::get_sign_up_fee( $product );
+		$billingInterval    = WC_Subscriptions_Product::get_interval( $product );
+		$billingPeriod      = WC_Subscriptions_Product::get_period( $product );
+		$subscriptionLength = WC_Subscriptions_Product::get_length( $product );
+		$trialLength        = WC_Subscriptions_Product::get_trial_length( $product );
+        $trialPeriod        = WC_Subscriptions_Product::get_trial_period( $product );
 
         $d = 'license-manager-for-woocommerce';
 
         $price = $include['price'];
         $sub = $include['subscription_price']
-                    ? sprintf(__('%s / activation', $d), $price, wcs_get_subscription_period_strings($billing_interval, $billing_period)) 
+                    ? sprintf(__('%s / activation', $d), $price, wcs_get_subscription_period_strings($billingInterval, $billingPeriod)) 
                     : '';
         $period = $include['subscription_period'] 
-                    ? sprintf(_n('%s, billed each %s', '%s, billed every %s', $billing_interval, $d), $sub, wcs_get_subscription_period_strings($billing_interval, $billing_period)) 
+                    ? sprintf(_n('%s, billed each %s', '%s, billed every %s', $billingInterval, $d), $sub, wcs_get_subscription_period_strings($billingInterval, $billingPeriod)) 
                     : '';
-        $length = $include['subscription_length'] && $subscription_length != 0 
-                    ? sprintf(_n('for a %s', 'for %s', $subscription_length, $d), wcs_get_subscription_period_strings($subscription_length, $billing_period)) 
+        $length = $include['subscription_length'] && $subscriptionLength != 0 
+                    ? sprintf(_n('for a %s', 'for %s', $subscriptionLength, $d), wcs_get_subscription_period_strings($subscriptionLength, $billingPeriod)) 
                     : '';
-        $trial = $include['trial_length'] && $trial_length != 0 
-                    ? sprintf(_n('with %s %s free trial', 'with a %s-%s free trial', $trial_length, $d), $trial_length, $trial_period) 
+        $trial = $include['trial_length'] && $trialLength != 0 
+                    ? sprintf(_n('with %s %s free trial', 'with a %s-%s free trial', $trialLength, $d), $trialLength, $trialPeriod) 
                     : '';
-        $fee = $include['sign_up_fee'] && $sign_up_fee != 0 
-                    ? sprintf(__('and a %s sign-up fee', $d),  wc_price($sign_up_fee)) 
+        $fee = $include['sign_up_fee'] && $signUpFee != 0 
+                    ? sprintf(__('and a %s sign-up fee', $d),  wc_price($signUpFee)) 
                     : '';
 
-        $subscription_string = sprintf('%s %s %s %s', $period, $length, $trial, $fee);
-        $subscription_string = trim(str_replace('  ', ' ', $subscription_string));
+        $subscriptionString = sprintf('%s %s %s %s', $period, $length, $trial, $fee);
+        $subscriptionString = trim(str_replace('  ', ' ', $subscriptionString));
 
-        return $subscription_string;
+        return $subscriptionString;
     }
 
-    function maybeCreateSubscriptionPriceString($subscription_string, $subscription_details) {
-        if (!isset($subscription_details['use_cost_per_activation']) || $subscription_details['use_cost_per_activation'] !== true) {
-            return $subscription_string;
+    function maybeCreateSubscriptionPriceString($subscriptionString, $subscriptionDetails) 
+    {
+        if (!isset($subscriptionDetails['use_cost_per_activation']) || $subscriptionDetails['use_cost_per_activation'] !== true) {
+            return $subscriptionString;
         }
 
-        $amount = $subscription_details['recurring_amount'];
-        $interval = $subscription_details['subscription_interval'];
-        $period = $subscription_details['subscription_period'];
-        $length = $subscription_details['subscription_length'];
+        $amount = $subscriptionDetails['recurring_amount'];
+        $interval = $subscriptionDetails['subscription_interval'];
+        $period = $subscriptionDetails['subscription_period'];
+        $length = $subscriptionDetails['subscription_length'];
 
         $d = 'license-manager-for-woocommerce';
 
@@ -87,20 +93,20 @@ class PricePerActivation
                     ? sprintf(_n('for a %s', 'for %s', $length, $d), wcs_get_subscription_period_strings($length, $period)) 
                     : '';
 
-        $subscription_string = sprintf('%s %s %s', $amount, $interval, $length);
-        $subscription_string = trim(str_replace('  ', ' ', $subscription_string));
+        $subscriptionString = sprintf('%s %s %s', $amount, $interval, $length);
+        $subscriptionString = trim(str_replace('  ', ' ', $subscriptionString));
 
-        return $subscription_string;
+        return $subscriptionString;
     }
 
-    function maybeAddSubscriptionDetailString($subscription_details, $cart) {
-
+    function maybeAddSubscriptionDetailString($subscriptionDetails, $cart) 
+    {
         /** @var array $cartItem */
         $cartItems = $cart->get_cart();
 
         if (!$cartItems) {
             error_log("LMFWC: Skipped because there is no item in the cart.");
-            return $subscription_details;
+            return $subscriptionDetails;
         }
 
         $useCostPerActivation = false;
@@ -124,8 +130,8 @@ class PricePerActivation
             }
         }
 
-        $subscription_details['use_cost_per_activation'] = $useCostPerActivation;
-        return $subscription_details;
+        $subscriptionDetails['use_cost_per_activation'] = $useCostPerActivation;
+        return $subscriptionDetails;
     }
 
     public function maybeChangeSubscriptionOrderQuantities($newOrder, $subscription, $type)
