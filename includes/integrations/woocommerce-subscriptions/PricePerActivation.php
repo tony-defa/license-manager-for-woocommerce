@@ -3,31 +3,54 @@
 
 namespace LicenseManagerForWooCommerce\Integrations\WooCommerceSubscriptions;
 
-use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
-use WC_Subscription;
-use WC_Order;
-use WC_Order_Item_Product;
-use WC_Stripe_Helper;
-use WC_Product;
-use WC_Subscriptions_Product;
 use WC_Cart;
+use WC_Order;
+use WC_Product;
+use WC_Subscription;
+use WC_Stripe_Helper;
+use WC_Order_Item_Product;
+use WC_Subscriptions_Product;
+use LicenseManagerForWooCommerce\Settings;
+use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 
 defined('ABSPATH') || exit;
 
+/** 
+ * Transforms a subscription into a cost per activation subscription. 
+ * 
+ * WARNING: There are some errors concerning the cart total, when having 2 of the same 
+ * subscription in the cart. Furthermore the cost per activation calculation is only 
+ * done on renewal orders, this means that the activation price is charged once for the 
+ * first order (parent order). To avoid this behaviour a trail period could be set on 
+ * the product.
+ */
 class PricePerActivation
 {
+
+    /**
+     * @var string
+     */
+    public const DEFAULT_ACTIVATION_NAME = 'activation';
+
+    /**
+     * @var string
+     */
+    public $activationName;
 
     /**
      * PricePerActivation constructor.
      */
     public function __construct()
     {
+        $this->activationName = Settings::get('lmfwc_activation_name_string') ?: self::DEFAULT_ACTIVATION_NAME;
+
         add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received
         add_filter('woocommerce_subscriptions_product_price_string', array($this, 'maybeCreateSubscriptionsProductPriceString'), 10, 3);    // shop, product, cart, checkout
         add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailString'), 10, 2);                // cart, checkout
         add_filter('wcs_new_order_created', array($this, 'maybeChangeSubscriptionOrderQuantities'), 10, 3);                                 // intercepts the newly created order
     }
 
+    
     function maybeCreateSubscriptionsProductPriceString($subscriptionString, $product, $include)
     {
         $productId = $product->get_id(); // product id or variation id
@@ -51,15 +74,19 @@ class PricePerActivation
         $trialPeriod        = WC_Subscriptions_Product::get_trial_period( $product );
 
         $price = $include['price'];
+        /* translators: 1: amount to pay per 2: activation name 3: subscription period (example: "9,95€ / activation, billed each month" or "19,95€ / activation, billed every 3 months") */
         $period = $include['subscription_price'] && $include['subscription_period'] 
-                    ? sprintf(_nx('%s / activation, billed each %s', '%s / activation, billed every %s', $billingInterval, 'Contains price per activation and billing period', 'license-manager-for-woocommerce'), $price, wcs_get_subscription_period_strings($billingInterval, $billingPeriod)) 
+                    ? sprintf(_nx('%1$s / %2$s, billed each %3$s', '%1$s / %2$s, billed every %3$s', $billingInterval, 'Contains price per activation and billing period', 'license-manager-for-woocommerce'), $price, $this->activationName, wcs_get_subscription_period_strings($billingInterval, $billingPeriod)) 
                     : '';
+        /* translators: %s: subscription period (example: "for a month" or "for 3 months") */
         $length = $include['subscription_length'] && $subscriptionLength != 0 
                     ? sprintf(_nx('for a %s', 'for %s', $subscriptionLength, 'The length of the subscription', 'license-manager-for-woocommerce'), wcs_get_subscription_period_strings($subscriptionLength, $billingPeriod)) 
                     : '';
+        /* translators: 1: trial length 2: trial period (example: "with 1 month free trial" or "with a 3-week free trial") */
         $trial = $include['trial_length'] && $trialLength != 0 
-                    ? sprintf(_nx('with %s %s free trial', 'with a %s-%s free trial', $trialLength, 'Describes the length of the trail period of the subscription', 'license-manager-for-woocommerce'), $trialLength, $trialPeriod) 
+                    ? sprintf(_nx('with %1$s %2$s free trial', 'with a %1$s-%2$s free trial', $trialLength, 'Describes the length of the trail period of the subscription', 'license-manager-for-woocommerce'), $trialLength, $trialPeriod) 
                     : '';
+        /* translators: %s: fee price (example: "and a 9,99€ sign-up fee") */
         $fee = $include['sign_up_fee'] && $signUpFee != 0 
                     ? sprintf(_x('and a %s sign-up fee', 'The sign up fee pricing', 'license-manager-for-woocommerce'),  wc_price($signUpFee)) 
                     : '';
@@ -130,7 +157,9 @@ class PricePerActivation
             }
         }
 
-        $interval = sprintf(_nx('%s / activation, billed each %s', '%s / activation, billed every %s', $interval, 'Contains price per activation and billing period', 'license-manager-for-woocommerce'), $amount, wcs_get_subscription_period_strings($interval, $period));
+        /* translators: 1: amount to pay per 2: activation name 3: subscription period (example: "9,95€ / activation, billed each month" or "19,95€ / activation, billed every 3 months") */
+        $interval = sprintf(_nx('%1$s / %2$s, billed each %3$s', '%1$s / %2$s, billed every %3$s', $interval, 'Contains price per activation and billing period', 'license-manager-for-woocommerce'), $amount, $this->activationName, wcs_get_subscription_period_strings($interval, $period));
+        /* translators: %s: subscription period (example: "for a month" or "for 3 months") */
         $length = $length != 0 
                     ? sprintf(_nx('for a %s', 'for %s', $length, 'The length of the subscription', 'license-manager-for-woocommerce'), wcs_get_subscription_period_strings($length, $period)) 
                     : '';
@@ -199,7 +228,7 @@ class PricePerActivation
             }
 
             if (!$this->isCostPerActivationProduct($productId)) {
-                error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
+                error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset {$this->activationName} count on renewal.");
                 continue;
             }
 
