@@ -44,13 +44,21 @@ class PricePerActivation
     {
         $this->activationName = Settings::get('lmfwc_activation_name_string') ?: self::DEFAULT_ACTIVATION_NAME;
 
-        add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received
         add_filter('woocommerce_subscriptions_product_price_string', array($this, 'maybeCreateSubscriptionsProductPriceString'), 10, 3);    // shop, product, cart, checkout
+        add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received, email
         add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailString'), 10, 2);                // cart, checkout
         add_filter('wcs_new_order_created', array($this, 'maybeChangeSubscriptionOrderQuantities'), 10, 3);                                 // intercepts the newly created order
     }
-
     
+    /**
+     * Overwrite price string for a cost per activation subscription product.
+     * This is executed on the following pages: shop, product, cart, checkout
+     *
+     * @param string $subscriptionString    a formatted price string form WooCommerce Subscription
+     * @param WC_Product $product           the product
+     * @param array $include                an array that contains switches for each segment
+     * @return string                       the modified $subscriptionString
+     */
     function maybeCreateSubscriptionsProductPriceString($subscriptionString, $product, $include)
     {
         $productId = $product->get_id(); // product id or variation id
@@ -97,6 +105,15 @@ class PricePerActivation
         return $subscriptionString;
     }
 
+    /**
+     * Overwrites the shortened formatted price string, if the product is a cost per activation
+     * subscription product.
+     * This is executed on the following pages: cart, checkout, order received, email
+     *
+     * @param string $subscriptionString    a formatted price string form WooCommerce Subscription
+     * @param array $subscriptionDetails    an array containing certain details of the subscription 
+     * @return string                       the modified $subscriptionString
+     */
     function maybeCreateSubscriptionPriceString($subscriptionString, $subscriptionDetails) 
     {
         $amount = $subscriptionDetails['recurring_amount'];
@@ -170,6 +187,17 @@ class PricePerActivation
         return $subscriptionString;
     }
 
+    /**
+     * Adds a boolean to the $subscriptionDetails array if the cart contains a 
+     * subscription product that is setup with 'cost_per_activation' meta. The 
+     * boolean is added to use on the 'woocommerce_subscription_price_string'
+     * hook.
+     * This is executed on the following pages: cart, checkout
+     *
+     * @param array $subscriptionDetails    an array containing certain details of the subscription 
+     * @param WC_Cart $cart                 the cart 
+     * @return array                        the modified $subscriptionDetails array
+     */
     function maybeAddSubscriptionDetailString($subscriptionDetails, $cart) 
     {
         /** @var array $cartItem */
@@ -205,9 +233,18 @@ class PricePerActivation
         return $subscriptionDetails;
     }
 
+    /**
+     * Changes the quantity and recalculates totals based on license activations, if the items 
+     * contained in the order are setup with the 'cost_per_activation' meta.
+     *
+     * @param WC_Order $newOrder                the newly created order
+     * @param WC_Subscription $subscription     the subscription of the created order
+     * @param string $type                      a string of order type, should be 'renewal_order'
+     * @return WC_Order                         the modified order
+     */
     public function maybeChangeSubscriptionOrderQuantities($newOrder, $subscription, $type)
     {
-        if ($type !== 'renewal_order' || !wcs_is_subscription( $subscription )) {
+        if ($type !== 'renewal_order' || !wcs_is_subscription($subscription)) {
             error_log("LMFWC: Skipped because is not valid subscription renewal order.");
             return $newOrder;
         }
