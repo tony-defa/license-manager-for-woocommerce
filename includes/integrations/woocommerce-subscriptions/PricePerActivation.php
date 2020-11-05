@@ -45,11 +45,12 @@ class PricePerActivation
         $this->activationName = Settings::get('lmfwc_activation_name_string') ?: self::DEFAULT_ACTIVATION_NAME;
 
         add_filter('woocommerce_subscriptions_product_price_string', array($this, 'maybeCreateSubscriptionsProductPriceString'), 10, 3);    // shop, product, cart, checkout
-        add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received, email
-        add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailString'), 10, 2);                // cart, checkout
+        add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received
+        add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailFromCart'), 10, 2);              // cart, checkout
+        add_filter('woocommerce_subscription_price_string_details', array($this, 'maybeAddSubscriptionDetailFromSubscription'), 10, 2);     // subscriptions (admin), order received, email?
         add_filter('wcs_new_order_created', array($this, 'maybeChangeSubscriptionOrderQuantities'), 10, 3);                                 // intercepts the newly created order
     }
-    
+
     /**
      * Overwrite price string for a cost per activation subscription product.
      * This is executed on the following pages: shop, product, cart, checkout
@@ -116,63 +117,14 @@ class PricePerActivation
      */
     function maybeCreateSubscriptionPriceString($subscriptionString, $subscriptionDetails) 
     {
+        if (!isset($subscriptionDetails['use_cost_per_activation']) || $subscriptionDetails['use_cost_per_activation'] === false) {
+            return $subscriptionString;
+        } 
+
         $amount = $subscriptionDetails['recurring_amount'];
         $interval = $subscriptionDetails['subscription_interval'];
         $period = $subscriptionDetails['subscription_period'];
         $length = $subscriptionDetails['subscription_length'];
-        $trialLength = $subscriptionDetails['trial_length'];
-
-        if (isset($subscriptionDetails['use_cost_per_activation']) && $subscriptionDetails['use_cost_per_activation'] === false) {
-            return $subscriptionString;
-        } else if (!isset($subscriptionDetails['use_cost_per_activation'])) {
-
-            // After the order is completed and the order e-mail is being generated, the 
-            // 'woocommerce_cart_subscription_string_details' hook will not be executed, 
-            // so we have a hart time finding out if the current price string should contain
-            // a 'cost_per_activation' price string. We can try to find out by getting all 
-            // product ids that match the current subscription details and will continue with 
-            // our price string formatting, only if we have exactly one matching product
-            // or product variation. This is not an ideal solution as this can not always
-            // guarantees a save match. 
-            // In the edit subscription admin panel this can also fail, if the product meta 
-            // data has changed since the subscription was ordered or if the data does not 
-            // match the subscription details anymore.
-            $allIds = get_posts(array(
-                'post_type' => array('product', 'product_variation'),
-                'post_status' => 'publish',
-                'numberposts' => -1,
-                'fields' => 'ids',
-                'meta_query' => array(
-                    array('key' => 'lmfwc_subscription_cost_per_activation_action',
-                          'value' => 'cost_per_activation', 
-                          'compare' => '=',
-                    ),
-                    array('key' => '_subscription_period_interval',
-                          'value' => $interval, 
-                          'compare' => '=',
-                    ),
-                    array('key' => '_subscription_period',
-                          'value' => $period, 
-                          'compare' => '=',
-                    )
-                ),
-            ));
-
-            $removeList = array();
-            foreach ($allIds as $id) {
-                $price = wc_get_product($id)->get_price();
-                if (floatval($amount) !== floatval($price)) {
-                    $removeList[] = $id;
-                }
-            }
-            $allIds = array_diff($allIds, $removeList);
-
-            // return the current formatted string if there are none or multiple ids 
-            // that match the subscription details
-            if (count($allIds) !== 1) {
-                return $subscriptionString;
-            }
-        }
 
         /* translators: 1: amount to pay per 2: activation name 3: subscription period (example: "9,95€ / activation, billed each month" or "19,95€ / activation, billed every 3 months") */
         $interval = sprintf(_nx('%1$s / %2$s, billed each %3$s', '%1$s / %2$s, billed every %3$s', $interval, 'Contains price per activation and billing period', 'license-manager-for-woocommerce'), $amount, $this->activationName, wcs_get_subscription_period_strings($interval, $period));
@@ -198,7 +150,7 @@ class PricePerActivation
      * @param WC_Cart $cart                 the cart 
      * @return array                        the modified $subscriptionDetails array
      */
-    function maybeAddSubscriptionDetailString($subscriptionDetails, $cart) 
+    function maybeAddSubscriptionDetailFromCart($subscriptionDetails, $cart) 
     {
         /** @var array $cartItem */
         $cartItems = $cart->get_cart();
@@ -208,29 +160,28 @@ class PricePerActivation
             return $subscriptionDetails;
         }
 
-        $useCostPerActivation = false;
+        return $this->addDetailBasedOnItems($subscriptionDetails, $cartItems);
+    }
+    
+    /**
+     * Same as @see maybeAddSubscriptionDetailFromCart()
+     * This is executed on the following pages: subscriptions (admin), order received, email?
+     *
+     * @param array $subscriptionDetails    an array containing certain details of the subscription 
+     * @param WC_Subscription $subscription the subscription 
+     * @return array                        the modified $subscriptionDetails array
+     */
+    function maybeAddSubscriptionDetailFromSubscription($subscriptionDetails, $subscription)
+    {
+        /** @var array $items */
+        $items = $subscription->get_items();
 
-        /** @var array $item */
-        foreach ($cartItems as $item) {
-            /** @var int $productId */
-            if (!$productId = $item['variation_id']) {
-                $productId = $item['product_id'];
-            }
-
-            if (!$this->isCostPerActivationProduct($productId)) {
-                error_log("LMFWC: Skipped product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
-                continue;
-            }
-
-            error_log("LMFWC: Product with id #{$productId} has cost per activation.");
-            $useCostPerActivation = true;
-            if ($useCostPerActivation) {
-                break;
-            }
+        if (!$items) {
+            error_log("LMFWC: Skipped because there is no item in the subscription.");
+            return $subscriptionDetails;
         }
 
-        $subscriptionDetails['use_cost_per_activation'] = $useCostPerActivation;
-        return $subscriptionDetails;
+        return $this->addDetailBasedOnItems($subscriptionDetails, $items);
     }
 
     /**
@@ -327,6 +278,32 @@ class PricePerActivation
         }
 
         return $newOrder;
+    }
+
+    private function addDetailBasedOnItems($subscriptionDetails, $items) {
+        $useCostPerActivation = false;
+
+        /** @var array $item */
+        foreach ($items as $id => $item) {
+            /** @var int $productId */
+            if (!$productId = $item['variation_id']) {
+                $productId = $item['product_id'];
+            }
+
+            if (!$this->isCostPerActivationProduct($productId)) {
+                error_log("LMFWC: Skipped product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
+                continue;
+            }
+
+            error_log("LMFWC: Product with id #{$productId} has cost per activation.");
+            $useCostPerActivation = true;
+            if ($useCostPerActivation) {
+                break;
+            }
+        }
+
+        $subscriptionDetails['use_cost_per_activation'] = $useCostPerActivation;
+        return $subscriptionDetails;
     }
 
     private function isCostPerActivationProduct($productId) {
