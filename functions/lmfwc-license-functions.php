@@ -363,6 +363,10 @@ function lmfwc_activate_license($licenseKey)
         $timesActivatedMax = absint($license->getTimesActivatedMax());
     }
 
+    if ($license->getStatus() === LicenseStatusEnum::DISABLED) {
+        throw new Exception("License Key: {$licenseKey} is disabled.");
+    }
+
     if ($timesActivatedMax && ($timesActivated >= $timesActivatedMax)) {
         throw new Exception("License Key: {$licenseKey} reached maximum activation count.");
     }
@@ -412,6 +416,10 @@ function lmfwc_deactivate_license($licenseKey)
 
     if ($license->getTimesActivated() !== null) {
         $timesActivated = absint($license->getTimesActivated());
+    }
+
+    if ($license->getStatus() === LicenseStatusEnum::DISABLED) {
+        throw new Exception("License Key: {$licenseKey} is disabled.");
     }
 
     if (!$timesActivated || $timesActivated === 0) {

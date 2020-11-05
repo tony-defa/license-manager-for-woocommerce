@@ -634,6 +634,10 @@ class Licenses extends LMFWC_REST_Controller
             return $licenseExpired;
         }
 
+        if (false !== $licenseExpired = $this->isLicenseDisabled($license)) {
+            return $licenseExpired;
+        }
+
         $timesActivated    = null;
         $timesActivatedMax = null;
 
@@ -750,6 +754,10 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         if (false !== $licenseExpired = $this->hasLicenseExpired($license)) {
+            return $licenseExpired;
+        }
+
+        if (false !== $licenseExpired = $this->isLicenseDisabled($license)) {
             return $licenseExpired;
         }
 
@@ -902,6 +910,24 @@ class Licenses extends LMFWC_REST_Controller
             }
         }
 
+        return false;
+    }
+
+    /**
+     * Checks if the license is disabled.
+     *
+     * @param LicenseResourceModel $license
+     * @return false|WP_Error
+     */
+    private function isLicenseDisabled($license)
+    {
+        if ($license->getStatus() === LicenseStatus::DISABLED) {
+            return new WP_Error(
+                'lmfwc_rest_license_disabled',
+                'The license Key is disabled.',
+                array('status' => 405)
+            );
+        }
         return false;
     }
 }
