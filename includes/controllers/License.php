@@ -60,7 +60,7 @@ class License
             && $_POST['status']
             && in_array($_POST['status'], LicenseStatusEnum::$status)
         ) {
-            $status = intval($_POST['status']);
+            $status = (int)$_POST['status'];
         }
 
         if ($source === 'file') {
@@ -112,7 +112,7 @@ class License
             AdminNotice::success(
                 sprintf(
                     __('%d license key(s) added successfully.', 'license-manager-for-woocommerce'),
-                    intval($result['added'])
+                    (int)$result['added']
                 )
             );
             wp_redirect(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE));
@@ -135,8 +135,8 @@ class License
             AdminNotice::warning(
                 sprintf(
                     __('%d key(s) have been imported, while %d key(s) were not imported.', 'license-manager-for-woocommerce'),
-                    intval($result['added']),
-                    intval($result['failed'])
+                    (int)$result['added'],
+                    (int)$result['failed']
                 )
             );
             wp_redirect(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE));

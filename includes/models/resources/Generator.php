@@ -91,11 +91,11 @@ class Generator extends AbstractResourceModel implements ModelInterface
             return;
         }
 
-        $this->id                = intval($generator->id);
+        $this->id                = (int)$generator->id;
         $this->name              = $generator->name;
         $this->charset           = $generator->charset;
-        $this->chunks            = intval($generator->chunks);
-        $this->chunkLength       = intval($generator->chunk_length);
+        $this->chunks            = (int)$generator->chunks;
+        $this->chunkLength       = (int)$generator->chunk_length;
         $this->timesActivatedMax = $generator->times_activated_max;
         $this->separator         = $generator->separator;
         $this->prefix            = $generator->prefix;

@@ -75,9 +75,9 @@ class APIKeyList extends WP_List_Table
      */
     public function column_title($item)
     {
-        $keyId  = intval($item['id']);
+        $keyId  = (int)$item['id'];
         $url    = admin_url(sprintf('admin.php?page=%s&tab=rest_api&edit_key=%d', AdminMenus::SETTINGS_PAGE, $keyId));
-        $userId = intval($item['user_id']);
+        $userId = (int)$item['user_id'];
 
         // Check if current user can edit other users or if it's the same user.
         $canEdit = current_user_can('edit_user', $userId) || get_current_user_id() === $userId;
