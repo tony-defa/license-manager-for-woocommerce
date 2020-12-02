@@ -242,3 +242,40 @@ table.wp-list-table.lizenzschlssel span.lmfwc-date {
 	background-color: var(--color-info);
 	color: #ffffff;
 }
+
+/** Products **/
+#license_manager_product_data .form-field.lmfwc_licensed_product_changelog {
+	padding: 5px 12px 5px 162px;
+	position: relative;
+	margin: 9px 0;
+}
+#license_manager_product_data .form-field.lmfwc_licensed_product_changelog label {
+	position: absolute;
+	left: 0;
+	margin: 0 12px;
+	line-height: 24px;
+	font-size: 12px;
+}
+#license_manager_product_data .form-field.lmfwc_licensed_product_changelog #wp-lmfwc_licensed_product_changelog-wrap {
+	margin-top: 23px;
+}
+.button.lmfwc-license-keys-show-all {
+	margin-right: 5px;
+}
+
+@media only screen and (max-width: 500px) {
+	#license_manager_product_data .form-field.lmfwc_licensed_product_changelog {
+		padding: 5px 20px;
+	}
+}
+
+@media only screen and (max-width: 1280px) {
+	#license_manager_product_data .form-field.lmfwc_licensed_product_changelog {
+		padding: 5px 12px 5px 12px;
+		clear: both;
+	}
+	#license_manager_product_data .form-field.lmfwc_licensed_product_changelog label {
+		position: static;
+		margin: 0;
+	}
+}

@@ -6,3 +6,4 @@ vendor
 vendor/*
 .idea
 .idea/*
+/composer.phar

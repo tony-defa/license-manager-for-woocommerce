@@ -15,6 +15,8 @@ use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceMode
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Settings;
 use stdClass;
+use WC_Customer_Download;
+use WC_Data_Store;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Product;
@@ -202,6 +204,8 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             $expiresAt     = $gmtDate->add($dateExpiresAt)->format('Y-m-d H:i:s');
         }
 
+	    Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $orderId );
+
         // Add the keys to the database table.
         foreach ($cleanLicenseKeys as $licenseKey) {
             // Key exists, up the invalid keys count.
@@ -318,6 +322,14 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             );
 
             if ($license) {
+	            if ( $validFor ) {
+		            $date         = new DateTime();
+		            $dateInterval = new DateInterval( 'P' . $validFor . 'D' );
+		            $expiresAt    = $date->add( $dateInterval )->format( 'Y-m-d H:i:s' );
+
+		            Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $orderId );
+	            }
+
                 $result['added']++;
             }
 

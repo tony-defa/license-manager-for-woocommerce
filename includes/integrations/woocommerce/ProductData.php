@@ -6,6 +6,7 @@ use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Models\Resources\Generator as GeneratorResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\Generator as GeneratorResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Settings;
 use WP_Error;
 use WP_Post;
 
@@ -80,13 +81,18 @@ class ProductData
         global $post;
 
         /** @var GeneratorResourceModel[] $generators */
-        $generators        = GeneratorResourceRepository::instance()->findAll();
-        $licensed          = get_post_meta($post->ID, 'lmfwc_licensed_product',                    true);
-        $deliveredQuantity = get_post_meta($post->ID, 'lmfwc_licensed_product_delivered_quantity', true);
-        $generatorId       = get_post_meta($post->ID, 'lmfwc_licensed_product_assigned_generator', true);
-        $useGenerator      = get_post_meta($post->ID, 'lmfwc_licensed_product_use_generator',      true);
-        $useStock          = get_post_meta($post->ID, 'lmfwc_licensed_product_use_stock',          true);
-        $generatorOptions  = array('' => __('Please select a generator', 'license-manager-for-woocommerce'));
+        $generators         = GeneratorResourceRepository::instance()->findAll();
+        $licensed           = get_post_meta($post->ID, 'lmfwc_licensed_product',                    true);
+        $deliveredQuantity  = get_post_meta($post->ID, 'lmfwc_licensed_product_delivered_quantity', true);
+        $generatorId        = get_post_meta($post->ID, 'lmfwc_licensed_product_assigned_generator', true);
+        $useGenerator       = get_post_meta($post->ID, 'lmfwc_licensed_product_use_generator',      true);
+        $useStock           = get_post_meta($post->ID, 'lmfwc_licensed_product_use_stock',          true);
+        $generatorOptions   = array('' => __('Please select a generator', 'license-manager-for-woocommerce'));
+        $productVersion     = get_post_meta( $post->ID, 'lmfwc_licensed_product_version', true );
+        $productTested      = get_post_meta( $post->ID, 'lmfwc_licensed_product_tested', true );
+        $productRequires    = get_post_meta( $post->ID, 'lmfwc_licensed_product_requires', true );
+        $productRequiresPhp = get_post_meta( $post->ID, 'lmfwc_licensed_product_requires_php', true );
+        $productChangelog   = get_post_meta( $post->ID, 'lmfwc_licensed_product_changelog', true );
 
         if ($generators) {
             /** @var GeneratorResourceModel $generator */
@@ -185,8 +191,59 @@ class ProductData
 
         do_action('lmfwc_product_data_panel', $post);
 
-        echo '</div></div>';
-    }
+		if ( Settings::get( 'lmfwc_product_downloads' ) ) {
+			echo '</div><div class="options_group">';
+
+			woocommerce_wp_text_input(
+				array(
+					'id'          => 'lmfwc_licensed_product_version',
+					'label'       => esc_html__( 'Product version', 'license-manager-for-woocommerce' ),
+					'value'       => $productVersion,
+					'desc_tip'    => true,
+					'description' => esc_html__( 'Defines current version of the product.', 'license-manager-for-woocommerce' )
+				)
+			);
+
+			woocommerce_wp_text_input(
+				array(
+					'id'          => 'lmfwc_licensed_product_tested',
+					'label'       => esc_html__( 'Product tested', 'license-manager-for-woocommerce' ),
+					'value'       => $productTested,
+					'desc_tip'    => true,
+					'description' => esc_html__( 'The version of WordPress where the product has been tested up to.', 'license-manager-for-woocommerce' )
+				)
+			);
+
+			woocommerce_wp_text_input(
+				array(
+					'id'          => 'lmfwc_licensed_product_requires',
+					'label'       => esc_html__( 'Product requires', 'license-manager-for-woocommerce' ),
+					'value'       => $productRequires,
+					'desc_tip'    => true,
+					'description' => esc_html__( 'The version of WordPress that the product requires.', 'license-manager-for-woocommerce' )
+				)
+			);
+
+			woocommerce_wp_text_input(
+				array(
+					'id'          => 'lmfwc_licensed_product_requires_php',
+					'label'       => esc_html__( 'Product requires PHP', 'license-manager-for-woocommerce' ),
+					'value'       => $productRequiresPhp,
+					'desc_tip'    => true,
+					'description' => esc_html__( 'The version of PHP that the product requires.', 'license-manager-for-woocommerce' )
+				)
+			);
+			?>
+            <div class="form-field lmfwc_licensed_product_changelog">
+                <label><?= esc_html__( 'Product changelog', 'license-manager-for-woocommerce' ) ?></label>
+				<?php
+				wp_editor( $productChangelog, 'lmfwc_licensed_product_changelog', [ 'media_buttons' => false ] );
+				?>
+            </div>
+		<?php }
+
+		echo '</div></div>';
+	}
 
     /**
      * Adds an icon to the new data tab.
@@ -274,8 +331,33 @@ class ProductData
             update_post_meta($postId, 'lmfwc_licensed_product_assigned_generator', 0);
         }
 
-        do_action('lmfwc_product_data_save_post', $postId);
-    }
+		// Update the product version according to the field.
+		$productVersion = sanitize_text_field( wp_unslash( $_POST['lmfwc_licensed_product_version'] ) );
+
+		update_post_meta( $postId, 'lmfwc_licensed_product_version', $productVersion );
+
+		// Update the product WordPress version tested up to according to the field.
+		$productTested = sanitize_text_field( wp_unslash( $_POST['lmfwc_licensed_product_tested'] ) );
+
+		update_post_meta( $postId, 'lmfwc_licensed_product_tested', $productTested );
+
+		// Update the product required WordPress version according to the field.
+		$productRequires = sanitize_text_field( wp_unslash( $_POST['lmfwc_licensed_product_requires'] ) );
+
+		update_post_meta( $postId, 'lmfwc_licensed_product_requires', $productRequires );
+
+		// Update the product required PHP version according to the field.
+		$productRequiresPhp = sanitize_text_field( wp_unslash( $_POST['lmfwc_licensed_product_requires_php'] ) );
+
+		update_post_meta( $postId, 'lmfwc_licensed_product_requires_php', $productRequiresPhp );
+
+		// Update the product changelog according to the field.
+		$productChangelog = wp_unslash( $_POST['lmfwc_licensed_product_changelog'] );
+
+		update_post_meta( $postId, 'lmfwc_licensed_product_changelog', $productChangelog );
+
+		do_action( 'lmfwc_product_data_save_post', $postId );
+	}
 
     /**
      * Adds the new product data fields to variable WooCommerce Products.

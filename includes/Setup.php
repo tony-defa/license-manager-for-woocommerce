@@ -309,6 +309,8 @@ class Setup
         $defaultSettingsGeneral = array(
             'lmfwc_hide_license_keys' => 0,
             'lmfwc_auto_delivery' => 1,
+            'lmfwc_product_downloads' => 1,
+            'lmfwc_download_expires' => 1,
             'lmfwc_disable_api_ssl' => 0,
             'lmfwc_enabled_api_routes' => array(
                 '000' => '1',
@@ -331,7 +333,9 @@ class Setup
                 '017' => '1',
                 '018' => '1',
                 '019' => '1',
-                '020' => '1'
+                '020' => '1',
+                '021' => '1',
+                '022' => '1'
             )
         );
         $defaultSettingsOrderStatus = array(

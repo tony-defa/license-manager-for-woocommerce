@@ -6,8 +6,10 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use LicenseManagerForWooCommerce\Abstracts\RestController as LMFWC_REST_Controller;
+use LicenseManagerForWooCommerce\Controllers\License;
 use LicenseManagerForWooCommerce\Enums\LicenseSource;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
+use LicenseManagerForWooCommerce\Integrations\WooCommerce\Order;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use WP_Error;
@@ -401,6 +403,14 @@ class Licenses extends LMFWC_REST_Controller
                     'times_activated_max' => $timesActivatedMax
                 )
             );
+
+	        if ( ( $expiresAt !== null || $validFor !== null ) && $orderId !== null ) {
+		        if ( empty( $expiresAt ) ) {
+			        $expiresAt = License::instance()->validFor2ExpiresAt( $validFor );
+		        }
+
+		        Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $orderId );
+	        }
         } catch (Exception $e) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -563,6 +573,12 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $licenseData = $updatedLicense->toArray();
+
+	    if ( ( isset( $updateData['expires_at'] ) || isset( $updateData['valid_for'] ) ) && isset( $licenseData['orderId'] ) ) {
+		    $expiresAt = $updateData['expires_at'] ?? License::instance()->validFor2ExpiresAt( $updateData['valid_for'] );
+
+		    Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $licenseData['orderId'] );
+	    }
 
         // Remove the hash and decrypt the license key
         unset($licenseData['hash']);
