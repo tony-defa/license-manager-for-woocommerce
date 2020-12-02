@@ -663,7 +663,7 @@ class Licenses extends LMFWC_REST_Controller
             }
 
             else {
-                $timesActivatedNew = intval($timesActivated) + 1;
+                $timesActivatedNew = (int)$timesActivated + 1;
             }
 
             /** @var LicenseResourceModel $updatedLicense */
@@ -772,7 +772,7 @@ class Licenses extends LMFWC_REST_Controller
 
         // Deactivate the license key
         try {
-            $timesActivatedNew = intval($timesActivated) - 1;
+            $timesActivatedNew = (int)$timesActivated - 1;
 
             /** @var LicenseResourceModel $updatedLicense */
             $updatedLicense = LicenseResourceRepository::instance()->update(
@@ -869,9 +869,9 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $result = array(
-            'timesActivated'       => intval($license->getTimesActivated()),
-            'timesActivatedMax'    => intval($license->getTimesActivatedMax()),
-            'remainingActivations' => intval($license->getTimesActivatedMax()) - intval($license->getTimesActivated())
+            'timesActivated'       => (int)$license->getTimesActivated(),
+            'timesActivatedMax'    => (int)$license->getTimesActivatedMax(),
+            'remainingActivations' => (int)$license->getTimesActivatedMax() - (int)$license->getTimesActivated()
         );
 
         return $this->response(true, $result, 200, 'v2/licenses/validate/{license_key}');

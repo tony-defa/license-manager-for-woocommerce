@@ -168,7 +168,7 @@ class LicensesList extends WP_List_Table
         );
 
         foreach ($results as $result) {
-            if (!$orderId = intval($result['order_id'])) {
+            if (!$orderId = (int)$result['order_id']) {
                 continue;
             }
 
@@ -224,7 +224,7 @@ class LicensesList extends WP_List_Table
         );
 
         foreach ($results as $result) {
-            if (!$productId = intval($result['product_id'])) {
+            if (!$productId = (int)$result['product_id']) {
                 continue;
             }
 
@@ -281,7 +281,7 @@ class LicensesList extends WP_List_Table
         );
 
         foreach ($results as $result) {
-            if (!$userId = intval($result['user_id'])) {
+            if (!$userId = (int)$result['user_id']) {
                 continue;
             }
 
@@ -367,7 +367,7 @@ class LicensesList extends WP_List_Table
         }
 
         // ID
-        $actions['id'] = sprintf(__('ID: %d', 'license-manager-for-woocommerce'), intval($item['id']));
+        $actions['id'] = sprintf(__('ID: %d', 'license-manager-for-woocommerce'), (int)$item['id']);
 
         // Edit
         $actions['edit'] = sprintf(
@@ -377,7 +377,7 @@ class LicensesList extends WP_List_Table
                     sprintf(
                         'admin.php?page=%s&action=edit&id=%d',
                         AdminMenus::LICENSES_PAGE,
-                        intval($item['id'])
+                        (int)$item['id']
                     ),
                     'lmfwc_edit_license_key'
                 )
@@ -408,7 +408,7 @@ class LicensesList extends WP_List_Table
                         sprintf(
                             'admin.php?page=%s&action=activate&id=%d&_wpnonce=%s',
                             AdminMenus::LICENSES_PAGE,
-                            intval($item['id']),
+                            (int)$item['id'],
                             wp_create_nonce('activate')
                         )
                     ),
@@ -423,7 +423,7 @@ class LicensesList extends WP_List_Table
                         sprintf(
                             'admin.php?page=%s&action=deactivate&id=%d&_wpnonce=%s',
                             AdminMenus::LICENSES_PAGE,
-                            intval($item['id']),
+                            (int)$item['id'],
                             wp_create_nonce('deactivate')
                         )
                     ),
@@ -439,7 +439,7 @@ class LicensesList extends WP_List_Table
                 sprintf(
                     'admin.php?page=%s&action=delete&id=%d&_wpnonce=%s',
                     AdminMenus::LICENSES_PAGE,
-                    intval($item['id']),
+                    (int)$item['id'],
                     wp_create_nonce('delete')
                 )
             ),
@@ -566,20 +566,20 @@ class LicensesList extends WP_List_Table
         if ($item['times_activated_max'] === null) {
             $timesActivatedMax = null;
         } else {
-            $timesActivatedMax = intval($item['times_activated_max']);
+            $timesActivatedMax = (int)$item['times_activated_max'];
         }
 
         if ($item['times_activated'] === null) {
             $timesActivated = null;
         } else {
-            $timesActivated = intval($item['times_activated']);
+            $timesActivated = (int)$item['times_activated'];
         }
 
         if ($timesActivatedMax === null) {
             return sprintf(
                 '<div class="lmfwc-status %s"><small>%d</small> / <b>%s</b></div>',
                 'activation done',
-                intval($timesActivated),
+                $timesActivated,
                 '&infin;'
             );
         }
@@ -761,7 +761,7 @@ class LicensesList extends WP_List_Table
         if ($item['valid_for']) {
             $html = sprintf(
                 '<b>%d</b> %s<br><small>%s</small>',
-                intval($item['valid_for']),
+                (int)$item['valid_for'],
                 __('day(s)', 'license-manager-for-woocommerce'),
                 __('After purchase', 'license-manager-for-woocommerce')
             );
@@ -946,7 +946,7 @@ class LicensesList extends WP_List_Table
 
         // Applies the view filter
         if ($this->isViewFilterActive()) {
-            $sql .= $wpdb->prepare(' AND status = %d', intval($_GET['status']));
+            $sql .= $wpdb->prepare(' AND status = %d', (int)$_GET['status']);
         }
 
         // Applies the search box filter
@@ -959,17 +959,17 @@ class LicensesList extends WP_List_Table
 
         // Applies the order filter
         if (isset($_REQUEST['order-id']) && is_numeric($_REQUEST['order-id'])) {
-            $sql .= $wpdb->prepare(' AND order_id = %d', intval($_REQUEST['order-id']));
+            $sql .= $wpdb->prepare(' AND order_id = %d', (int)$_REQUEST['order-id']);
         }
 
         // Applies the product filter
         if (isset($_REQUEST['product-id']) && is_numeric($_REQUEST['product-id'])) {
-            $sql .= $wpdb->prepare(' AND product_id = %d', intval($_REQUEST['product-id']));
+            $sql .= $wpdb->prepare(' AND product_id = %d', (int)$_REQUEST['product-id']);
         }
 
         // Applies the user filter
         if (isset($_REQUEST['user-id']) && is_numeric($_REQUEST['user-id'])) {
-            $sql .= $wpdb->prepare(' AND user_id = %d', intval($_REQUEST['user-id']));
+            $sql .= $wpdb->prepare(' AND user_id = %d', (int)$_REQUEST['user-id']);
         }
 
         $sql .= ' ORDER BY ' . (empty($_REQUEST['orderby']) ? 'id' : esc_sql($_REQUEST['orderby']));
@@ -992,11 +992,11 @@ class LicensesList extends WP_List_Table
         $sql = "SELECT COUNT(*) FROM {$this->table} WHERE 1 = 1";
 
         if ($this->isViewFilterActive()) {
-            $sql .= $wpdb->prepare(' AND status = %d', intval($_GET['status']));
+            $sql .= $wpdb->prepare(' AND status = %d', (int)$_GET['status']);
         }
 
         if (isset($_REQUEST['order-id'])) {
-            $sql .= $wpdb->prepare(' AND order_id = %d', intval($_REQUEST['order-id']));
+            $sql .= $wpdb->prepare(' AND order_id = %d', (int)$_REQUEST['order-id']);
         }
 
         if (array_key_exists('s', $_REQUEST) && $_REQUEST['s']) {

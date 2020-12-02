@@ -116,7 +116,7 @@ defined('ABSPATH') || exit;
         </tbody>
     </table>
 
-    <?php if (0 === intval($keyId)): ?>
+    <?php if (0 === (int)$keyId): ?>
         <?php submit_button(__('Generate API key', 'license-manager-for-woocommerce'), 'primary', 'update_api_key'); ?>
     <?php else: ?>
         <p class="submit">
