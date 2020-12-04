@@ -111,6 +111,7 @@ class ProductData
                 'label'             => __('Delivered quantity', 'license-manager-for-woocommerce'),
                 'value'             => $deliveredQuantity ? $deliveredQuantity : 1,
                 'description'       => __('Defines the amount of license keys to be delivered upon purchase.', 'license-manager-for-woocommerce'),
+                'desc_tip'          => true,
                 'type'              => 'number',
                 'custom_attributes' => array(
                     'step' => 'any',
@@ -281,6 +282,12 @@ class ProductData
         $useGenerator      = get_post_meta($productId, 'lmfwc_licensed_product_use_generator',      true);
         $useStock          = get_post_meta($productId, 'lmfwc_licensed_product_use_stock',          true);
         $generatorOptions  = array('' => __('Please select a generator', 'license-manager-for-woocommerce'));
+        $licenseStockCount = LicenseResourceRepository::instance()->countBy(
+            array(
+                'product_id' => $productId,
+                'status' => LicenseStatus::ACTIVE
+            )
+        );
 
         /** @var GeneratorResourceModel $generator */
         foreach ($generators as $generator) {
@@ -291,33 +298,31 @@ class ProductData
             );
         }
 
-        echo '<div class="panel woocommerce_options_panel" style="width: 100%;"><div class="options_group">';
-
-        echo sprintf('<strong>%s</strong>', __('License Manager for WooCommerce', 'license-manager-for-woocommerce'));
+        echo sprintf(
+            '<p class="form-row form-row-full"><strong>%s</strong></p>',
+            __('License Manager for WooCommerce', 'license-manager-for-woocommerce')
+        );
 
         echo '<input type="hidden" name="lmfwc_edit_flag" value="true" />';
 
-        // Checkbox "lmfwc_licensed_product"
-        woocommerce_wp_checkbox(
-            array(
-                'id'          => sprintf('lmfwc_licensed_product_%d', $loop),
-                'name'        => sprintf('lmfwc_licensed_product[%d]', $loop),
-                'label'       => __('Sell license key(s)', 'license-manager-for-woocommerce'),
-                'description' => __('Sell license keys for this variation', 'license-manager-for-woocommerce'),
-                'value'       => $licensed,
-                'cbvalue'     => 1,
-                'desc_tip'    => false
-            )
-        );
+        echo '
+            <p class="form-row form-row-full options">
+                <label class="tips" data-tip="' . esc_attr__('Sell license keys for this variation', 'license-manager-for-woocommerce') . '">
+                    ' . __('Sell license keys', 'license-manager-for-woocommerce') . '
+                    <input type="checkbox" class="checkbox" name="' . esc_attr(sprintf('lmfwc_licensed_product[%d]', $loop)) . '" ' . checked(1, $licensed, false) . '/>
+                </label>
+            </p>
+        ';
 
-        // Number "lmfwc_licensed_product_deliver_amount"
         woocommerce_wp_text_input(
             array(
-                'id'                => sprintf('lmfwc_licensed_product_delivered_quantity_%d', $loop),
-                'name'              => sprintf('lmfwc_licensed_product_delivered_quantity[%d]', $loop),
-                'label'             => __('Delivered quantity', 'license-manager-for-woocommerce'),
-                'value'             => $deliveredQuantity ? $deliveredQuantity : 1,
+                'id'            => "lmfwc_licensed_product_delivered_quantity_{$loop}",
+                'name'          => "lmfwc_licensed_product_delivered_quantity[{$loop}]",
+                'label'         => __('Delivered quantity', 'license-manager-for-woocommerce'),
+                'value'         => ($deliveredQuantity) ? $deliveredQuantity : 1,
+                'wrapper_class' => 'form-row form-row-full',
                 'description'       => __('Defines the amount of license keys to be delivered upon purchase.', 'license-manager-for-woocommerce'),
+                'desc_tip'          => true,
                 'type'              => 'number',
                 'custom_attributes' => array(
                     'step' => 'any',
@@ -326,62 +331,39 @@ class ProductData
             )
         );
 
-        echo '</div><div class="options_group">';
+        echo '
+            <p class="form-row form-row-full options">
+                <label class="tips" data-tip="' . esc_attr__('Automatically generate license keys with each sold variation', 'license-manager-for-woocommerce') . '">
+                    ' . __('Generate license keys', 'license-manager-for-woocommerce') . '
+                    <input type="checkbox" class="checkbox" name="' . esc_attr(sprintf('lmfwc_licensed_product_use_generator[%d]', $loop)) . '" ' . checked(1, $useGenerator, false) . '/>
+                </label>
+            </p>
+        ';
 
-        // Checkbox "lmfwc_licensed_product_use_generator"
-        woocommerce_wp_checkbox(
-            array(
-                'id'          => sprintf('lmfwc_licensed_product_use_generator_%d', $loop),
-                'name'        => sprintf('lmfwc_licensed_product_use_generator[%d]', $loop),
-                'label'       => __('Generate license keys', 'license-manager-for-woocommerce'),
-                'description' => __('Automatically generate license keys with each sold variation', 'license-manager-for-woocommerce'),
-                'value'       => $useGenerator,
-                'cbvalue'     => 1,
-                'desc_tip'    => false
-            )
-        );
-
-        // Dropdown "lmfwc_licensed_product_assigned_generator"
         woocommerce_wp_select(
             array(
-                'id'      => 'lmfwc_licensed_product_assigned_generator',
-                'name'    => sprintf('lmfwc_licensed_product_assigned_generator[%d]', $loop),
-                'label'   => __('Assign generator', 'license-manager-for-woocommerce'),
-                'options' => $generatorOptions,
-                'value'   => $generatorId
+                'id'            => 'lmfwc_licensed_product_assigned_generator',
+                'name'          => sprintf('lmfwc_licensed_product_assigned_generator[%d]', $loop),
+                'label'         => __('Assign generator', 'license-manager-for-woocommerce'),
+                'options'       => $generatorOptions,
+                'value'         => $generatorId,
+                'wrapper_class' => 'form-row form-row-full',
             )
         );
 
-        echo '</div><div class="options_group">';
-
-        // Checkbox "lmfwc_licensed_product_use_stock"
-        woocommerce_wp_checkbox(
-            array(
-                'id'          => sprintf('lmfwc_licensed_product_use_stock%d', $loop),
-                'name'        => sprintf('lmfwc_licensed_product_use_stock[%d]', $loop),
-                'label'       => __('Sell from stock', 'license-manager-for-woocommerce'),
-                'description' => __('Sell license keys from the available stock.', 'license-manager-for-woocommerce'),
-                'value'       => $useStock,
-                'cbvalue'     => 1,
-                'desc_tip'    => false
-            )
-        );
-
-        echo sprintf(
-            '<p class="form-field"><label>%s</label><span class="description">%d %s</span></p>',
-            __('Available', 'license-manager-for-woocommerce'),
-            LicenseResourceRepository::instance()->countBy(
-                array(
-                    'product_id' => $productId,
-                    'status' => LicenseStatus::ACTIVE
-                )
-            ),
-            __('License key(s) in stock and available for sale.', 'license-manager-for-woocommerce')
-        );
+        echo '
+            <p class="form-row form-row-full options">
+                <label class="tips" data-tip="' . esc_attr__('Sell license keys from the available stock.', 'license-manager-for-woocommerce') . '">
+                    ' . __('Sell from stock', 'license-manager-for-woocommerce') . '
+                    <input type="checkbox" class="checkbox" name="' . esc_attr(sprintf('lmfwc_licensed_product_use_stock[%d]', $loop)) . '" ' . checked(1, $useStock, false) . '/>
+                </label>
+                <label>
+                    ' . $licenseStockCount . ' ' . __('License key(s) in stock and available for sale.', 'license-manager-for-woocommerce') . '
+                </label>
+            </p>
+        ';
 
         do_action('lmfwc_variable_product_data_panel', $loop, $variationData, $variation);
-
-        echo '</div></div>';
     }
 
     /**
