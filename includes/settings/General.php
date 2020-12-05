@@ -529,6 +529,12 @@ class General
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
+            array(
+                'id'         => '021',
+                'name'       => 'v2/generators/{id}/generate',
+                'method'     => 'POST',
+                'deprecated' => false,
+            ),
         );
         $classList = array(
             'GET'  => 'text-success',
