@@ -117,7 +117,7 @@ final class Main extends Singleton
         wp_enqueue_script(
             'lmfwc_admin_js',
             LMFWC_JS_URL . 'script.js',
-	        array( 'jquery' ),
+            array('jquery'),
             $this->version
         );
 
@@ -198,8 +198,8 @@ final class Main extends Singleton
             array(
                 'show'              => wp_create_nonce('lmfwc_show_license_key'),
                 'show_all'          => wp_create_nonce('lmfwc_show_all_license_keys'),
-	            'product_downloads' => Settings::get( 'lmfwc_product_downloads' )
-             )
+                'product_downloads' => Settings::get( 'lmfwc_product_downloads' )
+            )
         );
     }
 

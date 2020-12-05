@@ -2,22 +2,17 @@
 
 namespace LicenseManagerForWooCommerce\Controllers;
 
-use DateInterval;
-use DateTime;
-use DateTimeZone;
 use Exception;
-use LicenseManagerForWooCommerce\Abstracts\Singleton;
 use LicenseManagerForWooCommerce\AdminMenus;
 use LicenseManagerForWooCommerce\AdminNotice;
 use LicenseManagerForWooCommerce\Enums\LicenseSource;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus as LicenseStatusEnum;
-use LicenseManagerForWooCommerce\Integrations\WooCommerce\Order;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 
 defined('ABSPATH') || exit;
 
-class License extends Singleton
+class License
 {
     /**
      * License constructor.
@@ -214,12 +209,12 @@ class License extends Singleton
         );
 
         // Redirect with message
-	    if ( $license ) {
-	        if ( ! $expiresAt && $validFor ) {
-		        $expiresAt = $this->validFor2ExpiresAt( $validFor );
-	        }
+        if ($license) {
+            if (!$expiresAt && $validFor) {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at($validFor);
+            }
 
-	        Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $orderId );
+            lmfwc_update_order_downloads_expiration($expiresAt, $orderId);
 
             AdminNotice::success(__('1 license key(s) added successfully.', 'license-manager-for-woocommerce'));
 
@@ -320,11 +315,11 @@ class License extends Singleton
                 apply_filters('lmfwc_stock_increase', $license->getProductId());
             }
 
-		    if ( ! $expiresAt && $validFor ) {
-			    $expiresAt = $this->validFor2ExpiresAt( $validFor );
-		    }
+            if ( ! $expiresAt && $validFor ) {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at($validFor);
+            }
 
-	        Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $orderId );
+            lmfwc_update_order_downloads_expiration( $expiresAt, $orderId );
 
             // Display a success message
             AdminNotice::success(__('Your license key has been updated successfully.', 'license-manager-for-woocommerce'));
@@ -382,19 +377,4 @@ class License extends Singleton
 
         wp_send_json($licenseKeysIds);
     }
-
-	/**
-	 * Turn valid for into expires at date
-	 */
-	public function validFor2ExpiresAt( $validFor )
-	{
-		if ( ! empty( $validFor ) ) {
-			$date         = new DateTime( 'now', new DateTimeZone( 'GMT' ) );
-			$dateInterval = new DateInterval( 'P' . $validFor . 'D' );
-
-			return $date->add( $dateInterval )->format( 'Y-m-d H:i:s' );
-		}
-
-		return null;
-	}
 }

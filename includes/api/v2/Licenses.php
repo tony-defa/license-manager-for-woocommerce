@@ -6,10 +6,8 @@ use DateTime;
 use DateTimeZone;
 use Exception;
 use LicenseManagerForWooCommerce\Abstracts\RestController as LMFWC_REST_Controller;
-use LicenseManagerForWooCommerce\Controllers\License;
 use LicenseManagerForWooCommerce\Enums\LicenseSource;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
-use LicenseManagerForWooCommerce\Integrations\WooCommerce\Order;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use WP_Error;
@@ -227,7 +225,6 @@ class Licenses extends LMFWC_REST_Controller
 
         $response = array();
 
-        /** @var LicenseResourceModel $license */
         foreach ($licenses as $license) {
             $licenseData = $license->toArray();
 
@@ -375,10 +372,10 @@ class Licenses extends LMFWC_REST_Controller
 
         if ($expiresAt) {
             try {
-                $expiresAtDateTime = new \DateTime($expiresAt);
+                $expiresAtDateTime = new DateTime($expiresAt);
                 $expiresAt = $expiresAtDateTime->format('Y-m-d H:i:s');
                 $validFor  = null;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return new WP_Error(
                     'lmfwc_rest_data_error',
                     $e->getMessage(),
@@ -404,13 +401,13 @@ class Licenses extends LMFWC_REST_Controller
                 )
             );
 
-	        if ( ( $expiresAt !== null || $validFor !== null ) && $orderId !== null ) {
-		        if ( empty( $expiresAt ) ) {
-			        $expiresAt = License::instance()->validFor2ExpiresAt( $validFor );
-		        }
+            if ( ( $expiresAt !== null || $validFor !== null ) && $orderId !== null ) {
+                if ( empty( $expiresAt ) ) {
+                    $expiresAt = lmfwc_convert_valid_for_to_expires_at( $validFor );
+                }
 
-		        Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $orderId );
-	        }
+                lmfwc_update_order_downloads_expiration( $expiresAt, $orderId );
+            }
         } catch (Exception $e) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -574,11 +571,15 @@ class Licenses extends LMFWC_REST_Controller
 
         $licenseData = $updatedLicense->toArray();
 
-	    if ( ( isset( $updateData['expires_at'] ) || isset( $updateData['valid_for'] ) ) && isset( $licenseData['orderId'] ) ) {
-		    $expiresAt = $updateData['expires_at'] ?? License::instance()->validFor2ExpiresAt( $updateData['valid_for'] );
+        if ( ( isset( $updateData['expires_at'] ) || isset( $updateData['valid_for'] ) ) && isset( $licenseData['orderId'] ) ) {
+            if ( isset($updateData['expires_at'] ) ) {
+                $expiresAt = $updateData['expires_at'];
+            } else {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at( $updateData['valid_for'] );
+            }
 
-		    Order::instance()->updateOrderDownloadsExpiration( $expiresAt, $licenseData['orderId'] );
-	    }
+            lmfwc_update_order_downloads_expiration( $expiresAt, $licenseData['orderId'] );
+        }
 
         // Remove the hash and decrypt the license key
         unset($licenseData['hash']);

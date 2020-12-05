@@ -2,9 +2,6 @@
 
 namespace LicenseManagerForWooCommerce\Integrations\WooCommerce;
 
-use DateTime;
-use DateTimeZone;
-use LicenseManagerForWooCommerce\Abstracts\Singleton;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 use LicenseManagerForWooCommerce\Lists\LicensesList;
 use LicenseManagerForWooCommerce\Models\Resources\Generator as GeneratorResourceModel;
@@ -12,8 +9,6 @@ use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceMode
 use LicenseManagerForWooCommerce\Repositories\Resources\Generator as GeneratorResourceRepository;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Settings;
-use WC_Customer_Download;
-use WC_Data_Store;
 use WC_Order_Item_Product;
 use WC_Product_Simple;
 use function WC;
@@ -23,7 +18,7 @@ use WC_Product;
 
 defined('ABSPATH') || exit;
 
-class Order extends Singleton
+class Order
 {
     /**
      * OrderManager constructor.
@@ -396,39 +391,4 @@ class Order extends Singleton
 
         echo $html;
     }
-
-	/**
-	 * Updates the expiration of downloads in orders
-	 */
-	public function updateOrderDownloadsExpiration( $expiresAt, $orderId )
-	{
-		if ( ! empty( $expiresAt ) && ! empty( $orderId ) && Settings::get( 'lmfwc_download_expires' ) ) {
-			$dataStore           = WC_Data_Store::load( 'customer-download' );
-			$downloadPermissions = $dataStore->get_downloads(
-				[
-					'order_id' => $orderId
-				]
-			);
-
-			// Validate expiresAt is given in the right format (time check) - otherwise add current GMT time
-			if ( ! DateTime::createFromFormat( 'Y-m-d H:i:s', $expiresAt ) !== false ) {
-				$date  = new DateTime( $expiresAt, new DateTimeZone( 'GMT' ) );
-				$now   = new DateTime( 'now', new DateTimeZone( 'GMT' ) );
-				$today = new DateTime( date( 'Y-m-d' ), new DateTimeZone( 'GMT' ) );
-				$time  = $today->diff( $now );
-
-				$date->add( $time );
-
-				$expiresAt = $date->format( 'Y-m-d H:i:s' );
-			}
-
-			if ( $downloadPermissions && count( $downloadPermissions ) > 0 ) {
-				foreach ( $downloadPermissions as $download ) {
-					$download = new WC_Customer_Download( $download->get_id() );
-					$download->set_access_expires( $expiresAt );
-					$download->save();
-				}
-			}
-		}
-	}
 }

@@ -104,21 +104,21 @@ class General
             'license_keys_section'
         );
 
-	    add_settings_field(
-		    'lmfwc_product_downloads',
-		    __('Product downloads', 'license-manager-for-woocommerce'),
-		    array($this, 'fieldProductDownloads'),
-		    'lmfwc_license_keys',
-		    'license_keys_section'
-	    );
+        add_settings_field(
+            'lmfwc_product_downloads',
+            __('Product downloads', 'license-manager-for-woocommerce'),
+            array($this, 'fieldProductDownloads'),
+            'lmfwc_license_keys',
+            'license_keys_section'
+        );
 
-	    add_settings_field(
-		    'lmfwc_download_expires',
-		    __('Download expires', 'license-manager-for-woocommerce'),
-		    array($this, 'fieldDownloadExpires'),
-		    'lmfwc_license_keys',
-		    'license_keys_section'
-	    );
+        add_settings_field(
+            'lmfwc_download_expires',
+            __('Download expires', 'license-manager-for-woocommerce'),
+            array($this, 'fieldDownloadExpires'),
+            'lmfwc_license_keys',
+            'license_keys_section'
+        );
 
         add_settings_field(
             'lmfwc_allow_duplicates',
@@ -615,18 +615,18 @@ class General
                 'method'     => 'POST',
                 'deprecated' => false,
             ),
-	          array(
-		            'id'         => '022',
-		            'name'       => 'v2/products/update/{license_key}',
-		            'method'     => 'GET',
-		            'deprecated' => false,
-	          ),
-	          array(
-		            'id'         => '023',
-		            'name'       => 'v2/products/download/latest/{license_key}',
-		            'method'     => 'GET',
-		            'deprecated' => false,
-	          ),
+            array(
+                'id'         => '022',
+                'name'       => 'v2/products/update/{license_key}',
+                'method'     => 'GET',
+                'deprecated' => false,
+            ),
+            array(
+                'id'         => '023',
+                'name'       => 'v2/products/download/latest/{license_key}',
+                'method'     => 'GET',
+                'deprecated' => false,
+            ),
         );
         $classList = array(
             'GET'  => 'text-success',

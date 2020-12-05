@@ -135,10 +135,10 @@ table.wp-list-table.lizenzschlssel span.lmfwc-date {
 	border-radius: 3px;
 	opacity: 1;
 	-webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.1);
-			box-shadow: 2px 3px 5px rgba(0,0,0,.1);
+	box-shadow: 2px 3px 5px rgba(0,0,0,.1);
 	-webkit-transition: all .5s ease-out;
-		 -o-transition: all .5s ease-out;
-			transition: all .5s ease-out;
+	-o-transition: all .5s ease-out;
+	transition: all .5s ease-out;
 }
 
 /* Source Icons */
@@ -215,7 +215,7 @@ table.wp-list-table.lizenzschlssel span.lmfwc-date {
 	display: inline-block;
 }
 .lmfwc-icons:before {
-	font-family: woocommerce;
+	font-family: woocommerce, sans-serif;
 	text-align: center;
 	display: inline-block;
 	width: 100%;
