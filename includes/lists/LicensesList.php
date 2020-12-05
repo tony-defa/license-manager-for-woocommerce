@@ -880,9 +880,9 @@ class LicensesList extends WP_List_Table
         $actions = array(
             'activate'          => __('Activate', 'license-manager-for-woocommerce'),
             'deactivate'        => __('Deactivate', 'license-manager-for-woocommerce'),
+            'disable'           => __('Mark as disabled', 'license-manager-for-woocommerce'),
             'mark_as_sold'      => __('Mark as sold', 'license-manager-for-woocommerce'),
             'mark_as_delivered' => __('Mark as delivered', 'license-manager-for-woocommerce'),
-            'mark_as_disabled'  => __('Mark as disabled', 'license-manager-for-woocommerce'),
             'delete'            => __('Delete', 'license-manager-for-woocommerce'),
             'export_csv'        => __('Export (CSV)', 'license-manager-for-woocommerce'),
             'export_pdf'        => __('Export (PDF)', 'license-manager-for-woocommerce')
@@ -905,14 +905,14 @@ class LicensesList extends WP_List_Table
             case 'deactivate':
                 $this->toggleLicenseKeyStatus(LicenseStatus::INACTIVE);
                 break;
+            case 'disable':
+                $this->toggleLicenseKeyStatus(LicenseStatus::DISABLED);
+                break;
             case 'mark_as_sold':
                 $this->toggleLicenseKeyStatus(LicenseStatus::SOLD);
                 break;
             case 'mark_as_delivered':
                 $this->toggleLicenseKeyStatus(LicenseStatus::DELIVERED);
-                break;
-            case 'mark_as_disabled':
-                $this->toggleLicenseKeyStatus(LicenseStatus::DISABLED);
                 break;
             case 'delete':
                 $this->deleteLicenseKeys();
