@@ -634,8 +634,8 @@ class Licenses extends LMFWC_REST_Controller
             return $licenseExpired;
         }
 
-        if (false !== $licenseExpired = $this->isLicenseDisabled($license)) {
-            return $licenseExpired;
+        if (false !== $licenseDisabled = $this->isLicenseDisabled($license)) {
+            return $licenseDisabled;
         }
 
         $timesActivated    = null;
@@ -757,8 +757,8 @@ class Licenses extends LMFWC_REST_Controller
             return $licenseExpired;
         }
 
-        if (false !== $licenseExpired = $this->isLicenseDisabled($license)) {
-            return $licenseExpired;
+        if (false !== $licenseDisabled = $this->isLicenseDisabled($license)) {
+            return $licenseDisabled;
         }
 
         $timesActivated = null;
@@ -928,6 +928,7 @@ class Licenses extends LMFWC_REST_Controller
                 array('status' => 405)
             );
         }
+        
         return false;
     }
 }
