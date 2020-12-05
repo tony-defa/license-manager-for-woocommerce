@@ -19,7 +19,7 @@ class Suspend
     /**
      * @var string
      */
-    private const STATUS_META_KEY = 'previous_subscription_status_for_%s';
+    const STATUS_META_KEY = 'previous_subscription_status_for_%s';
 
     /**
      * Suspend constructor.
@@ -37,7 +37,7 @@ class Suspend
      * including: pending, active, on-hold, pending-cancel, cancelled, or expired; 
      * as well as any custom subscription statuses.
      *
-     * @param int $subscription   Subscription that has been put on hold
+     * @param WC_Subscription $subscription   Subscription that has been put on hold
      * @param string $newWCSubStatus   The string representation of the new status applied to the subscription.
      * @param string $oldWCSubStatus   The string representation of the subscriptions status before the change was applied.
      * @return bool
@@ -49,7 +49,6 @@ class Suspend
         } else if ($newWCSubStatus === 'active' && $oldWCSubStatus === 'on-hold') {
             $newLicenseStatus = Settings::get('lmfwc_auto_delivery') ? LicenseStatusEnum::DELIVERED : LicenseStatusEnum::SOLD;
         } else {
-            error_log("LMFWC: Skipped because status change is not relevant. ");
             return false;
         }
 
@@ -57,7 +56,6 @@ class Suspend
         $parentOrderArray = $subscription->get_related_orders('ids', 'any');
 
         if (!$parentOrderArray || count($parentOrderArray) === 0) {
-            error_log("LMFWC: Skipped because the parent orders could not be found. ");
             return false;
         }
 
@@ -72,12 +70,8 @@ class Suspend
             );
 
             if (!$licenses) {
-                error_log("LMFWC: Skipped parent Order #{$parentOrderId} because no licenses were found.");
                 continue;
             }
-
-            $licenseCount = count($licenses);
-            error_log("LMFWC: License count is: {$licenseCount}");
 
             /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
@@ -92,7 +86,6 @@ class Suspend
     
                     $interval = $dateExpiresAt->diff(new DateTime('now', new DateTimeZone('UTC')))->format('%r%a');
                     if (intval($interval) > 0) {
-                        error_log("LMFWC: Skipped because license has already expired $interval day(s) ago.");
                         continue;
                     }
                 }
@@ -110,10 +103,6 @@ class Suspend
                     }
                 }
 
-                error_log("LMFWC: previous status: {$previousStatus}");
-                error_log("LMFWC: Status current: {$currentLicenseStatus}");
-                error_log("LMFWC: Status NEW: {$newLicenseStatus}");
-
                 try {
                     lmfwc_update_license(
                         $license->getDecryptedLicenseKey(),
@@ -126,8 +115,6 @@ class Suspend
                 }
             }
         }
-
-        error_log("LMFWC: Success, returning TRUE");
 
         return true;
     }
