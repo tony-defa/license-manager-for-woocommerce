@@ -603,7 +603,7 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $licenseKey = sanitize_text_field($request->get_param('license_key'));
-        $activations = intval($request->get_param('activations'));
+        $activations = (int)$request->get_param('activations');
 
         if (!$licenseKey) {
             return new WP_Error(
@@ -682,10 +682,8 @@ class Licenses extends LMFWC_REST_Controller
         try {
             if (!$timesActivated) {
                 $timesActivatedNew = $activations;
-            }
-
-            else {
-                $timesActivatedNew = intval($timesActivated) + $activations;
+            } else {
+                $timesActivatedNew = (int)$timesActivated + $activations;
             }
 
             /** @var LicenseResourceModel $updatedLicense */
@@ -736,7 +734,7 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $licenseKey = sanitize_text_field($request->get_param('license_key'));
-        $deactivations = intval($request->get_param('deactivations'));
+        $deactivations = (int)$request->get_param('deactivations');
 
         if (!$licenseKey) {
             return new WP_Error(
@@ -810,7 +808,7 @@ class Licenses extends LMFWC_REST_Controller
 
         // Deactivate the license key
         try {
-            $timesActivatedNew = intval($timesActivated) - $deactivations;
+            $timesActivatedNew = (int)$timesActivated - $deactivations;
 
             /** @var LicenseResourceModel $updatedLicense */
             $updatedLicense = LicenseResourceRepository::instance()->update(
@@ -907,9 +905,9 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $result = array(
-            'timesActivated'       => intval($license->getTimesActivated()),
-            'timesActivatedMax'    => intval($license->getTimesActivatedMax()),
-            'remainingActivations' => intval($license->getTimesActivatedMax()) - intval($license->getTimesActivated())
+            'timesActivated'       => (int)$license->getTimesActivated(),
+            'timesActivatedMax'    => (int)$license->getTimesActivatedMax(),
+            'remainingActivations' => (int)$license->getTimesActivatedMax() - (int)$license->getTimesActivated()
         );
 
         return $this->response(true, $result, 200, 'v2/licenses/validate/{license_key}');

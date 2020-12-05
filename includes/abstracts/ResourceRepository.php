@@ -52,7 +52,7 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
                 case ColumnTypeEnum::TINYINT:
                 case ColumnTypeEnum::BIGINT:
                     if ($data[$column] !== null) {
-                        $data[$column] = intval($value);
+                        $data[$column] = (int)$value;
                     }
                     break;
             }
@@ -337,7 +337,7 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
 
         $count = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table};");
 
-        return intval($count);
+        return (int)$count;
     }
 
     /**
@@ -361,7 +361,7 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
 
         $count = $wpdb->get_var($sqlQuery);
 
-        return intval($count);
+        return (int)$count;
     }
 
     /**

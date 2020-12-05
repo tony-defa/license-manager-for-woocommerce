@@ -172,7 +172,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
         if ($licenseData['order_id'] === null) {
             $updateData['order_id'] = null;
         } else {
-            $updateData['order_id'] = intval($licenseData['order_id']);
+            $updateData['order_id'] = (int)$licenseData['order_id'];
         }
     }
 
@@ -181,7 +181,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
         if ($licenseData['product_id'] === null) {
             $updateData['product_id'] = null;
         } else {
-            $updateData['product_id'] = intval($licenseData['product_id']);
+            $updateData['product_id'] = (int)$licenseData['product_id'];
         }
     }
 
@@ -190,7 +190,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
         if ($licenseData['user_id'] === null) {
             $updateData['user_id'] = null;
         } else {
-            $updateData['user_id'] = intval($licenseData['user_id']);
+            $updateData['user_id'] = (int)$licenseData['user_id'];
         }
     }
 
@@ -219,18 +219,18 @@ function lmfwc_update_license($licenseKey, $licenseData)
         if ($licenseData['valid_for'] === null) {
             $updateData['valid_for'] = null;
         } else {
-            $updateData['valid_for'] = intval($licenseData['valid_for']);
+            $updateData['valid_for'] = (int)$licenseData['valid_for'];
         }
     }
 
     // Status
     if (array_key_exists('status', $licenseData)) {
-        if (!in_array(intval($licenseData['status']), LicenseStatusEnum::$status)) {
+        if (!in_array((int)$licenseData['status'], LicenseStatusEnum::$status)) {
             throw new Exception('The \'status\' array key not valid. Possible values are: 1 for SOLD, 2 for
             DELIVERED, 3 for ACTIVE, and 4 for INACTIVE.');
         }
 
-        $updateData['status'] = intval($licenseData['status']);
+        $updateData['status'] = (int)$licenseData['status'];
     }
 
     // Times activated
@@ -238,7 +238,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
         if ($licenseData['times_activated'] === null) {
             $updateData['times_activated'] = null;
         } else {
-            $updateData['times_activated'] = intval($licenseData['times_activated']);
+            $updateData['times_activated'] = (int)$licenseData['times_activated'];
         }
     }
 
@@ -247,7 +247,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
         if ($licenseData['times_activated_max'] === null) {
             $updateData['times_activated_max'] = null;
         } else {
-            $updateData['times_activated_max'] = intval($licenseData['times_activated_max']);
+            $updateData['times_activated_max'] = (int)$licenseData['times_activated_max'];
         }
     }
 
@@ -370,7 +370,7 @@ function lmfwc_activate_license($licenseKey)
     if (!$timesActivated) {
         $timesActivatedNew = 1;
     } else {
-        $timesActivatedNew = intval($timesActivated) + 1;
+        $timesActivatedNew = (int)$timesActivated + 1;
     }
 
     /** @var LicenseResourceModel $updatedLicense */
@@ -418,7 +418,7 @@ function lmfwc_deactivate_license($licenseKey)
         throw new Exception("License Key: {$licenseKey} has not been activated yet.");
     }
 
-    $timesActivatedNew = intval($timesActivated) - 1;
+    $timesActivatedNew = (int)$timesActivated - 1;
 
     /** @var LicenseResourceModel $updatedLicense */
     $updatedLicense = LicenseResourceRepository::instance()->update(

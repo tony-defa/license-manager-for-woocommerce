@@ -129,7 +129,7 @@ class Stock
 
         /** @var WC_Product $product */
         foreach ($products as $product) {
-            $woocommerceStock = intval($product->get_stock_quantity());
+            $woocommerceStock = (int)$product->get_stock_quantity();
             $licenseStock     = License::instance()->countBy(
                 array(
                     'status'     => LicenseStatus::ACTIVE,

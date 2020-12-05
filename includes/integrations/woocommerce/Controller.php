@@ -226,7 +226,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     'valid_for'           => $generator->getExpiresIn(),
                     'source'              => LicenseSource::GENERATOR,
                     'status'              => $cleanStatus,
-                    'times_activated_max' => $generator->getTimesActivatedMax()
+                    'times_activated_max' => $generator->getTimesActivatedMax() ?: null
                 )
             );
         }
@@ -366,7 +366,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         for ($i = 0; $i < $cleanAmount; $i++) {
             /** @var LicenseResourceModel $license */
             $license   = $cleanLicenseKeys[$i];
-            $validFor  = intval($license->getValidFor());
+            $validFor  = (int)$license->getValidFor();
             $expiresAt = $license->getExpiresAt();
 
             if ($validFor) {
@@ -408,7 +408,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         }
 
         if (array_key_exists('page', $_POST)) {
-            $page = intval($_POST['page']);
+            $page = (int)$_POST['page'];
         }
 
         if ($page > 1) {
@@ -419,7 +419,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             // Search for a specific order
             if ($type === 'shop_order') {
                 /** @var WC_Order $order */
-                $order = wc_get_order(intval($term));
+                $order = wc_get_order((int)$term);
 
                 // Order exists.
                 if ($order && $order instanceof WC_Order) {
@@ -441,7 +441,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             // Search for a specific product
             elseif ($type === 'product') {
                 /** @var WC_Product $product */
-                $product = wc_get_product(intval($term));
+                $product = wc_get_product((int)$term);
 
                 // Product exists.
                 if ($product) {

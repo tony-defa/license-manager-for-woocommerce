@@ -250,7 +250,7 @@ class ProductData
         update_post_meta(
             $postId,
             'lmfwc_licensed_product_assigned_generator',
-            intval($_POST['lmfwc_licensed_product_assigned_generator'])
+            (int)$_POST['lmfwc_licensed_product_assigned_generator']
         );
 
         // Update the use generator flag, according to checkbox.
@@ -435,7 +435,7 @@ class ProductData
         update_post_meta(
             $variationId,
             'lmfwc_licensed_product_assigned_generator',
-            intval($_POST['lmfwc_licensed_product_assigned_generator'][$i])
+            (int)$_POST['lmfwc_licensed_product_assigned_generator'][$i]
         );
 
         // Update the use generator flag, according to checkbox.
