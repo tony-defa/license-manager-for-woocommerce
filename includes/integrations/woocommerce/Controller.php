@@ -65,8 +65,6 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
      */
     public function getCustomerLicenseKeys($args)
     {
-        error_log('LMFWC: getCustomerLicenseKeys FROM WooCommerce');
-
         /** @var WC_Order $order */
         $order = $args['order'];
         $data  = array();
@@ -141,7 +139,6 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             )
         );
 
-        /** @var LicenseResourceModel $license */
         foreach ($licenses as $license) {
             $product = wc_get_product($license->getProductId());
 
@@ -369,7 +366,6 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         }
 
         for ($i = 0; $i < $cleanAmount; $i++) {
-            /** @var LicenseResourceModel $license */
             $license   = $cleanLicenseKeys[$i];
             $validFor  = intval($license->getValidFor());
             $expiresAt = $license->getExpiresAt();
@@ -508,10 +504,9 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     $more = false;
                 }
 
-                /** @var WC_Order $order */
                 foreach ($orders as $order) {
                     $text = sprintf(
-                    /* translators: $1: order id, $2 customer name, $3 customer email */
+                        /* translators: $1: order id, $2 customer name, $3 customer email */
                         '#%1$s %2$s <%3$s>',
                         $order->get_id(),
                         $order->get_formatted_billing_full_name(),
