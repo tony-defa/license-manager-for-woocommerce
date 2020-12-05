@@ -29,9 +29,13 @@ class MyAccount
      */
     public function accountMenuItems($items)
     {
-        $items['view-license-keys'] = __('License keys', 'license-manager-for-woocommerce');
+        $customItems = array(
+            'view-license-keys' => __('License keys', 'license-manager-for-woocommerce')
+        );
 
-        return $items;
+        $customItems = array_slice( $items, 0, 2, true ) + $customItems + array_slice( $items, 2, count( $items ), true );
+
+        return $customItems;
     }
 
     /**

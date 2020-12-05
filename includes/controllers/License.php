@@ -210,6 +210,12 @@ class License
 
         // Redirect with message
         if ($license) {
+            if (!$expiresAt && $validFor) {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at($validFor);
+            }
+
+            lmfwc_update_order_downloads_expiration($expiresAt, $orderId);
+
             AdminNotice::success(__('1 license key(s) added successfully.', 'license-manager-for-woocommerce'));
 
             // Update the stock
@@ -308,6 +314,12 @@ class License
             if ($license->getProductId() !== null && $license->getStatus() === LicenseStatusEnum::ACTIVE) {
                 apply_filters('lmfwc_stock_increase', $license->getProductId());
             }
+
+            if ( ! $expiresAt && $validFor ) {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at($validFor);
+            }
+
+            lmfwc_update_order_downloads_expiration( $expiresAt, $orderId );
 
             // Display a success message
             AdminNotice::success(__('Your license key has been updated successfully.', 'license-manager-for-woocommerce'));

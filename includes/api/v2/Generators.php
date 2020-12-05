@@ -459,9 +459,16 @@ class Generators extends LMFWC_REST_Controller
         return $this->response(true, $updatedGenerator->toArray(), 200, 'v2/generators/{id}');
     }
 
+    /**
+     * Callback for the POST generators/{id}/generate route. Creates licenses
+     * using a generator with a save option.
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response|WP_Error
+     */
     public function generateLicenseKeys(WP_REST_Request $request)
     {
-        if (!$this->isRouteEnabled($this->settings, '020')) {
+        if (!$this->isRouteEnabled($this->settings, '021')) {
             return $this->routeDisabledError();
         }
 

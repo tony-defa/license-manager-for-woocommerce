@@ -136,7 +136,6 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             )
         );
 
-        /** @var LicenseResourceModel $license */
         foreach ($licenses as $license) {
             $product = wc_get_product($license->getProductId());
 
@@ -201,6 +200,8 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             $dateExpiresAt = new DateInterval($dateInterval);
             $expiresAt     = $gmtDate->add($dateExpiresAt)->format('Y-m-d H:i:s');
         }
+
+        lmfwc_update_order_downloads_expiration($expiresAt, $orderId);
 
         // Add the keys to the database table.
         foreach ($cleanLicenseKeys as $licenseKey) {
@@ -318,6 +319,14 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             );
 
             if ($license) {
+                if ($validFor) {
+                    $date         = new DateTime();
+                    $dateInterval = new DateInterval('P' . $validFor . 'D');
+                    $expiresAt    = $date->add($dateInterval)->format('Y-m-d H:i:s');
+
+                    lmfwc_update_order_downloads_expiration($expiresAt, $orderId);
+                }
+
                 $result['added']++;
             }
 
@@ -364,7 +373,6 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         }
 
         for ($i = 0; $i < $cleanAmount; $i++) {
-            /** @var LicenseResourceModel $license */
             $license   = $cleanLicenseKeys[$i];
             $validFor  = (int)$license->getValidFor();
             $expiresAt = $license->getExpiresAt();
@@ -424,7 +432,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                 // Order exists.
                 if ($order && $order instanceof WC_Order) {
                     $text = sprintf(
-                        /* translators: $1: order id, $2: customer name, $3: customer email */
+                    /* translators: $1: order id, $2: customer name, $3: customer email */
                         '#%1$s %2$s <%3$s>',
                         $order->get_id(),
                         $order->get_formatted_billing_full_name(),
@@ -446,7 +454,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                 // Product exists.
                 if ($product) {
                     $text = sprintf(
-                        /* translators: $1: order id, $2 customer name */
+                    /* translators: $1: order id, $2 customer name */
                         '(#%1$s) %2$s',
                         $product->get_id(),
                         $product->get_formatted_name()
@@ -475,7 +483,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     $results[] = array(
                         'id' => $user->ID,
                         'text' => sprintf(
-                            /* translators: $1: user nicename, $2: user id, $3: user email */
+                        /* translators: $1: user nicename, $2: user id, $3: user email */
                             '%1$s (#%2$d - %3$s)',
                             $user->user_nicename,
                             $user->ID,
@@ -503,10 +511,9 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     $more = false;
                 }
 
-                /** @var WC_Order $order */
                 foreach ($orders as $order) {
                     $text = sprintf(
-                    /* translators: $1: order id, $2 customer name, $3 customer email */
+                        /* translators: $1: order id, $2 customer name, $3 customer email */
                         '#%1$s %2$s <%3$s>',
                         $order->get_id(),
                         $order->get_formatted_billing_full_name(),
