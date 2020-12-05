@@ -34,6 +34,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         new Lists\LicensesList();
         new Order();
         new ProductData();
+        new Suspend();
     }
 
     /**

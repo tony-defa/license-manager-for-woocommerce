@@ -107,6 +107,10 @@ class RestController extends WP_REST_Controller
             return LicenseStatus::INACTIVE;
         }
 
+        if (strtoupper($enumerator) === 'DISABLED') {
+            return LicenseStatus::DISABLED;
+        }
+
         return $status;
     }
 
