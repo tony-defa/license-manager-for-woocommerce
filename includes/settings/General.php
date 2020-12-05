@@ -609,18 +609,24 @@ class General
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
-	        array(
-		        'id'         => '021',
-		        'name'       => 'v2/products/update/{license_key}',
-		        'method'     => 'GET',
-		        'deprecated' => false,
-	        ),
-	        array(
-		        'id'         => '022',
-		        'name'       => 'v2/products/download/latest/{license_key}',
-		        'method'     => 'GET',
-		        'deprecated' => false,
-	        ),
+            array(
+                'id'         => '021',
+                'name'       => 'v2/generators/{id}/generate',
+                'method'     => 'POST',
+                'deprecated' => false,
+            ),
+	          array(
+		            'id'         => '022',
+		            'name'       => 'v2/products/update/{license_key}',
+		            'method'     => 'GET',
+		            'deprecated' => false,
+	          ),
+	          array(
+		            'id'         => '023',
+		            'name'       => 'v2/products/download/latest/{license_key}',
+		            'method'     => 'GET',
+		            'deprecated' => false,
+	          ),
         );
         $classList = array(
             'GET'  => 'text-success',
