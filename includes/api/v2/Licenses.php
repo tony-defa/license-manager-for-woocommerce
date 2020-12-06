@@ -194,7 +194,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'read')) {
+        if (!$this->capabilityCheck('read_licenses')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_view',
                 __('Sorry, you cannot list resources.', 'license-manager-for-woocommerce'),
@@ -250,7 +250,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'read')) {
+        if (!$this->capabilityCheck('read_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_view',
                 __('Sorry, you cannot view this resource.', 'license-manager-for-woocommerce'),
@@ -319,7 +319,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'create')) {
+        if (!$this->capabilityCheck('create_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_create',
                 __('Sorry, you are not allowed to create resources.', 'license-manager-for-woocommerce'),
@@ -451,7 +451,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'edit')) {
+        if (!$this->capabilityCheck('edit_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_edit',
                 __('Sorry, you are not allowed to edit resources.', 'license-manager-for-woocommerce'),
@@ -601,7 +601,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'edit')) {
+        if (!$this->capabilityCheck('activate_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_edit',
                 __('Sorry, you are not allowed to edit this resource.', 'license-manager-for-woocommerce'),
@@ -724,7 +724,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'edit')) {
+        if (!$this->capabilityCheck('deactivate_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_edit',
                 __('Sorry, you are not allowed to edit this resource.', 'license-manager-for-woocommerce'),
@@ -837,7 +837,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'read')) {
+        if (!$this->capabilityCheck('validate_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_view',
                 __('Sorry, you cannot view this resource.', 'license-manager-for-woocommerce'),
