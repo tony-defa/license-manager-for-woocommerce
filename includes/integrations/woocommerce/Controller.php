@@ -60,22 +60,23 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
     /**
      * Retrieves ordered license keys.
      *
-     * @param WC_Order $order WooCommerce Order
-     *
+     * @param array $args
      * @return array
      */
-    public function getCustomerLicenseKeys($order)
+    public function getCustomerLicenseKeys($args)
     {
-        $data = array();
+        /** @var WC_Order $order */
+        $order = $args['order'];
+        $data  = array();
 
-        /** @var WC_Order_Item_Product $item_data */
-        foreach ($order->get_items() as $item_data) {
+        /** @var WC_Order_Item_Product $itemData */
+        foreach ($order->get_items() as $itemData) {
 
             /** @var WC_Product_Simple|WC_Product_Variation $product */
-            $product = $item_data->get_product();
+            $product = $itemData->get_product();
 
             // Check if the product has been activated for selling.
-            if (!get_post_meta($product->get_id(), 'lmfwc_licensed_product', true)) {
+            if (!lmfwc_is_licensed_product($product->get_id())) {
                 continue;
             }
 
@@ -91,7 +92,9 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             $data[$product->get_id()]['keys'] = $licenses;
         }
 
-        return $data;
+        $args['data'] = $data;
+
+        return $args;
     }
 
     /**
@@ -165,9 +168,9 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
     public function insertGeneratedLicenseKeys($orderId, $productId, $licenseKeys, $status, $generator)
     {
         $cleanLicenseKeys = array();
-        $cleanOrderId     = $orderId   ? absint($orderId)   : null;
-        $cleanProductId   = $productId ? absint($productId) : null;
-        $cleanStatus      = $status    ? absint($status)    : null;
+        $cleanOrderId     = ($orderId)   ? absint($orderId)   : null;
+        $cleanProductId   = ($productId) ? absint($productId) : null;
+        $cleanStatus      = ($status)    ? absint($status)    : null;
         $userId           = null;
 
         if (!$cleanStatus || !in_array($cleanStatus, LicenseStatus::$status)) {

@@ -197,6 +197,14 @@ table.wp-list-table.lizenzschlssel span.lmfwc-date {
 	color: var(--color-danger);
 }
 
+.lmfwc-status.disabled {
+	border: 2px solid var(--color-warning);
+	color: var(--color-warning);
+}
+.lmfwc-status.disabled > span.dashicons {
+	color: var(--color-warning);
+}
+
 .lmfwc-status.activation.done,
 .lmfwc-status.activation.done > span.dashicons {
 	color: var(--color-info);

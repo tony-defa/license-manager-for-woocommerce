@@ -106,12 +106,7 @@ final class Main extends Singleton
         );
 
         // CSS
-        wp_enqueue_style(
-            'lmfwc_admin_css',
-            LMFWC_CSS_URL . 'main.css',
-            array(),
-            $this->version
-        );
+        wp_enqueue_style('lmfwc_admin_css', LMFWC_CSS_URL . 'main.css', array(), $this->version);
 
         // JavaScript
         wp_enqueue_script(
@@ -189,6 +184,15 @@ final class Main extends Singleton
         // Settings page
         if ($hook === 'license-manager_page_lmfwc_settings') {
             wp_enqueue_script('lmfwc_settings_page_js', LMFWC_JS_URL . 'settings_page.js');
+        }
+
+        // Edit Post
+        if ($hook === 'post.php') {
+
+            // WooCommerce Product Page
+            if (isset($_GET['action']) && $_GET['action'] === 'edit' && isset($_GET['post']) && wc_get_product($_GET['post'])) {
+                wp_enqueue_script('lmfwc_edit_product', LMFWC_JS_URL . 'edit_product.js', array('jquery'));
+            }
         }
 
         // Script localization
@@ -288,6 +292,10 @@ final class Main extends Singleton
 
         if ($this->isPluginActive('woocommerce/woocommerce.php')) {
             new Integrations\WooCommerce\Controller();
+        }
+
+        if ($this->isPluginActive('woocommerce-subscriptions/woocommerce-subscriptions.php')) {
+            new Integrations\WooCommerceSubscriptions\Controller();
         }
 
         if (Settings::get('lmfwc_allow_duplicates')) {
