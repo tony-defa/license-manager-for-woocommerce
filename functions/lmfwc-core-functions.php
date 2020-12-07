@@ -282,7 +282,7 @@ function lmfwc_get_subscription_renewal_custom_interval($productId) {
     $customerInterval = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true);
 
     if ($customerInterval && is_numeric($customerInterval)) {
-        return intval($customerInterval);
+        return (int)$customerInterval;
     }
 
     return 1;

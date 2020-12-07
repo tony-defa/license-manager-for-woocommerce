@@ -256,7 +256,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
         if ($licenseData['times_activated_overall'] === null) {
             $updateData['times_activated_overall'] = null;
         } else {
-            $updateData['times_activated_overall'] = intval($licenseData['times_activated_overall']);
+            $updateData['times_activated_overall'] = (int)$licenseData['times_activated_overall'];
         }
     }
 

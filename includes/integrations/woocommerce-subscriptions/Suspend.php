@@ -85,7 +85,7 @@ class Suspend
                     }
     
                     $interval = $dateExpiresAt->diff(new DateTime('now', new DateTimeZone('UTC')))->format('%r%a');
-                    if (intval($interval) > 0) {
+                    if ((int)$interval > 0) {
                         continue;
                     }
                 }
@@ -107,7 +107,7 @@ class Suspend
                     lmfwc_update_license(
                         $license->getDecryptedLicenseKey(),
                         array(
-                            'status' => intval($newLicenseStatus)
+                            'status' => (int)$newLicenseStatus
                         )
                     );
                 } catch (Exception $e) {

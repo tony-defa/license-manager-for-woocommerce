@@ -177,7 +177,7 @@ class ProductData
         update_post_meta(
             $postId,
             'lmfwc_subscription_renewal_custom_interval',
-            intval($_POST['lmfwc_subscription_renewal_custom_interval'])
+            (int)$_POST['lmfwc_subscription_renewal_custom_interval']
         );
 
         // Update the subscription renewal custom period
@@ -352,7 +352,7 @@ class ProductData
         update_post_meta(
             $variationId,
             'lmfwc_subscription_renewal_custom_interval',
-            intval($_POST['lmfwc_subscription_renewal_custom_interval'][$i])
+            (int)$_POST['lmfwc_subscription_renewal_custom_interval'][$i]
         );
 
         // Update the subscription renewal custom period

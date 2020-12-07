@@ -584,7 +584,7 @@ class LicensesList extends WP_List_Table
         if ($item['times_activated_overall'] === null) {
             $timesActivatedOverall = null;
         } else {
-            $timesActivatedOverall = intval($item['times_activated_overall']);
+            $timesActivatedOverall = (int)$item['times_activated_overall'];
         }
 
         if ($item['times_activated'] === null) {
@@ -610,7 +610,7 @@ class LicensesList extends WP_List_Table
             $status = 'activation pending';
         }
 
-        $productId = intval($item['product_id']);
+        $productId = (int)$item['product_id'];
         if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal' 
                 && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license') {
             $overall = sprintf(
