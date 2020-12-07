@@ -19,6 +19,7 @@ defined('ABSPATH') || exit;
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once __DIR__ . '/functions/lmfwc-core-functions.php';
+require_once __DIR__ . '/functions/lmfwc-generator-functions.php';
 require_once __DIR__ . '/functions/lmfwc-license-functions.php';
 require_once __DIR__ . '/functions/lmfwc-meta-functions.php';
 

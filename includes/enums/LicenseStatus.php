@@ -3,7 +3,6 @@
 namespace LicenseManagerForWooCommerce\Enums;
 
 use ReflectionClass;
-use ReflectionException;
 
 defined('ABSPATH') || exit;
 
@@ -138,7 +137,6 @@ abstract class LicenseStatus
      * Returns the class constants as an array.
      *
      * @return array
-     * @throws ReflectionException
      */
     public static function getConstants()
     {
