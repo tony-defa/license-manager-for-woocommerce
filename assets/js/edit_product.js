@@ -3,6 +3,7 @@ jQuery(function($) {
 
   const lmfwcBindWcsEvents = function() {
     let onSubscriptionRenewal = document.querySelectorAll('select.lmfwc_subscription_renewal_action');
+    let resetAction = document.querySelectorAll('select.lmfwc_subscription_renewal_reset_action');
     let extendBy = document.querySelectorAll('select.lmfwc_subscription_renewal_interval_type');
     let interval = document.querySelectorAll('input.lmfwc_subscription_renewal_custom_interval');
     let period = document.querySelectorAll('select.lmfwc_subscription_renewal_custom_period');
@@ -16,10 +17,12 @@ jQuery(function($) {
         const value = event.target.value;
 
         if (value === 'issue_new_license') {
+          resetAction[i].parentNode.style.display = 'none';
           extendBy[i].parentNode.style.display = 'none';
           interval[i].parentNode.style.display = 'none';
           period[i].parentNode.style.display = 'none';
         } else {
+          resetAction[i].parentNode.style.display = 'block';
           extendBy[i].parentNode.style.display = 'block';
 
           if (extendBy[i].value === 'subscription') {
