@@ -57,7 +57,7 @@ class Order
                 return false;
             }
 
-            $parentOrderId = intval(reset($parentOrderArray));
+            $parentOrderId = (int)reset($parentOrderArray);
 
             if (!$parentOrderId) {
                 return false;
@@ -72,7 +72,7 @@ class Order
 
             // Extend the license either by the subscription, or user-defined customer interval/period.
             if (lmfwc_get_subscription_renewal_interval_type($productId) === 'subscription') {
-                $subscriptionInterval = intval(WC_Subscriptions_Product::get_interval($productId));
+                $subscriptionInterval = (int)WC_Subscriptions_Product::get_interval($productId);
                 $subscriptionPeriod   = WC_Subscriptions_Product::get_period($productId);
             } else {
                 $subscriptionInterval = lmfwc_get_subscription_renewal_custom_interval($productId);
@@ -116,11 +116,11 @@ class Order
                 if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal') {
                     $oldTimesActivated = $license->getTimesActivated();
                     $newTimesActivated = 0;
-                    $oldTimesActivatedOverall = intval($license->getTimesActivatedOverall());
+                    $oldTimesActivatedOverall = (int)$license->getTimesActivatedOverall();
                     $newTimesActivatedOverall = $oldTimesActivatedOverall + $oldTimesActivated;
 
-                    $arr['times_activated'] = intval($newTimesActivated);
-                    $arr['times_activated_overall'] = intval($newTimesActivatedOverall);
+                    $arr['times_activated'] = (int)$newTimesActivated;
+                    $arr['times_activated_overall'] = (int)$newTimesActivatedOverall;
                 }
 
                 try {
