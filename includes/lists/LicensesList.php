@@ -134,6 +134,17 @@ class LicensesList extends WP_List_Table
             LicenseResourceRepository::instance()->countBy(array('status' => LicenseStatus::INACTIVE))
         );
 
+        // Disabled link
+        $class = $current == LicenseStatus::DISABLED ? ' class="current"' :'';
+        $disabledUrl = esc_url(add_query_arg('status', LicenseStatus::DISABLED));
+        $statusLinks['disabled'] = sprintf(
+            '<a href="%s" %s>%s <span class="count">(%d)</span></a>',
+            $disabledUrl,
+            $class,
+            __('Disabled', 'license-manager-for-woocommerce'),
+            LicenseResourceRepository::instance()->countBy(array('status' => LicenseStatus::DISABLED))
+        );
+
         return $statusLinks;
     }
 
@@ -400,6 +411,7 @@ class LicensesList extends WP_List_Table
         // Activate, Deactivate
         if ($item['status'] != LicenseStatus::SOLD
             && $item['status'] != LicenseStatus::DELIVERED
+            && $item['status'] != LicenseStatus::DISABLED
         ) {
             if ($item['status'] != LicenseStatus::ACTIVE) {
                 $actions['activate'] = sprintf(
@@ -822,6 +834,12 @@ class LicensesList extends WP_List_Table
                     __('Inactive', 'license-manager-for-woocommerce')
                 );
                 break;
+            case LicenseStatus::DISABLED:
+                $status = sprintf(
+                    '<div class="lmfwc-status disabled"><span class="dashicons dashicons-warning"></span> %s</div>',
+                    __('Disabled', 'license-manager-for-woocommerce')
+                );
+                break;
             default:
                 $status = sprintf(
                     '<div class="lmfwc-status unknown">%s</div>',
@@ -880,6 +898,7 @@ class LicensesList extends WP_List_Table
         $actions = array(
             'activate'          => __('Activate', 'license-manager-for-woocommerce'),
             'deactivate'        => __('Deactivate', 'license-manager-for-woocommerce'),
+            'disable'           => __('Mark as disabled', 'license-manager-for-woocommerce'),
             'mark_as_sold'      => __('Mark as sold', 'license-manager-for-woocommerce'),
             'mark_as_delivered' => __('Mark as delivered', 'license-manager-for-woocommerce'),
             'delete'            => __('Delete', 'license-manager-for-woocommerce'),
@@ -903,6 +922,9 @@ class LicensesList extends WP_List_Table
                 break;
             case 'deactivate':
                 $this->toggleLicenseKeyStatus(LicenseStatus::INACTIVE);
+                break;
+            case 'disable':
+                $this->toggleLicenseKeyStatus(LicenseStatus::DISABLED);
                 break;
             case 'mark_as_sold':
                 $this->toggleLicenseKeyStatus(LicenseStatus::SOLD);
@@ -1116,6 +1138,9 @@ class LicensesList extends WP_List_Table
                 break;
             case LicenseStatus::ACTIVE:
                 $nonce = 'activate';
+                break;
+            case LicenseStatus::DISABLED:
+                $nonce = 'disable';
                 break;
             default:
                 $nonce = 'deactivate';

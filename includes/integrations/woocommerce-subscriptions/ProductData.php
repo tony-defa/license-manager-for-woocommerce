@@ -38,14 +38,32 @@ class ProductData
         $customInterval         = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod           = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
 
+        $wrapperClass = array(
+            'lmfwc_subscription_renewal_interval_type'   => '',
+            'lmfwc_subscription_renewal_custom_interval' => '',
+            'lmfwc_subscription_renewal_custom_period'   => ''
+        );
+
+        if ($renewalAction === 'extend_existing_license') {
+            if ($renewalIntervalType === 'subscription') {
+                $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
+                $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
+            }
+        } else {
+            $wrapperClass['lmfwc_subscription_renewal_interval_type']   .= ' hidden';
+            $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
+            $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
+        }
+
         echo '</div><div class="options_group">';
 
         // Dropdown "lmfwc_subscription_renewal_action"
         woocommerce_wp_select(
             array(
-                'id'      => 'lmfwc_subscription_renewal_action',
-                'label'   => __('On subscription renewal', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'id'            => 'lmfwc_subscription_renewal_action',
+                'class'         => 'lmfwc_subscription_renewal_action',
+                'label'         => __('On subscription renewal', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'issue_new_license'       => __('Issue a new license key on each subscription renewal', 'license-manager-for-woocommerce'),
                     'extend_existing_license' => __('Extend the existing license on each subscription renewal', 'license-manager-for-woocommerce')
                 ),
@@ -69,9 +87,11 @@ class ProductData
         // Dropdown "lmfwc_subscription_renewal_interval_type"
         woocommerce_wp_select(
             array(
-                'id'      => 'lmfwc_subscription_renewal_interval_type',
-                'label'   => __('Extend by', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'id'            => 'lmfwc_subscription_renewal_interval_type',
+                'class'         => 'lmfwc_subscription_renewal_interval_type',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_renewal_interval_type'],
+                'label'         => __('Extend by', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'subscription' => __('WooCommerce Subscription interval', 'license-manager-for-woocommerce'),
                     'custom'       => __('Custom interval', 'license-manager-for-woocommerce')
                 ),
@@ -83,6 +103,8 @@ class ProductData
         woocommerce_wp_text_input(
             array(
                 'id'                => 'lmfwc_subscription_renewal_custom_interval',
+                'class'             => 'lmfwc_subscription_renewal_custom_interval',
+                'wrapper_class'     => $wrapperClass['lmfwc_subscription_renewal_custom_interval'],
                 'label'             => __('Interval', 'license-manager-for-woocommerce'),
                 'value'             => $customInterval,
                 'type'              => 'number',
@@ -96,9 +118,11 @@ class ProductData
         // Dropdown "lmfwc_subscription_renewal_custom_period"
         woocommerce_wp_select(
             array(
-                'id'      => 'lmfwc_subscription_renewal_custom_period',
-                'label'   => __('Period', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'id'            => 'lmfwc_subscription_renewal_custom_period',
+                'class'         => 'lmfwc_subscription_renewal_custom_period',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_renewal_custom_period'],
+                'label'         => __('Period', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'hour'  => __('Hour(s)', 'license-manager-for-woocommerce'),
                     'day'   => __('Day(s)', 'license-manager-for-woocommerce'),
                     'week'  => __('Week(s)', 'license-manager-for-woocommerce'),
@@ -181,19 +205,38 @@ class ProductData
         $customInterval      = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod        = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
 
-        echo '</div><div class="options_group">';
+        $wrapperClass = array(
+            'lmfwc_subscription_renewal_interval_type'   => 'form-row form-row-full',
+            'lmfwc_subscription_renewal_custom_interval' => 'form-field form-row form-row-first',
+            'lmfwc_subscription_renewal_custom_period'   => 'form-field form-row form-row-last'
+        );
+
+        if ($renewalAction === 'extend_existing_license') {
+            if ($renewalIntervalType === 'subscription') {
+                $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
+                $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
+            }
+        } else {
+            $wrapperClass['lmfwc_subscription_renewal_interval_type']   .= ' hidden';
+            $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
+            $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
+        }
+
+        //echo '</div><div class="options_group">';
 
         // Dropdown "lmfwc_subscription_renewal_action"
         woocommerce_wp_select(
             array(
-                'id'      => sprintf('lmfwc_subscription_renewal_action_%d', $loop),
-                'name'    => sprintf('lmfwc_subscription_renewal_action[%d]', $loop),
-                'label'   => __('On subscription renewal', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'id'            => sprintf('lmfwc_subscription_renewal_action_%d', $loop),
+                'class'         => 'lmfwc_subscription_renewal_action',
+                'name'          => sprintf('lmfwc_subscription_renewal_action[%d]', $loop),
+                'label'         => __('On subscription renewal', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'issue_new_license'       => __('Issue a new license key on each subscription renewal', 'license-manager-for-woocommerce'),
                     'extend_existing_license' => __('Extend the existing license on each subscription renewal', 'license-manager-for-woocommerce')
                 ),
-                'value' => $renewalAction
+                'value' => $renewalAction,
+                'wrapper_class' => 'form-row form-row-full'
             )
         );
 
@@ -214,10 +257,12 @@ class ProductData
         // Dropdown "lmfwc_subscription_renewal_interval_type"
         woocommerce_wp_select(
             array(
-                'id'      => sprintf('lmfwc_subscription_renewal_interval_type_%d', $loop),
-                'name'    => sprintf('lmfwc_subscription_renewal_interval_type[%d]', $loop),
-                'label'   => __('Extend by', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'id'            => sprintf('lmfwc_subscription_renewal_interval_type_%d', $loop),
+                'class'         => 'lmfwc_subscription_renewal_interval_type',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_renewal_interval_type'],
+                'name'          => sprintf('lmfwc_subscription_renewal_interval_type[%d]', $loop),
+                'label'         => __('Extend by', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'subscription' => __('WooCommerce Subscription interval', 'license-manager-for-woocommerce'),
                     'custom'       => __('Custom interval', 'license-manager-for-woocommerce')
                 ),
@@ -225,10 +270,14 @@ class ProductData
             )
         );
 
+        echo '<div>';
+
         // Number "lmfwc_subscription_renewal_custom_interval"
         woocommerce_wp_text_input(
             array(
                 'id'                => sprintf('lmfwc_subscription_renewal_custom_interval_%d', $loop),
+                'class'             => 'lmfwc_subscription_renewal_custom_interval',
+                'wrapper_class'     => $wrapperClass['lmfwc_subscription_renewal_custom_interval'],
                 'name'              => sprintf('lmfwc_subscription_renewal_custom_interval[%d]', $loop),
                 'label'             => __('Interval', 'license-manager-for-woocommerce'),
                 'value'             => $customInterval,
@@ -243,10 +292,12 @@ class ProductData
         // Dropdown "lmfwc_subscription_renewal_custom_period"
         woocommerce_wp_select(
             array(
-                'id'      => sprintf('lmfwc_subscription_renewal_custom_period_%d', $loop),
-                'name'    => sprintf('lmfwc_subscription_renewal_custom_period[%d]', $loop),
-                'label'   => __('Period', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'id'            => sprintf('lmfwc_subscription_renewal_custom_period_%d', $loop),
+                'class'         => 'lmfwc_subscription_renewal_custom_period',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_renewal_custom_period'],
+                'name'          => sprintf('lmfwc_subscription_renewal_custom_period[%d]', $loop),
+                'label'         => __('Period', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'hour'  => __('Hour(s)', 'license-manager-for-woocommerce'),
                     'day'   => __('Day(s)', 'license-manager-for-woocommerce'),
                     'week'  => __('Week(s)', 'license-manager-for-woocommerce'),
@@ -256,6 +307,8 @@ class ProductData
                 'value' => $customPeriod
             )
         );
+
+        echo '</div>';
     }
 
     /**
