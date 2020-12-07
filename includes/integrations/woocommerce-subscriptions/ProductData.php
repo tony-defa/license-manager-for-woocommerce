@@ -38,11 +38,6 @@ class ProductData
         $customInterval         = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod           = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
 
-        $disableOnRenewalActionNewLicense = array();
-        if ($renewalAction === 'issue_new_license') {
-            $disableOnRenewalActionNewLicense['disabled'] = 'true';
-        }
-
         echo '</div><div class="options_group">';
 
         // Dropdown "lmfwc_subscription_renewal_action"
@@ -67,7 +62,6 @@ class ProductData
                     'do_not_reset_on_renewal'   => __('Do no reset times activated on key with maximum activations', 'license-manager-for-woocommerce'),
                     'reset_license_on_renewal'  => __('Reset times activated to 0 on keys that have a maximum activation count', 'license-manager-for-woocommerce')
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalResetAction
             )
         );
@@ -81,7 +75,6 @@ class ProductData
                     'subscription' => __('WooCommerce Subscription interval', 'license-manager-for-woocommerce'),
                     'custom'       => __('Custom interval', 'license-manager-for-woocommerce')
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalIntervalType
             )
         );
@@ -93,10 +86,10 @@ class ProductData
                 'label'             => __('Interval', 'license-manager-for-woocommerce'),
                 'value'             => $customInterval,
                 'type'              => 'number',
-                'custom_attributes' => array_merge(array(
+                'custom_attributes' => array(
                     'step' => '1',
                     'min'  => '1'
-                ), $disableOnRenewalActionNewLicense)
+                )
             )
         );
 
@@ -112,7 +105,6 @@ class ProductData
                     'month' => __('Month(s)', 'license-manager-for-woocommerce'),
                     'year'  => __('Year(s)', 'license-manager-for-woocommerce'),
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $customPeriod
             )
         );
@@ -140,40 +132,32 @@ class ProductData
         );
 
         // Update the subscription renewal reset action
-        if (isset($_POST['lmfwc_subscription_renewal_reset_action'])) {
-            update_post_meta(
-                $postId,
-                'lmfwc_subscription_renewal_reset_action',
-                sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'])
-            );
-        }
+        update_post_meta(
+            $postId,
+            'lmfwc_subscription_renewal_reset_action',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'])
+        );
 
         // Update the subscription renewal interval type
-        if (isset($_POST['lmfwc_subscription_renewal_interval_type'])) {
-            update_post_meta(
-                $postId,
-                'lmfwc_subscription_renewal_interval_type',
-                sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'])
-            );
-        }
+        update_post_meta(
+            $postId,
+            'lmfwc_subscription_renewal_interval_type',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'])
+        );
 
         // Update the subscription renewal custom interval
-        if (isset($_POST['lmfwc_subscription_renewal_custom_interval'])) {
-            update_post_meta(
-                $postId,
-                'lmfwc_subscription_renewal_custom_interval',
-                intval($_POST['lmfwc_subscription_renewal_custom_interval'])
-            );
-        }
+        update_post_meta(
+            $postId,
+            'lmfwc_subscription_renewal_custom_interval',
+            intval($_POST['lmfwc_subscription_renewal_custom_interval'])
+        );
 
         // Update the subscription renewal custom period
-        if (isset($_POST['lmfwc_subscription_renewal_custom_period'])) {
-            update_post_meta(
-                $postId,
-                'lmfwc_subscription_renewal_custom_period',
-                sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'])
-            );
-        }
+        update_post_meta(
+            $postId,
+            'lmfwc_subscription_renewal_custom_period',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'])
+        );
     }
 
     /**
@@ -196,11 +180,6 @@ class ProductData
         $renewalIntervalType = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
         $customInterval      = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
         $customPeriod        = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
-
-        $disableOnRenewalActionNewLicense = array();
-        if ($renewalAction === 'issue_new_license') {
-            $disableOnRenewalActionNewLicense['disabled'] = 'true';
-        }
 
         echo '</div><div class="options_group">';
 
@@ -228,7 +207,6 @@ class ProductData
                     'do_not_reset_on_renewal'   => __('Do no reset times activated on key with maximum activations', 'license-manager-for-woocommerce'),
                     'reset_license_on_renewal'  => __('Reset times activated to 0 on keys that have a maximum activation count', 'license-manager-for-woocommerce')
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalResetAction
             )
         );
@@ -243,7 +221,6 @@ class ProductData
                     'subscription' => __('WooCommerce Subscription interval', 'license-manager-for-woocommerce'),
                     'custom'       => __('Custom interval', 'license-manager-for-woocommerce')
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalIntervalType
             )
         );
@@ -256,10 +233,10 @@ class ProductData
                 'label'             => __('Interval', 'license-manager-for-woocommerce'),
                 'value'             => $customInterval,
                 'type'              => 'number',
-                'custom_attributes' => array_merge(array(
+                'custom_attributes' => array(
                     'step' => '1',
                     'min'  => '1'
-                ), $disableOnRenewalActionNewLicense)
+                )
             )
         );
 
@@ -276,7 +253,6 @@ class ProductData
                     'month' => __('Month(s)', 'license-manager-for-woocommerce'),
                     'year'  => __('Year(s)', 'license-manager-for-woocommerce'),
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $customPeriod
             )
         );
@@ -298,39 +274,31 @@ class ProductData
         );
     
         // Update the subscription renewal reset action
-        if (isset($_POST['lmfwc_subscription_renewal_reset_action'][$i])) {
-            update_post_meta(
-                $variationId,
-                'lmfwc_subscription_renewal_reset_action',
-                sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'][$i])
-            );
-        }
+        update_post_meta(
+            $variationId,
+            'lmfwc_subscription_renewal_reset_action',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'][$i])
+        );
 
         // Update the subscription renewal interval type
-        if (isset($_POST['lmfwc_subscription_renewal_interval_type'][$i])) {
-            update_post_meta(
-                $variationId,
-                'lmfwc_subscription_renewal_interval_type',
-                sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'][$i])
-            );
-        }
+        update_post_meta(
+            $variationId,
+            'lmfwc_subscription_renewal_interval_type',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'][$i])
+        );
 
         // Update the subscription renewal custom interval
-        if (isset($_POST['lmfwc_subscription_renewal_custom_interval'][$i])) {
-            update_post_meta(
-                $variationId,
-                'lmfwc_subscription_renewal_custom_interval',
-                intval($_POST['lmfwc_subscription_renewal_custom_interval'][$i])
-            );
-        }
+        update_post_meta(
+            $variationId,
+            'lmfwc_subscription_renewal_custom_interval',
+            intval($_POST['lmfwc_subscription_renewal_custom_interval'][$i])
+        );
 
         // Update the subscription renewal custom period
-        if (isset($_POST['lmfwc_subscription_renewal_custom_period'][$i])) {
-            update_post_meta(
-                $variationId,
-                'lmfwc_subscription_renewal_custom_period',
-                sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'][$i])
-            );
-        }
+        update_post_meta(
+            $variationId,
+            'lmfwc_subscription_renewal_custom_period',
+            sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'][$i])
+        );
     }
 }
