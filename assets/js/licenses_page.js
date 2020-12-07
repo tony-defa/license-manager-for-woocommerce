@@ -1,20 +1,22 @@
-document.addEventListener('DOMContentLoaded', function() {
-    const importLicenseProduct = jQuery('select#bulk__product');
-    const importLicenseOrder   = jQuery('select#bulk__order');
-    const addLicenseProduct    = jQuery('select#single__product');
-    const addLicenseOrder      = jQuery('select#single__order');
-    const addLicenseUser       = jQuery('select#single__user');
-    const addValidFor          = jQuery('input#single__valid_for');
-    const addExpiresAt         = jQuery('input#single__expires_at');
-    const editLicenseProduct   = jQuery('select#edit__product');
-    const editLicenseOrder     = jQuery('select#edit__order');
-    const editValidFor         = jQuery('input#edit__valid_for');
-    const editExpiresAt        = jQuery('input#edit__expires_at');
-    const bulkAddSource        = jQuery('input[type="radio"].bulk__type');
+jQuery(function($) {
+    'use strict';
+
+    const importLicenseProduct = $('select#bulk__product');
+    const importLicenseOrder   = $('select#bulk__order');
+    const addLicenseProduct    = $('select#single__product');
+    const addLicenseOrder      = $('select#single__order');
+    const addLicenseUser       = $('select#single__user');
+    const addValidFor          = $('input#single__valid_for');
+    const addExpiresAt         = $('input#single__expires_at');
+    const editLicenseProduct   = $('select#edit__product');
+    const editLicenseOrder     = $('select#edit__order');
+    const editValidFor         = $('input#edit__valid_for');
+    const editExpiresAt        = $('input#edit__expires_at');
+    const bulkAddSource        = $('input[type="radio"].bulk__type');
     // Licenses table
-    const dropdownOrders   = jQuery('select#filter-by-order-id');
-    const dropdownProducts = jQuery('select#filter-by-product-id');
-    const dropdownUsers    = jQuery('select#filter-by-user-id');
+    const dropdownOrders   = $('select#filter-by-order-id');
+    const dropdownProducts = $('select#filter-by-product-id');
+    const dropdownUsers    = $('select#filter-by-user-id');
 
     const productDropdownSearchConfig = {
         ajax: {
@@ -154,17 +156,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (bulkAddSource.length > 0) {
         bulkAddSource.change(function() {
-            const value = jQuery('input[type="radio"].bulk__type:checked').val();
+            const value = $('input[type="radio"].bulk__type:checked').val();
 
             if (value !== 'file' && value !== 'clipboard') {
                 return;
             }
 
             // Hide the currently visible row
-            jQuery('tr.bulk__source_row:visible').addClass('hidden');
+            $('tr.bulk__source_row:visible').addClass('hidden');
 
             // Display the selected row
-            jQuery('tr#bulk__source_' + value + '.bulk__source_row').removeClass('hidden');
+            $('tr#bulk__source_' + value + '.bulk__source_row').removeClass('hidden');
         })
     }
 

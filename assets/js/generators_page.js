@@ -1,6 +1,8 @@
-document.addEventListener('DOMContentLoaded', function(event) {
-    let generateLicenseKeysProduct = jQuery('select#generate__product');
-    let generateLicenseKeysOrder   = jQuery('select#generate__order');
+jQuery(function($) {
+    'use strict';
+
+    let generateLicenseKeysProduct = $('select#generate__product');
+    let generateLicenseKeysOrder   = $('select#generate__order');
 
     const productDropdownSearchConfig = {
         ajax: {
