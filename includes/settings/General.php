@@ -45,7 +45,7 @@ class General
     {
         if (isset($_POST['lmfwc_stock_synchronize'])) {
             // Permission check
-            if (!current_user_can('manage_options')) {
+            if (!current_user_can('manage_license_manager_for_woocommerce')) {
                 return $settings;
             }
 
@@ -100,6 +100,22 @@ class General
             'lmfwc_auto_delivery',
             __('Automatic delivery', 'license-manager-for-woocommerce'),
             array($this, 'fieldAutoDelivery'),
+            'lmfwc_license_keys',
+            'license_keys_section'
+        );
+
+        add_settings_field(
+            'lmfwc_product_downloads',
+            __('Product downloads', 'license-manager-for-woocommerce'),
+            array($this, 'fieldProductDownloads'),
+            'lmfwc_license_keys',
+            'license_keys_section'
+        );
+
+        add_settings_field(
+            'lmfwc_download_expires',
+            __('Download expires', 'license-manager-for-woocommerce'),
+            array($this, 'fieldDownloadExpires'),
             'lmfwc_license_keys',
             'license_keys_section'
         );
@@ -249,6 +265,70 @@ class General
         $html .= sprintf(
             '<p class="description">%s</p>',
             __('If this setting is off, you must manually send out all license keys for completed orders.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</fieldset>';
+
+        echo $html;
+    }
+
+    /**
+     * Callback for the "lmfwc_product_downloads" field.
+     *
+     * @return void
+     */
+    public function fieldProductDownloads()
+    {
+        $field = 'lmfwc_product_downloads';
+        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
+
+        $html = '<fieldset>';
+        $html .= sprintf('<label for="%s">', $field);
+        $html .= sprintf(
+            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
+            $field,
+            $field,
+            checked(true, $value, false)
+        );
+        $html .= sprintf(
+            '<span>%s</span>',
+            __('Enable product download management for digital / virtual products e.g. WordPress themes, plugins & more.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</label>';
+        $html .= sprintf(
+            '<p class="description">%s</p>',
+            __('If this setting is off, the download management for digital / virtual products is not available e.g. current version or changelog field in products.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</fieldset>';
+
+        echo $html;
+    }
+
+    /**
+     * Callback for the "lmfwc_download_expires" field.
+     *
+     * @return void
+     */
+    public function fieldDownloadExpires()
+    {
+        $field = 'lmfwc_download_expires';
+        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
+
+        $html = '<fieldset>';
+        $html .= sprintf('<label for="%s">', $field);
+        $html .= sprintf(
+            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
+            $field,
+            $field,
+            checked(true, $value, false)
+        );
+        $html .= sprintf(
+            '<span>%s</span>',
+            __('Automatically set download expiration date in orders to the license expiration date.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</label>';
+        $html .= sprintf(
+            '<p class="description">%s</p>',
+            __('If this setting is off, digital / virtual products can may still be downloaded when the license has expired.', 'license-manager-for-woocommerce')
         );
         $html .= '</fieldset>';
 
@@ -526,6 +606,24 @@ class General
             array(
                 'id'         => '020',
                 'name'       => 'v2/generators/{id}',
+                'method'     => 'GET',
+                'deprecated' => false,
+            ),
+            array(
+                'id'         => '021',
+                'name'       => 'v2/generators/{id}/generate',
+                'method'     => 'POST',
+                'deprecated' => false,
+            ),
+            array(
+                'id'         => '022',
+                'name'       => 'v2/products/update/{license_key}',
+                'method'     => 'GET',
+                'deprecated' => false,
+            ),
+            array(
+                'id'         => '023',
+                'name'       => 'v2/products/download/latest/{license_key}',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),

@@ -204,6 +204,8 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             $expiresAt     = $gmtDate->add($dateExpiresAt)->format('Y-m-d H:i:s');
         }
 
+        lmfwc_update_order_downloads_expiration($expiresAt, $orderId);
+
         // Add the keys to the database table.
         foreach ($cleanLicenseKeys as $licenseKey) {
             // Key exists, up the invalid keys count.
@@ -228,7 +230,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     'valid_for'           => $generator->getExpiresIn(),
                     'source'              => LicenseSource::GENERATOR,
                     'status'              => $cleanStatus,
-                    'times_activated_max' => $generator->getTimesActivatedMax()
+                    'times_activated_max' => $generator->getTimesActivatedMax() ?: null
                 )
             );
         }
@@ -320,6 +322,14 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             );
 
             if ($license) {
+                if ($validFor) {
+                    $date         = new DateTime();
+                    $dateInterval = new DateInterval('P' . $validFor . 'D');
+                    $expiresAt    = $date->add($dateInterval)->format('Y-m-d H:i:s');
+
+                    lmfwc_update_order_downloads_expiration($expiresAt, $orderId);
+                }
+
                 $result['added']++;
             }
 
@@ -367,7 +377,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
 
         for ($i = 0; $i < $cleanAmount; $i++) {
             $license   = $cleanLicenseKeys[$i];
-            $validFor  = intval($license->getValidFor());
+            $validFor  = (int)$license->getValidFor();
             $expiresAt = $license->getExpiresAt();
 
             if ($validFor) {
@@ -409,7 +419,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         }
 
         if (array_key_exists('page', $_POST)) {
-            $page = intval($_POST['page']);
+            $page = (int)$_POST['page'];
         }
 
         if ($page > 1) {
@@ -420,12 +430,12 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             // Search for a specific order
             if ($type === 'shop_order') {
                 /** @var WC_Order $order */
-                $order = wc_get_order(intval($term));
+                $order = wc_get_order((int)$term);
 
                 // Order exists.
                 if ($order && $order instanceof WC_Order) {
                     $text = sprintf(
-                        /* translators: $1: order id, $2: customer name, $3: customer email */
+                    /* translators: $1: order id, $2: customer name, $3: customer email */
                         '#%1$s %2$s <%3$s>',
                         $order->get_id(),
                         $order->get_formatted_billing_full_name(),
@@ -442,12 +452,12 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             // Search for a specific product
             elseif ($type === 'product') {
                 /** @var WC_Product $product */
-                $product = wc_get_product(intval($term));
+                $product = wc_get_product((int)$term);
 
                 // Product exists.
                 if ($product) {
                     $text = sprintf(
-                        /* translators: $1: order id, $2 customer name */
+                    /* translators: $1: order id, $2 customer name */
                         '(#%1$s) %2$s',
                         $product->get_id(),
                         $product->get_formatted_name()
@@ -476,7 +486,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
                     $results[] = array(
                         'id' => $user->ID,
                         'text' => sprintf(
-                            /* translators: $1: user nicename, $2: user id, $3: user email */
+                        /* translators: $1: user nicename, $2: user id, $3: user email */
                             '%1$s (#%2$d - %3$s)',
                             $user->user_nicename,
                             $user->ID,

@@ -194,7 +194,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'read')) {
+        if (!$this->capabilityCheck('read_licenses')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_view',
                 __('Sorry, you cannot list resources.', 'license-manager-for-woocommerce'),
@@ -225,7 +225,6 @@ class Licenses extends LMFWC_REST_Controller
 
         $response = array();
 
-        /** @var LicenseResourceModel $license */
         foreach ($licenses as $license) {
             $licenseData = $license->toArray();
 
@@ -251,7 +250,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'read')) {
+        if (!$this->capabilityCheck('read_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_view',
                 __('Sorry, you cannot view this resource.', 'license-manager-for-woocommerce'),
@@ -320,7 +319,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'create')) {
+        if (!$this->capabilityCheck('create_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_create',
                 __('Sorry, you are not allowed to create resources.', 'license-manager-for-woocommerce'),
@@ -373,10 +372,10 @@ class Licenses extends LMFWC_REST_Controller
 
         if ($expiresAt) {
             try {
-                $expiresAtDateTime = new \DateTime($expiresAt);
+                $expiresAtDateTime = new DateTime($expiresAt);
                 $expiresAt = $expiresAtDateTime->format('Y-m-d H:i:s');
                 $validFor  = null;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 return new WP_Error(
                     'lmfwc_rest_data_error',
                     $e->getMessage(),
@@ -401,6 +400,14 @@ class Licenses extends LMFWC_REST_Controller
                     'times_activated_max' => $timesActivatedMax
                 )
             );
+
+            if ( ( $expiresAt !== null || $validFor !== null ) && $orderId !== null ) {
+                if ( empty( $expiresAt ) ) {
+                    $expiresAt = lmfwc_convert_valid_for_to_expires_at( $validFor );
+                }
+
+                lmfwc_update_order_downloads_expiration( $expiresAt, $orderId );
+            }
         } catch (Exception $e) {
             return new WP_Error(
                 'lmfwc_rest_data_error',
@@ -444,7 +451,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'edit')) {
+        if (!$this->capabilityCheck('edit_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_edit',
                 __('Sorry, you are not allowed to edit resources.', 'license-manager-for-woocommerce'),
@@ -564,6 +571,16 @@ class Licenses extends LMFWC_REST_Controller
 
         $licenseData = $updatedLicense->toArray();
 
+        if ( ( isset( $updateData['expires_at'] ) || isset( $updateData['valid_for'] ) ) && isset( $licenseData['orderId'] ) ) {
+            if ( isset($updateData['expires_at'] ) ) {
+                $expiresAt = $updateData['expires_at'];
+            } else {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at( $updateData['valid_for'] );
+            }
+
+            lmfwc_update_order_downloads_expiration( $expiresAt, $licenseData['orderId'] );
+        }
+
         // Remove the hash and decrypt the license key
         unset($licenseData['hash']);
         $licenseData['licenseKey'] = $updatedLicense->getDecryptedLicenseKey();
@@ -584,7 +601,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'edit')) {
+        if (!$this->capabilityCheck('activate_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_edit',
                 __('Sorry, you are not allowed to edit this resource.', 'license-manager-for-woocommerce'),
@@ -667,7 +684,7 @@ class Licenses extends LMFWC_REST_Controller
             }
 
             else {
-                $timesActivatedNew = intval($timesActivated) + 1;
+                $timesActivatedNew = (int)$timesActivated + 1;
             }
 
             /** @var LicenseResourceModel $updatedLicense */
@@ -707,7 +724,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'edit')) {
+        if (!$this->capabilityCheck('deactivate_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_edit',
                 __('Sorry, you are not allowed to edit this resource.', 'license-manager-for-woocommerce'),
@@ -780,7 +797,7 @@ class Licenses extends LMFWC_REST_Controller
 
         // Deactivate the license key
         try {
-            $timesActivatedNew = intval($timesActivated) - 1;
+            $timesActivatedNew = (int)$timesActivated - 1;
 
             /** @var LicenseResourceModel $updatedLicense */
             $updatedLicense = LicenseResourceRepository::instance()->update(
@@ -820,7 +837,7 @@ class Licenses extends LMFWC_REST_Controller
             return $this->routeDisabledError();
         }
 
-        if (!$this->permissionCheck('license', 'read')) {
+        if (!$this->capabilityCheck('validate_license')) {
             return new WP_Error(
                 'lmfwc_rest_cannot_view',
                 __('Sorry, you cannot view this resource.', 'license-manager-for-woocommerce'),
@@ -877,9 +894,9 @@ class Licenses extends LMFWC_REST_Controller
         }
 
         $result = array(
-            'timesActivated'       => intval($license->getTimesActivated()),
-            'timesActivatedMax'    => intval($license->getTimesActivatedMax()),
-            'remainingActivations' => intval($license->getTimesActivatedMax()) - intval($license->getTimesActivated())
+            'timesActivated'       => (int)$license->getTimesActivated(),
+            'timesActivatedMax'    => (int)$license->getTimesActivatedMax(),
+            'remainingActivations' => (int)$license->getTimesActivatedMax() - (int)$license->getTimesActivated()
         );
 
         return $this->response(true, $result, 200, 'v2/licenses/validate/{license_key}');

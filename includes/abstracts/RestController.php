@@ -133,23 +133,17 @@ class RestController extends WP_REST_Controller
     }
 
     /**
-     * Checks if the current user can access the requested route.
+     * Checks if the current user has permission to perform the request.
      *
-     * @param string $object  "license" or "generator"
-     * @param string $context "read", "edit", "create", "delete", or "batch"
+     * @param string $cap Capability slug
      *
      * @return bool
      */
-    protected function permissionCheck($object, $context = 'read')
+    protected function capabilityCheck($cap)
     {
-        $objects = array(
-            'license'   => 'manage_options',
-            'generator' => 'manage_options'
-        );
+        $hasPermission = current_user_can($cap);
 
-        $permission = current_user_can($objects[$object]);
-
-        return apply_filters('lmfwc_rest_check_permissions', $permission, $context, $object);
+        return apply_filters('lmfwc_rest_capability_check', $hasPermission, $cap);
     }
 
     /**

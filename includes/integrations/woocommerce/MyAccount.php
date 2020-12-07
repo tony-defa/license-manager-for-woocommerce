@@ -29,9 +29,13 @@ class MyAccount
      */
     public function accountMenuItems($items)
     {
-        $items['view-license-keys'] = __('License keys', 'license-manager-for-woocommerce');
+        $customItems = array(
+            'view-license-keys' => __('License keys', 'license-manager-for-woocommerce')
+        );
 
-        return $items;
+        $customItems = array_slice( $items, 0, 2, true ) + $customItems + array_slice( $items, 2, count( $items ), true );
+
+        return $customItems;
     }
 
     /**
@@ -78,7 +82,7 @@ class MyAccount
         $page = 1;
 
         if ($wp_query->query['view-license-keys']) {
-            $page = intval($wp_query->query['view-license-keys']);
+            $page = (int)$wp_query->query['view-license-keys'];
         }
 
         $licenseKeys = apply_filters('lmfwc_get_all_customer_license_keys', $user->ID);
