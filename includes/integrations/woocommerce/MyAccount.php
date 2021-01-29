@@ -14,10 +14,11 @@ class MyAccount
      */
     public function __construct()
     {
-        add_rewrite_endpoint('view-license-keys', EP_ROOT | EP_PAGES);
+        add_rewrite_endpoint('licenses', EP_ROOT | EP_PAGES);
 
-        add_filter('woocommerce_account_menu_items',                 array($this, 'accountMenuItems'), 10, 1);
-        add_action('woocommerce_account_view-license-keys_endpoint', array($this, 'viewLicenseKeys'));
+        add_filter('woocommerce_account_menu_items',        array($this, 'accountMenuItems'));
+        add_action('woocommerce_account_licenses_endpoint', array($this, 'licensesEndpoint'));
+        add_filter('the_title',                             array($this, 'title'));
     }
 
     /**
@@ -30,10 +31,11 @@ class MyAccount
     public function accountMenuItems($items)
     {
         $customItems = array(
-            'view-license-keys' => __('License keys', 'license-manager-for-woocommerce')
+            'licenses' => __('Licenses', 'license-manager-for-woocommerce')
         );
 
-        $customItems = array_slice( $items, 0, 2, true ) + $customItems + array_slice( $items, 2, count( $items ), true );
+        $customItems = array_slice($items, 0, 2, true)
+            + $customItems + array_slice($items, 2, count($items), true);
 
         return $customItems;
     }
@@ -41,7 +43,7 @@ class MyAccount
     /**
      * Creates an overview of all purchased license keys.
      */
-    public function viewLicenseKeys()
+    public function licensesEndpoint()
     {
         $user = wp_get_current_user();
 
@@ -81,21 +83,52 @@ class MyAccount
 
         $page = 1;
 
-        if ($wp_query->query['view-license-keys']) {
-            $page = (int)$wp_query->query['view-license-keys'];
+        if ($wp_query->query['licenses']) {
+            $page = (int)$wp_query->query['licenses'];
         }
 
-        $licenseKeys = apply_filters('lmfwc_get_all_customer_license_keys', $user->ID);
-
         echo wc_get_template_html(
-            'myaccount/lmfwc-view-license-keys.php',
+            'myaccount/lmfwc-licenses.php',
             array(
-                'dateFormat'  => get_option('date_format'),
-                'licenseKeys' => $licenseKeys,
-                'page'        => $page
+                'dateFormat'       => get_option('date_format'),
+                'customerLicenses' => apply_filters('lmfwc_get_all_customer_license_keys', $user->ID),
+                'page'             => $page,
+                'canActivate'      => Settings::get('lmfwc_allow_users_to_activate'),
+                'canDeactivate'    => Settings::get('lmfwc_allow_users_to_deactivate'),
             ),
             '',
             LMFWC_TEMPLATES_DIR
         );
+    }
+
+    /**
+     * Sets the page title for the "My account -> Licenses" page.
+     *
+     * @param string $title
+     * @return string
+     */
+    public function title($title)
+    {
+        global $wp;
+        global $wp_query;
+
+        if ($wp_query !== null
+            && !is_admin()
+            && is_main_query()
+            && in_the_loop()
+            && is_page()
+            && isset($wp->query_vars['pagename'])
+            && $wp->query_vars['pagename'] === apply_filters('lmfwc_myaccount_pagename', 'my-account')
+            && array_key_exists('licenses', $wp->query_vars)
+        ) {
+            $title = apply_filters(
+                'lmfwc_myaccount_licenses_page_title',
+                __('Licenses', 'license-manager-for-woocommerce')
+            );
+
+            remove_filter('the_title', array($this, 'title'));
+        }
+
+        return $title;
     }
 }

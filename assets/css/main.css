@@ -214,6 +214,14 @@ table.wp-list-table.lizenzschlssel span.lmfwc-date {
 .lmfwc-myaccount-license-key {
 	font-family: Consolas, monospace;
 	font-size: 13px;
+	white-space: nowrap;
+}
+.lmfwc-myaccount-actions {
+	white-space: nowrap;
+}
+.lmfwc-myaccount-actions form {
+	margin: 0;
+	display: inline-block;
 }
 
 /** Custom icons **/

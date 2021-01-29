@@ -69,6 +69,8 @@ class General
             }
         }
 
+        flush_rewrite_rules();
+
         return $settings;
     }
 

@@ -128,10 +128,11 @@ function lmfwc_get_license($licenseKey)
 /**
  * Retrieves multiple license keys by a query array.
  *
- * @param array $query Key/value pairs with the license table column names as keys
+ * @param array       $query   Key/value pairs with the license table column names as keys
+ * @param string|null $orderBy Column name, followed by either ASC or DESC
  * @return LicenseResourceModel[]
  */
-function lmfwc_get_licenses($query)
+function lmfwc_get_licenses($query, $orderBy = null)
 {
     if (array_key_exists('license_key', $query)) {
         $query['hash'] = apply_filters('lmfwc_hash', $query['license_key']);
@@ -139,7 +140,7 @@ function lmfwc_get_licenses($query)
     }
 
     /** @var LicenseResourceModel[] $licenses */
-    $licenses = LicenseResourceRepository::instance()->findAllBy($query);
+    $licenses = LicenseResourceRepository::instance()->findAllBy($query, $orderBy);
 
     if (!$licenses) {
         return array();

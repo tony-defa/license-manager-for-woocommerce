@@ -14,7 +14,6 @@ use LicenseManagerForWooCommerce\Models\Resources\Generator as GeneratorResource
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Settings;
-use stdClass;
 use WC_Order;
 use WC_Order_Item_Product;
 use WC_Product;
@@ -102,53 +101,50 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
      *
      * @param int $userId
      *
-     * @return stdClass|WC_Order[]
+     * @return array
      */
     public function getAllCustomerLicenseKeys($userId)
     {
         global $wpdb;
 
-        $query = "
+        $table = $wpdb->prefix . LicenseResourceRepository::TABLE;
+        $userId = $wpdb->prepare('%d', $userId);
+        $result = array();
+
+        $sql = "
             SELECT
-                DISTINCT(pm1.post_id) AS orderId
+                DISTINCT(order_id)
             FROM
-                {$wpdb->postmeta} AS pm1
-            INNER JOIN
-                {$wpdb->postmeta} AS pm2
-                ON 1=1
-                   AND pm1.post_id = pm2.post_id
+                {$table}
             WHERE
-                1=1
-                AND pm1.meta_key = 'lmfwc_order_complete'
-                AND pm1.meta_value = '1'
-                AND pm2.meta_key = '_customer_user'
-                AND pm2.meta_value = '{$userId}'
-        ;";
+                `user_id` = {$userId}
+            ORDER BY
+                created_at DESC
+            ;
+        ";
 
-        $result   = array();
-        $orderIds = $wpdb->get_col($query);
+        $orderIds = $wpdb->get_col($sql);
 
-        if (empty($orderIds)) {
-            return array();
+        if (!$orderIds || empty($orderIds)) {
+            return $result;
         }
 
-        /** @var LicenseResourceModel[] $licenses */
-        $licenses = LicenseResourceRepository::instance()->findAllBy(
-            array(
-                'order_id' => $orderIds
-            )
-        );
+        foreach ($orderIds as $orderId) {
+            $order = wc_get_order($orderId);
 
-        foreach ($licenses as $license) {
-            $product = wc_get_product($license->getProductId());
-
-            if (!$product) {
-                $result[$license->getProductId()]['name'] = '#' . $license->getProductId();
-            } else {
-                $result[$license->getProductId()]['name'] = $product->get_formatted_name();
-            }
-
-            $result[$license->getProductId()]['licenses'][] = $license;
+            $result[] = array(
+                'order' => $order,
+                'orderId' => $orderId,
+                'licenses' => lmfwc_get_licenses(
+                    array(
+                        'user_id' => $userId,
+                        'order_id' => $orderId
+                    ),
+                    array(
+                        'created_at' => 'DESC'
+                    )
+                )
+            );
         }
 
         return $result;
@@ -564,7 +560,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             elseif ($type === 'user') {
                 $users = new WP_User_Query(
                     array(
-                        'search'         => '*'.esc_attr($term).'*',
+                        'search'         => '*' . esc_attr($term) . '*',
                         'search_columns' => array(
                             'user_login',
                             'user_nicename',
