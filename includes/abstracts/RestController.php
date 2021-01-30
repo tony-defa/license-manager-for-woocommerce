@@ -27,7 +27,7 @@ abstract class RestController extends WP_REST_Controller
         return new WP_REST_Response(
             array(
                 'success' => $success,
-                'data'    => apply_filters('lmfwc_rest_api_pre_response', $_SERVER['REQUEST_METHOD'], $route, $data)
+                'data'    => apply_filters('lmfwc_rest_api_pre_response', $data, $_SERVER['REQUEST_METHOD'], $route)
             ),
             $code
         );
