@@ -23,25 +23,26 @@ jQuery(function($) {
             cache: true,
             delay: 500,
             url: ajaxurl,
-            method: 'POST',
+            method: 'GET',
             dataType: 'json',
             data: function(params) {
                 return {
-                    action: 'lmfwc_dropdown_search',
-                    security: security.dropdownSearch,
-                    term: params.term,
-                    page: params.page,
-                    type: 'product'
+                    action: 'woocommerce_json_search_products_and_variations',
+                    security: security.productSearch,
+                    term: params.term
                 };
             },
-            processResults: function(data, params) {
-                params.page = params.page || 1;
+            processResults: function(data) {
+                let terms = [];
+
+                if (data) {
+                    $.each(data, function(id, text) {
+                        terms.push({ id: id, text: text });
+                    });
+                }
 
                 return {
-                    results: data.results,
-                    pagination: {
-                        more: data.pagination.more
-                    }
+                    results: terms
                 };
             }
         },
@@ -58,8 +59,8 @@ jQuery(function($) {
             dataType: 'json',
             data: function(params) {
                 return {
-                    action: 'lmfwc_dropdown_search',
-                    security: security.dropdownSearch,
+                    action: 'lmfwc_dropdown_order_search',
+                    security: security.orderSearch,
                     term: params.term,
                     page: params.page,
                     type: 'shop_order'
@@ -89,11 +90,10 @@ jQuery(function($) {
             dataType: 'json',
             data: function(params) {
                 return {
-                    action: 'lmfwc_dropdown_search',
-                    security: security.dropdownSearch,
+                    action: 'lmfwc_dropdown_user_search',
+                    security: security.userSearch,
                     term: params.term,
-                    page: params.page,
-                    type: 'user'
+                    page: params.page
                 };
             },
             processResults: function(data, params) {

@@ -16,7 +16,6 @@ use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResour
 use LicenseManagerForWooCommerce\Settings;
 use WC_Order;
 use WC_Order_Item_Product;
-use WC_Product;
 use WC_Product_Simple;
 use WC_Product_Variation;
 use WP_User;
@@ -38,7 +37,8 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
         add_filter('lmfwc_insert_generated_license_keys', array($this, 'insertGeneratedLicenseKeys'), 10, 5);
         add_filter('lmfwc_insert_imported_license_keys',  array($this, 'insertImportedLicenseKeys'),  10, 7);
         add_action('lmfwc_sell_imported_license_keys',    array($this, 'sellImportedLicenseKeys'),    10, 3);
-        add_action('wp_ajax_lmfwc_dropdown_search',       array($this, 'dropdownDataSearch'),         10);
+        add_action('wp_ajax_lmfwc_dropdown_user_search',  array($this, 'dropdownUserSearch'),         10);
+        add_action('wp_ajax_lmfwc_dropdown_order_search', array($this, 'dropdownOrderSearch'),        10);
     }
 
     /**
@@ -395,20 +395,19 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
     }
 
     /**
-     * Performs a paginated data search for orders, products, or users to be used inside a select2 dropdown
+     * Performs a paginated data search for users to be used inside a select2
+     * dropdown.
      */
-    public function dropdownDataSearch()
+    public function dropdownUserSearch()
     {
-        check_ajax_referer('lmfwc_dropdown_search', 'security');
+        check_ajax_referer('lmfwc_dropdown_user_search', 'security');
 
-        $type    = (string)wc_clean(wp_unslash($_POST['type']));
         $page    = 1;
         $limit   = 10;
         $results = array();
         $term    = isset($_POST['term']) ? (string)wc_clean(wp_unslash($_POST['term'])) : '';
         $more    = true;
         $offset  = 0;
-        $ids     = array();
 
         if (!$term) {
             wp_die();
@@ -422,162 +421,37 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
             $offset = ($page - 1) * $limit;
         }
 
-        if (is_numeric($term)) {
-            // Search for a specific order
-            if ($type === 'shop_order') {
-                /** @var WC_Order $order */
-                $order = wc_get_order((int)$term);
+        $args =array(
+            'search' => '*' . esc_attr($term) . '*',
+            'search_columns' => array(
+                'user_id',
+                'user_login',
+                'user_nicename',
+                'user_email',
+                'user_url',
+            ),
+            'number' => $limit,
+            'offset' => $offset
+        );
 
-                // Order exists.
-                if ($order && $order instanceof WC_Order) {
-                    $text = sprintf(
-                    /* translators: $1: order id, $2: customer name, $3: customer email */
-                        '#%1$s %2$s <%3$s>',
-                        $order->get_id(),
-                        $order->get_formatted_billing_full_name(),
-                        $order->get_billing_email()
-                    );
+        $users = new WP_User_Query(apply_filters('lmfwc_dropdown_user_search_args', $args));
 
-                    $results[] = array(
-                        'id' => $order->get_id(),
-                        'text' => $text
-                    );
-                }
-            }
-
-            // Search for a specific product
-            elseif ($type === 'product') {
-                /** @var WC_Product $product */
-                $product = wc_get_product((int)$term);
-
-                // Product exists.
-                if ($product) {
-                    $text = sprintf(
-                    /* translators: $1: order id, $2 customer name */
-                        '(#%1$s) %2$s',
-                        $product->get_id(),
-                        $product->get_formatted_name()
-                    );
-
-                    $results[] = array(
-                        'id' => $product->get_id(),
-                        'text' => $text
-                    );
-                }
-            }
-
-            // Search for a specific user
-            elseif ($type === 'user') {
-                $users = new WP_User_Query(
-                    array(
-                        'search'         => '*'.esc_attr($term).'*',
-                        'search_columns' => array(
-                            'user_id'
-                        ),
-                    )
-                );
-
-                /** @var WP_User $user */
-                foreach ($users->get_results() as $user) {
-                    $results[] = array(
-                        'id' => $user->ID,
-                        'text' => sprintf(
-                        /* translators: $1: user nicename, $2: user id, $3: user email */
-                            '%1$s (#%2$d - %3$s)',
-                            $user->user_nicename,
-                            $user->ID,
-                            $user->user_email
-                        )
-                    );
-                }
-            }
+        if (count($users->get_results()) < $limit) {
+            $more = false;
         }
 
-        if (empty($ids)) {
-            $args = array(
-                'type'     => $type,
-                'limit'    => $limit,
-                'offset'   => $offset,
-                'customer' => $term,
+        /** @var WP_User $user */
+        foreach ($users->get_results() as $user) {
+            $results[] = array(
+                'id' => $user->ID,
+                'text' => sprintf(
+                /* translators: $1: user nicename, $2: user id, $3: user email */
+                    '%1$s (#%2$d - %3$s)',
+                    $user->user_nicename,
+                    $user->ID,
+                    $user->user_email
+                )
             );
-
-            // Search for orders
-            if ($type === 'shop_order') {
-                /** @var WC_Order[] $orders */
-                $orders = wc_get_orders($args);
-
-                if (count($orders) < $limit) {
-                    $more = false;
-                }
-
-                foreach ($orders as $order) {
-                    $text = sprintf(
-                        /* translators: $1: order id, $2 customer name, $3 customer email */
-                        '#%1$s %2$s <%3$s>',
-                        $order->get_id(),
-                        $order->get_formatted_billing_full_name(),
-                        $order->get_billing_email()
-                    );
-
-                    $results[] = array(
-                        'id' => $order->get_id(),
-                        'text' => $text
-                    );
-                }
-            }
-
-            // Search for products
-            elseif ($type === 'product') {
-                $products = $this->searchProducts($term, $limit, $offset);
-
-                if (count($products) < $limit) {
-                    $more = false;
-                }
-
-                foreach ($products as $productId) {
-                    /** @var WC_Product $product */
-                    $product = wc_get_product($productId);
-
-                    if (!$product) {
-                        continue;
-                    }
-
-                    $text = sprintf(
-                    /* translators: $1: product id, $2 product name */
-                        '(#%1$s) %2$s',
-                        $product->get_id(),
-                        $product->get_name()
-                    );
-
-                    $results[] = array(
-                        'id' => $product->get_id(),
-                        'text' => $text
-                    );
-                }
-            }
-
-            // Search for users
-            elseif ($type === 'user') {
-                $users = new WP_User_Query(
-                    array(
-                        'search'         => '*' . esc_attr($term) . '*',
-                        'search_columns' => array(
-                            'user_login',
-                            'user_nicename',
-                            'user_email',
-                            'user_url',
-                        ),
-                    )
-                );
-
-                /** @var WP_User $user */
-                foreach ($users->get_results() as $user) {
-                    $results[] = array(
-                        'id' => $user->ID,
-                        'text' => sprintf('%s (#%d - %s)', $user->user_nicename, $user->ID, $user->user_email)
-                    );
-                }
-            }
         }
 
         wp_send_json(
@@ -592,36 +466,94 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
     }
 
     /**
-     * Searches the database for posts that match the given term.
-     *
-     * @param string $term   The search term
-     * @param int    $limit  Maximum number of search results
-     * @param int    $offset Search offset
-     *
-     * @return array
+     * Performs a paginated data search for orders to be used inside a select2
+     * dropdown.
      */
-    private function searchProducts($term, $limit, $offset)
+    public function dropdownOrderSearch()
     {
-        global $wpdb;
+        check_ajax_referer('lmfwc_dropdown_order_search', 'security');
 
-        $sql ="
-            SELECT
-                DISTINCT (posts.ID)
-            FROM
-                $wpdb->posts as posts
-            INNER JOIN
-                $wpdb->postmeta as meta
-                    ON 1=1
-                    AND posts.ID = meta.post_id
-            WHERE
-                1=1
-                AND posts.post_title LIKE '%$term%'
-                AND (posts.post_type = 'product' OR posts.post_type = 'product_variation')
-            ORDER BY posts.ID DESC
-            LIMIT $limit
-            OFFSET $offset
-        ";
+        $page    = 1;
+        $limit   = 10;
+        $results = array();
+        $term    = isset($_POST['term']) ? (string)wc_clean(wp_unslash($_POST['term'])) : '';
+        $more    = true;
+        $offset  = 0;
+        $ids     = array();
 
-        return $wpdb->get_col($sql);
+        if (!$term) {
+            wp_die();
+        }
+
+        if (isset($_POST['page'])) {
+            $page = (int)$_POST['page'];
+        }
+
+        if ($page > 1) {
+            $offset = ($page - 1) * $limit;
+        }
+
+        if (is_numeric($term)) {
+            /** @var WC_Order $order */
+            $order = wc_get_order((int)$term);
+
+            // Order exists.
+            if ($order && $order instanceof WC_Order) {
+                $text = sprintf(
+                /* translators: $1: order id, $2: customer name, $3: customer email */
+                    '#%1$s %2$s <%3$s>',
+                    $order->get_id(),
+                    $order->get_formatted_billing_full_name(),
+                    $order->get_billing_email()
+                );
+
+                $results[] = array(
+                    'id' => $order->get_id(),
+                    'text' => $text
+                );
+            }
+        }
+
+        if (empty($ids)) {
+            $args = array(
+                'limit' => $limit,
+                'offset' => $offset,
+                'customer' => $term,
+                'orderby' => 'date',
+                'order' => 'DESC'
+            );
+
+            /** @var WC_Order[] $orders */
+            $orders = wc_get_orders(apply_filters('lmfwc_dropdown_order_search_args', $args));
+
+            if (count($orders) < $limit) {
+                $more = false;
+            }
+
+            foreach ($orders as $order) {
+                $text = sprintf(
+                /* translators: $1: order id, $2 customer name, $3 customer email */
+                    '#%1$s %2$s <%3$s>',
+                    $order->get_id(),
+                    $order->get_formatted_billing_full_name(),
+                    $order->get_billing_email()
+                );
+
+                $results[] = array(
+                    'id' => $order->get_id(),
+                    'text' => $text
+                );
+            }
+        }
+
+        wp_send_json(
+            array(
+                'page' => $page,
+                'results' => $results,
+                'pagination' => array(
+                    'more' => $more
+                )
+            )
+        );
     }
 }

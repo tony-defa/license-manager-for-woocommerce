@@ -154,7 +154,9 @@ final class Main extends Singleton
                 'lmfwc_licenses_page_js',
                 'security',
                 array(
-                    'dropdownSearch' => wp_create_nonce('lmfwc_dropdown_search')
+                    'userSearch' => wp_create_nonce('lmfwc_dropdown_user_search'),
+                    'orderSearch' => wp_create_nonce('lmfwc_dropdown_order_search'),
+                    'productSearch' => wp_create_nonce('search-products')
                 )
             );
         }
@@ -176,7 +178,8 @@ final class Main extends Singleton
                 'lmfwc_generators_page_js',
                 'security',
                 array(
-                    'dropdownSearch' => wp_create_nonce('lmfwc_dropdown_search')
+                    'orderSearch' => wp_create_nonce('lmfwc_dropdown_order_search'),
+                    'productSearch' => wp_create_nonce('search-products')
                 )
             );
         }
