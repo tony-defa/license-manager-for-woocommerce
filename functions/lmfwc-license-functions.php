@@ -97,7 +97,7 @@ function lmfwc_add_license($licenseKey, $licenseData = array())
 
     // Update the stock
     if ($license->getProductId() !== null && $license->getStatus() === LicenseStatusEnum::ACTIVE) {
-        apply_filters('lmfwc_stock_increase', $license->getProductId());
+        lmfwc_stock_increase($license->getProductId());
     }
 
     return $license;
@@ -260,7 +260,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
 
     // Update the stock
     if ($oldLicense->getProductId() !== null && $oldLicense->getStatus() === LicenseStatusEnum::ACTIVE) {
-        apply_filters('lmfwc_stock_decrease', $oldLicense->getProductId());
+        lmfwc_stock_decrease($oldLicense->getProductId());
     }
 
     /** @var LicenseResourceModel $license */
@@ -294,7 +294,7 @@ function lmfwc_update_license($licenseKey, $licenseData)
 
     // Update the stock
     if ($newLicense->getProductId() !== null && $newLicense->getStatus() === LicenseStatusEnum::ACTIVE) {
-        apply_filters('lmfwc_stock_increase', $newLicense->getProductId());
+        lmfwc_stock_increase($newLicense->getProductId());
     }
 
     return $newLicense;
@@ -320,7 +320,7 @@ function lmfwc_delete_license($licenseKey)
         && $oldLicense->getProductId() !== null
         && $oldLicense->getStatus() === LicenseStatusEnum::ACTIVE
     ) {
-        apply_filters('lmfwc_stock_decrease', $oldLicense->getProductId());
+        lmfwc_stock_decrease($oldLicense->getProductId());
     }
 
     /** @var LicenseResourceModel $license */

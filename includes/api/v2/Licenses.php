@@ -426,7 +426,7 @@ class Licenses extends LMFWC_REST_Controller
 
         // Update the stock
         if ($license->getProductId() !== null && $license->getStatus() === LicenseStatus::ACTIVE) {
-            apply_filters('lmfwc_stock_increase', $license->getProductId());
+            lmfwc_stock_increase($license->getProductId());
         }
 
         $licenseData = $license->toArray();
@@ -550,7 +550,7 @@ class Licenses extends LMFWC_REST_Controller
 
         // Update the stock
         if ($license->getProductId() !== null && $license->getStatus() === LicenseStatus::ACTIVE) {
-            apply_filters('lmfwc_stock_decrease', $license->getProductId());
+            lmfwc_stock_decrease($license->getProductId());
         }
 
         /** @var LicenseResourceModel $updatedLicense */
@@ -566,7 +566,7 @@ class Licenses extends LMFWC_REST_Controller
 
         // Update the stock
         if ($updatedLicense->getProductId() !== null && $updatedLicense->getStatus() === LicenseStatus::ACTIVE) {
-            apply_filters('lmfwc_stock_increase', $updatedLicense->getProductId());
+            lmfwc_stock_increase($updatedLicense->getProductId());
         }
 
         $licenseData = $updatedLicense->toArray();

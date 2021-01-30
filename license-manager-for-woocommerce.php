@@ -22,6 +22,7 @@ require_once __DIR__ . '/functions/lmfwc-core-functions.php';
 require_once __DIR__ . '/functions/lmfwc-generator-functions.php';
 require_once __DIR__ . '/functions/lmfwc-license-functions.php';
 require_once __DIR__ . '/functions/lmfwc-meta-functions.php';
+require_once __DIR__ . '/functions/lmfwc-stock-functions.php';
 
 // Define LMFWC_PLUGIN_FILE.
 if (!defined('LMFWC_PLUGIN_FILE')) {

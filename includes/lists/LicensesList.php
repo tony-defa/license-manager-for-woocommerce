@@ -1146,13 +1146,13 @@ class LicensesList extends WP_List_Table
                 // License was active, but no longer is
                 if ($license->getStatus() === LicenseStatus::ACTIVE && $status !== LicenseStatus::ACTIVE) {
                     // Update the stock
-                    apply_filters('lmfwc_stock_decrease', $license->getProductId());
+                    lmfwc_stock_decrease($license->getProductId());
                 }
 
                 // License was not active, but is now
                 if ($license->getStatus() !== LicenseStatus::ACTIVE && $status === LicenseStatus::ACTIVE) {
                     // Update the stock
-                    apply_filters('lmfwc_stock_increase', $license->getProductId());
+                    lmfwc_stock_increase($license->getProductId());
                 }
             }
 
@@ -1191,7 +1191,7 @@ class LicensesList extends WP_List_Table
             if ($result) {
                 // Update the stock
                 if ($license->getProductId() !== null && $license->getStatus() === LicenseStatus::ACTIVE) {
-                    apply_filters('lmfwc_stock_decrease', $license->getProductId());
+                    lmfwc_stock_decrease($license->getProductId());
                 }
 
                 $count += $result;
