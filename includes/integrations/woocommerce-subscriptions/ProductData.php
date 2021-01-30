@@ -135,32 +135,40 @@ class ProductData
         }
 
         // Update the subscription renewal action
-        update_post_meta(
-            $postId,
-            'lmfwc_subscription_renewal_action',
-            sanitize_text_field($_POST['lmfwc_subscription_renewal_action'])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_action'])) {
+            update_post_meta(
+                $postId,
+                'lmfwc_subscription_renewal_action',
+                sanitize_text_field($_POST['lmfwc_subscription_renewal_action'])
+            );
+        }
 
         // Update the subscription renewal interval type
-        update_post_meta(
-            $postId,
-            'lmfwc_subscription_renewal_interval_type',
-            sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_interval_type'])) {
+            update_post_meta(
+                $postId,
+                'lmfwc_subscription_renewal_interval_type',
+                sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'])
+            );
+        }
 
         // Update the subscription renewal custom interval
-        update_post_meta(
-            $postId,
-            'lmfwc_subscription_renewal_custom_interval',
-            intval($_POST['lmfwc_subscription_renewal_custom_interval'])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_custom_interval'])) {
+            update_post_meta(
+                $postId,
+                'lmfwc_subscription_renewal_custom_interval',
+                intval($_POST['lmfwc_subscription_renewal_custom_interval'])
+            );
+        }
 
         // Update the subscription renewal custom period
-        update_post_meta(
-            $postId,
-            'lmfwc_subscription_renewal_custom_period',
-            sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_custom_period'])) {
+            update_post_meta(
+                $postId,
+                'lmfwc_subscription_renewal_custom_period',
+                sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'])
+            );
+        }
     }
 
     /**
@@ -284,31 +292,39 @@ class ProductData
     public function variableProductSave($variationId, $i)
     {
         // Update the subscription renewal action
-        update_post_meta(
-            $variationId,
-            'lmfwc_subscription_renewal_action',
-            sanitize_text_field($_POST['lmfwc_subscription_renewal_action'][$i])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_action'][$i])) {
+            update_post_meta(
+                $variationId,
+                'lmfwc_subscription_renewal_action',
+                sanitize_text_field($_POST['lmfwc_subscription_renewal_action'][$i])
+            );
+        }
 
         // Update the subscription renewal interval type
-        update_post_meta(
-            $variationId,
-            'lmfwc_subscription_renewal_interval_type',
-            sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'][$i])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_interval_type'][$i])) {
+            update_post_meta(
+                $variationId,
+                'lmfwc_subscription_renewal_interval_type',
+                sanitize_text_field($_POST['lmfwc_subscription_renewal_interval_type'][$i])
+            );
+        }
 
         // Update the subscription renewal custom interval
-        update_post_meta(
-            $variationId,
-            'lmfwc_subscription_renewal_custom_interval',
-            intval($_POST['lmfwc_subscription_renewal_custom_interval'][$i])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_custom_interval'][$i])) {
+            update_post_meta(
+                $variationId,
+                'lmfwc_subscription_renewal_custom_interval',
+                intval($_POST['lmfwc_subscription_renewal_custom_interval'][$i])
+            );
+        }
 
         // Update the subscription renewal custom period
-        update_post_meta(
-            $variationId,
-            'lmfwc_subscription_renewal_custom_period',
-            sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'][$i])
-        );
+        if (isset($_POST['lmfwc_subscription_renewal_custom_period'][$i])) {
+            update_post_meta(
+                $variationId,
+                'lmfwc_subscription_renewal_custom_period',
+                sanitize_text_field($_POST['lmfwc_subscription_renewal_custom_period'][$i])
+            );
+        }
     }
 }
