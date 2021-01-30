@@ -48,7 +48,9 @@ defined('ABSPATH') || exit; ?>
             <th class="license-key"><?php _e('Product', 'license-manager-for-woocommerce'); ?></th>
             <th class="activation"><?php _e('Activation status', 'license-manager-for-woocommerce'); ?></th>
             <th class="valid-until"><?php _e('Valid until', 'license-manager-for-woocommerce'); ?></th>
-            <th class="actions"></th>
+            <?php if ($canActivate || $canDeactivate): ?>
+                <th class="actions"></th>
+            <?php endif; ?>
         </tr>
         </thead>
 
@@ -90,33 +92,35 @@ defined('ABSPATH') || exit; ?>
                     }
                     ?>
                 </td>
-                <td class="lmfwc-myaccount-actions">
-                    <?php if ($canActivate): ?>
-                        <form method="post">
-                            <input type="hidden"
-                                   name="license"
-                                   value="<?php echo esc_attr($license->getDecryptedLicenseKey());?>"/>
-                            <input type="hidden" name="action" value="activate">
-                            <?php wp_nonce_field('lmfwc_myaccount_activate_license'); ?>
-                            <button class="button" type="submit">
-                                <?php _e('Activate', 'license-manager-for-woocommerce');?>
-                            </button>
-                        </form>
-                    <?php endif; ?>
+                <?php if ($canActivate || $canDeactivate): ?>
+                    <td class="lmfwc-myaccount-actions">
+                        <?php if ($canActivate): ?>
+                            <form method="post">
+                                <input type="hidden"
+                                       name="license"
+                                       value="<?php echo esc_attr($license->getDecryptedLicenseKey());?>"/>
+                                <input type="hidden" name="action" value="activate">
+                                <?php wp_nonce_field('lmfwc_myaccount_activate_license'); ?>
+                                <button class="button" type="submit">
+                                    <?php _e('Activate', 'license-manager-for-woocommerce');?>
+                                </button>
+                            </form>
+                        <?php endif; ?>
 
-                    <?php if ($canDeactivate): ?>
-                        <form method="post">
-                            <input type="hidden"
-                                   name="license"
-                                   value="<?php echo esc_attr($license->getDecryptedLicenseKey());?>"/>
-                            <input type="hidden" name="action" value="deactivate">
-                            <?php wp_nonce_field('lmfwc_myaccount_deactivate_license'); ?>
-                            <button class="button" type="submit">
-                                <?php _e('Deactivate', 'license-manager-for-woocommerce');?>
-                            </button>
-                        </form>
-                    <?php endif; ?>
-                </td>
+                        <?php if ($canDeactivate): ?>
+                            <form method="post">
+                                <input type="hidden"
+                                       name="license"
+                                       value="<?php echo esc_attr($license->getDecryptedLicenseKey());?>"/>
+                                <input type="hidden" name="action" value="deactivate">
+                                <?php wp_nonce_field('lmfwc_myaccount_deactivate_license'); ?>
+                                <button class="button" type="submit">
+                                    <?php _e('Deactivate', 'license-manager-for-woocommerce');?>
+                                </button>
+                            </form>
+                        <?php endif; ?>
+                    </td>
+                <?php endif; ?>
             </tr>
         <?php endforeach; ?>
 

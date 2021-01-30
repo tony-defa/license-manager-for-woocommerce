@@ -288,3 +288,30 @@ function lmfwc_get_subscription_renewal_custom_period($productId) {
 
     return 'day';
 }
+
+/**
+ * Inserts a new key/value after the key in the array.
+ *
+ * @param string $needle
+ * @param array  $haystack
+ * @param string $newKey
+ * @param string $newValue
+ * @return array
+ */
+function lmfwc_array_insert_after($needle, $haystack, $newKey, $newValue) {
+    if (array_key_exists($needle, $haystack)) {
+        $newArray = array();
+
+        foreach ($haystack as $key => $value) {
+            $newArray[$key] = $value;
+
+            if ($key === $needle) {
+                $newArray[$newKey] = $newValue;
+            }
+        }
+
+        return $newArray;
+    }
+
+    return $haystack;
+}
