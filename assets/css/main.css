@@ -211,7 +211,7 @@ table.wp-list-table.lizenzschlssel span.lmfwc-date {
 }
 
 /** My Account **/
-.lmfwc-myaccount-license-key {
+.lmfwc-myaccount-license-key span {
 	font-family: Consolas, monospace;
 	font-size: 13px;
 	white-space: nowrap;

@@ -112,11 +112,11 @@ class MyAccount
         echo wc_get_template_html(
             'myaccount/lmfwc-licenses.php',
             array(
-                'dateFormat'       => get_option('date_format'),
-                'customerLicenses' => apply_filters('lmfwc_get_all_customer_license_keys', $user->ID),
-                'page'             => (int)$page,
-                'canActivate'      => Settings::get('lmfwc_allow_users_to_activate'),
-                'canDeactivate'    => Settings::get('lmfwc_allow_users_to_deactivate'),
+                'date_format'       => get_option('date_format'),
+                'customer_licenses' => apply_filters('lmfwc_get_all_customer_license_keys', $user->ID),
+                'page'              => (int)$page,
+                'can_activate'      => Settings::get('lmfwc_allow_users_to_activate'),
+                'can_deactivate'    => Settings::get('lmfwc_allow_users_to_deactivate'),
             ),
             '',
             LMFWC_TEMPLATES_DIR
