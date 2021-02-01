@@ -15,7 +15,7 @@ class Setup
     /**
      * @var int
      */
-    const DB_VERSION = 109;
+    const DB_VERSION = 110;
 
     /**
      * @var string
@@ -37,7 +37,7 @@ class Setup
      */
     const LICENSE_META_TABLE_NAME = 'lmfwc_licenses_meta';
   
-     * Installation script.
+    /** Installation script.
      *
      * @throws EnvironmentIsBrokenException
      * @throws Exception
