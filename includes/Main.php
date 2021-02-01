@@ -154,7 +154,9 @@ final class Main extends Singleton
                 'lmfwc_licenses_page_js',
                 'security',
                 array(
-                    'dropdownSearch' => wp_create_nonce('lmfwc_dropdown_search')
+                    'userSearch' => wp_create_nonce('lmfwc_dropdown_user_search'),
+                    'orderSearch' => wp_create_nonce('lmfwc_dropdown_order_search'),
+                    'productSearch' => wp_create_nonce('search-products')
                 )
             );
         }
@@ -176,7 +178,8 @@ final class Main extends Singleton
                 'lmfwc_generators_page_js',
                 'security',
                 array(
-                    'dropdownSearch' => wp_create_nonce('lmfwc_dropdown_search')
+                    'orderSearch' => wp_create_nonce('lmfwc_dropdown_order_search'),
+                    'productSearch' => wp_create_nonce('search-products')
                 )
             );
         }
@@ -275,8 +278,6 @@ final class Main extends Singleton
     {
         Setup::migrate();
 
-        $this->publicHooks();
-
         new Crypto();
         new Import();
         new Export();
@@ -301,44 +302,6 @@ final class Main extends Singleton
         if (Settings::get('lmfwc_allow_duplicates')) {
             add_filter('lmfwc_duplicate', '__return_false', PHP_INT_MAX);
         }
-    }
-
-    /**
-     * Defines all public hooks
-     *
-     * @return void
-     */
-    protected function publicHooks()
-    {
-        add_filter(
-            'lmfwc_license_keys_table_heading',
-            function($text) {
-                $default = __('Your license key(s)', 'license-manager-for-woocommerce');
-
-                if (!$text) {
-                    return $default;
-                }
-
-                return sanitize_text_field($text);
-            },
-            10,
-            1
-        );
-
-        add_filter(
-            'lmfwc_license_keys_table_valid_until',
-            function($text) {
-                $default = __('Valid until', 'license-manager-for-woocommerce');
-
-                if (!$text) {
-                    return $default;
-                }
-
-                return sanitize_text_field($text);
-            },
-            10,
-            1
-        );
     }
 
     /**

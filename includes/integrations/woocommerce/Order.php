@@ -284,13 +284,11 @@ class Order
         }
 
         echo wc_get_template_html(
-            'myaccount/lmfwc-license-keys.php',
+            'myaccount/lmfwc-order-licenses.php',
             array(
-                'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
-                'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                'data'          => $customerLicenseKeys['data'],
-                'date_format'   => get_option('date_format'),
-                'args'          => apply_filters('lmfwc_template_args_myaccount_license_keys', array())
+                'order'       => $order,
+                'data'        => $customerLicenseKeys['data'],
+                'date_format' => get_option('date_format')
             ),
             '',
             LMFWC_TEMPLATES_DIR

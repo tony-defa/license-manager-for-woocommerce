@@ -13,6 +13,11 @@ defined('ABSPATH') || exit;
 class Setup
 {
     /**
+     * @var int
+     */
+    const DB_VERSION = 109;
+
+    /**
      * @var string
      */
     const LICENSES_TABLE_NAME = 'lmfwc_licenses';
@@ -31,13 +36,7 @@ class Setup
      * @var string
      */
     const LICENSE_META_TABLE_NAME = 'lmfwc_licenses_meta';
-
-    /**
-     * @var int
-     */
-    const DB_VERSION = 109;
-
-    /**
+  
      * Installation script.
      *
      * @throws EnvironmentIsBrokenException
@@ -50,8 +49,6 @@ class Setup
         self::setDefaultFilesAndFolders();
         self::setDefaultSettings();
         self::createRoles();
-
-        flush_rewrite_rules();
     }
 
     /**
@@ -82,9 +79,11 @@ class Setup
 
         self::removeRoles();
 
-        delete_option('lmfwc_settings_general');
-        delete_option('lmfwc_settings_order_status');
-        delete_option('lmfwc_settings_tools');
+        foreach (self::getDefaultSettings() as $group => $setting) {
+            delete_option($group);
+        }
+
+        // After cleanup remove version reference
         delete_option('lmfwc_db_version');
     }
 
@@ -311,70 +310,81 @@ class Setup
      */
     public static function setDefaultSettings()
     {
-        $defaultSettingsGeneral = array(
-            'lmfwc_hide_license_keys' => 0,
-            'lmfwc_auto_delivery' => 1,
-            'lmfwc_product_downloads' => 1,
-            'lmfwc_download_expires' => 1,
-            'lmfwc_disable_api_ssl' => 0,
-            'lmfwc_enabled_api_routes' => array(
-                '000' => '1',
-                '001' => '1',
-                '002' => '1',
-                '003' => '1',
-                '004' => '1',
-                '005' => '1',
-                '006' => '1',
-                '007' => '1',
-                '008' => '1',
-                '009' => '1',
-                '010' => '1',
-                '011' => '1',
-                '012' => '1',
-                '013' => '1',
-                '014' => '1',
-                '015' => '1',
-                '016' => '1',
-                '017' => '1',
-                '018' => '1',
-                '019' => '1',
-                '020' => '1',
-                '021' => '1',
-                '022' => '1',
-                '023' => '1'
-            )
-        );
-        $defaultSettingsOrderStatus = array(
-            'lmfwc_license_key_delivery_options' => array(
-                'wc-completed' => array(
-                    'send' => '1'
-                )
-            )
-        );
-        $defaultSettingsTools = array(
-            'lmfwc_csv_export_columns' => array(
-                'id'                  => '1',
-                'order_id'            => '1',
-                'product_id'          => '1',
-                'user_id'             => '1',
-                'license_key'         => '1',
-                'expires_at'          => '1',
-                'valid_for'           => '1',
-                'status'              => '1',
-                'times_activated'     => '1',
-                'times_activated_max' => '1',
-                'created_at'          => '1',
-                'created_by'          => '1',
-                'updated_at'          => '1',
-                'updated_by'          => '1',
-            )
-        );
+        // Only update user settings if they don't exist already
+        foreach (self::getDefaultSettings() as $group => $setting) {
+            if (!get_option($group, false)) {
+                update_option($group, $setting);
+            }
+        }
 
-        // The defaults for the Setting API.
-        update_option('lmfwc_settings_general', $defaultSettingsGeneral);
-        update_option('lmfwc_settings_order_status', $defaultSettingsOrderStatus);
-        update_option('lmfwc_settings_tools', $defaultSettingsTools);
+        // Database version is always updated
         update_option('lmfwc_db_version', self::DB_VERSION);
+    }
+
+    /**
+     * Returns an associative array of the default plugin settings. The key
+     * represents the setting group, and the value the individual settings
+     * fields with their corresponding values.
+     *
+     * @return array
+     */
+    public static function getDefaultSettings()
+    {
+        return array(
+            'lmfwc_settings_general' => array(
+                'lmfwc_hide_license_keys'         => '1',
+                'lmfwc_auto_delivery'             => '1',
+                'lmfwc_product_downloads'         => '1',
+                'lmfwc_download_expires'          => '1',
+                'lmfwc_allow_duplicates'          => '0',
+                'lmfwc_enable_stock_manager'      => '0',
+                'lmfwc_allow_users_to_activate'   => '0',
+                'lmfwc_allow_users_to_deactivate' => '0',
+                'lmfwc_disable_api_ssl'           => '0',
+                'lmfwc_enabled_api_routes'        => array(
+                    '010' => '1',
+                    '011' => '1',
+                    '012' => '1',
+                    '013' => '1',
+                    '014' => '1',
+                    '015' => '1',
+                    '016' => '1',
+                    '017' => '1',
+                    '018' => '1',
+                    '019' => '1',
+                    '020' => '1',
+                    '021' => '1',
+                    '022' => '1',
+                    '023' => '1'
+                )
+            ),
+            'lmfwc_settings_order_status' => array(
+                'lmfwc_license_key_delivery_options' => array(
+                    'wc-completed' => array(
+                        'send' => '1'
+                    )
+                )
+            ),
+            'lmfwc_settings_tools' => array(
+                'lmfwc_csv_export_columns' => array(
+                    'id'                  => '1',
+                    'order_id'            => '1',
+                    'product_id'          => '1',
+                    'user_id'             => '1',
+                    'license_key'         => '1',
+                    'expires_at'          => '1',
+                    'valid_for'           => '1',
+                    'status'              => '1',
+                    'times_activated'     => '1',
+                    'times_activated_max' => '1',
+                    'created_at'          => '1',
+                    'created_by'          => '1',
+                    'updated_at'          => '1',
+                    'updated_by'          => '1',
+                )
+            ),
+            'woocommerce_myaccount_licenses_endpoint' => 'licenses'
+        );
     }
 
     /**

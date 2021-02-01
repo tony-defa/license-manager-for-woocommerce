@@ -31,6 +31,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
      */
     public function bootstrap()
     {
+        new API\v2\Licenses();
         new Lists\LicensesList();
         new Order();
         new ProductData();
