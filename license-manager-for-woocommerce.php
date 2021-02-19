@@ -10,7 +10,7 @@
  * Tested up to: 5.5
  * Requires PHP: 5.6
  * WC requires at least: 2.7
- * WC tested up to: 4.5
+ * WC tested up to: 5.0
  */
 
 namespace LicenseManagerForWooCommerce;
