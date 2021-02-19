@@ -43,6 +43,15 @@ $color-grey-1:    #E1E1E1;
 }
 
 #lmfwc-license-table {
+  .tablenav {
+    #filter-by-order-id + .select2-container,
+    #filter-by-user-id + .select2-container,
+    #filter-by-product-id + .select2-container {
+      width: auto !important;
+      max-width: 10rem;
+    }
+  }
+
   .wp-list-table {
 
     td.column-status {

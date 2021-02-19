@@ -26,6 +26,12 @@
 #lmfwc-generators-table .wp-list-table {
   table-layout: auto !important; }
 
+#lmfwc-license-table .tablenav #filter-by-order-id + .select2-container,
+#lmfwc-license-table .tablenav #filter-by-user-id + .select2-container,
+#lmfwc-license-table .tablenav #filter-by-product-id + .select2-container {
+  width: auto !important;
+  max-width: 10rem; }
+
 #lmfwc-license-table .wp-list-table td.column-status {
   vertical-align: middle;
   text-align: left; }
