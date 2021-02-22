@@ -571,19 +571,19 @@ class General
             ),
             array(
                 'id'         => '021',
-                'name'       => 'v2/generators/{id}/generate',
+                'name'       => 'v2/generators/<b>{id}</b>/generate',
                 'method'     => 'POST',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '022',
-                'name'       => 'v2/products/update/{license_key}',
+                'name'       => 'v2/products/update/<b>{license_key}</b>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
             array(
                 'id'         => '023',
-                'name'       => 'v2/products/download/latest/{license_key}',
+                'name'       => 'v2/products/download/latest/<b>{license_key}</b>',
                 'method'     => 'GET',
                 'deprecated' => false,
             ),
