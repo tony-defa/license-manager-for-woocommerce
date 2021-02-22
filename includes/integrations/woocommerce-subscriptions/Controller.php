@@ -31,10 +31,12 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
      */
     public function bootstrap()
     {
+        new API\v2\Licenses();
         new Lists\LicensesList();
         new Order();
         new ProductData();
         new PricePerActivation();
+        new Suspend();
     }
 
     /**
@@ -47,8 +49,6 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
      */
     public function getCustomerLicenseKeys($args)
     {
-        error_log('LMFWC: getCustomerLicenseKeys FROM WooCommerce Subscriptions');
-
         /** @var WC_Order $order */
         $order = $args['order'];
         $data  = array();
@@ -75,8 +75,6 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
 
                 if ($parentOrder) {
                     $orderId = $parentOrder->get_id();
-                } else {
-                    error_log("LMFWC: Email: Skipped Order #{$orderId} because parent order could not be found.");
                 }
             }
 

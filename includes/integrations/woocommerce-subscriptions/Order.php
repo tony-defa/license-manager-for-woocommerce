@@ -35,13 +35,11 @@ class Order
     {
         // Return if this is not a renewal order
         if (!wcs_order_contains_renewal($orderId)) {
-            error_log("LMFWC: Skipped Order #{$orderId} because it does not contain a renewal.");
             return false;
         }
 
         // Return if the product hasn't been configured to extend subscriptions
         if (lmfwc_get_subscription_renewal_action($productId) !== 'extend_existing_license') {
-            error_log("LMFWC: Skipped Order #{$orderId} because product #{$productId} should not be extended.");
             return false;
         }
 
@@ -49,27 +47,19 @@ class Order
         $subscriptions = wcs_get_subscriptions_for_renewal_order($orderId);
 
         if (!$subscriptions) {
-            error_log("LMFWC: Skipped Order #{$orderId} because parent order could not be found.");
             return false;
         }
-
-        $subscriptionCount = count($subscriptions);
-        error_log("LMFWC: Number of Subscriptions: {$subscriptionCount}");
 
         foreach ($subscriptions as $subscription) {
             $parentOrderArray = $subscription->get_related_orders('ids', 'parent');
 
             if (!$parentOrderArray || count($parentOrderArray) !== 1) {
-                error_log("LMFWC: Skipped because the parent order could not be found. ");
                 return false;
             }
 
-            $parentOrderId = intval(reset($parentOrderArray));
-
-            error_log("LMFWC: Parent Order ID: #{$parentOrderId}");
+            $parentOrderId = (int)reset($parentOrderArray);
 
             if (!$parentOrderId) {
-                error_log("LMFWC: Skipped because the parent order ID could not be retrieved.");
                 return false;
             }
 
@@ -77,13 +67,12 @@ class Order
             $parentOrder = wc_get_order($parentOrderId);
 
             if (!$parentOrder) {
-                error_log("LMFWC: Skipped because the parent order could not be retrieved.");
                 return false;
             }
 
             // Extend the license either by the subscription, or user-defined customer interval/period.
             if (lmfwc_get_subscription_renewal_interval_type($productId) === 'subscription') {
-                $subscriptionInterval = intval(WC_Subscriptions_Product::get_interval($productId));
+                $subscriptionInterval = (int)WC_Subscriptions_Product::get_interval($productId);
                 $subscriptionPeriod   = WC_Subscriptions_Product::get_period($productId);
             } else {
                 $subscriptionInterval = lmfwc_get_subscription_renewal_custom_interval($productId);
@@ -99,12 +88,8 @@ class Order
             );
 
             if (!$licenses) {
-                error_log("LMFWC: Skipped parent Order #{$parentOrderId} because no licenses were found.");
                 return false;
             }
-
-            $licenseCount = count($licenses);
-            error_log("LMFWC: License count is: {$licenseCount}");
 
             /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
@@ -122,14 +107,7 @@ class Order
                     $modifyString .= 's';
                 }
 
-                $licenseExpiresAt = $license->getExpiresAt();
                 $dateNewExpiresAt->modify($modifyString);
-
-                error_log("LMFWC: Interval: {$subscriptionInterval}");
-                error_log("LMFWC: Period: {$subscriptionPeriod}");
-                error_log("LMFWC: Modify String: {$modifyString}");
-                error_log("LMFWC: ExpiresAt OLD - {$licenseExpiresAt}");
-                error_log("LMFWC: ExpiresAt NEW - {$dateNewExpiresAt->format('Y-m-d H:i:s')}");
 
                 $arr = array (
                     'expires_at' => $dateNewExpiresAt->format('Y-m-d H:i:s')
@@ -138,16 +116,11 @@ class Order
                 if (lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal') {
                     $oldTimesActivated = $license->getTimesActivated();
                     $newTimesActivated = 0;
-                    $oldTimesActivatedOverall = intval($license->getTimesActivatedOverall());
+                    $oldTimesActivatedOverall = (int)$license->getTimesActivatedOverall();
                     $newTimesActivatedOverall = $oldTimesActivatedOverall + $oldTimesActivated;
 
-                    error_log("LMFWC: TimesActivated OLD - {$oldTimesActivated}");
-                    error_log("LMFWC: TimesActivated NEW - {$newTimesActivated}");
-                    error_log("LMFWC: TimesActivatedOverall OLD - {$oldTimesActivatedOverall}");
-                    error_log("LMFWC: TimesActivatedOverall NEW - {$newTimesActivatedOverall}");
-
-                    $arr['times_activated'] = intval($newTimesActivated);
-                    $arr['times_activated_overall'] = intval($newTimesActivatedOverall);
+                    $arr['times_activated'] = (int)$newTimesActivated;
+                    $arr['times_activated_overall'] = (int)$newTimesActivatedOverall;
                 }
 
                 try {
@@ -160,8 +133,6 @@ class Order
                 }
             }
         }
-
-        error_log("LMFWC: Success, returning TRUE");
 
         return true;
     }

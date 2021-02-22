@@ -106,23 +106,23 @@ class License extends AbstractResourceModel implements ModelInterface
             return;
         }
 
-        $this->id                       = $license->id                      === null ? null : intval($license->id);
-        $this->orderId                  = $license->order_id                === null ? null : intval($license->order_id);
-        $this->productId                = $license->product_id              === null ? null : intval($license->product_id);
-        $this->userId                   = $license->user_id                 === null ? null : intval($license->user_id);
-        $this->licenseKey               = $license->license_key;
-        $this->hash                     = $license->hash;
-        $this->expiresAt                = $license->expires_at;
-        $this->validFor                 = $license->valid_for               === null ? null : intval($license->valid_for);
-        $this->source                   = $license->source                  === null ? null : intval($license->source);
-        $this->status                   = $license->status                  === null ? null : intval($license->status);
-        $this->timesActivated           = $license->times_activated         === null ? null : intval($license->times_activated);
-        $this->timesActivatedMax        = $license->times_activated_max     === null ? null : intval($license->times_activated_max);
-        $this->timesActivatedOverall    = $license->times_activated_overall === null ? null : intval($license->times_activated_overall);
-        $this->createdAt                = $license->created_at;
-        $this->createdBy                = $license->created_by              === null ? null : intval($license->created_by);
-        $this->updatedAt                = $license->updated_at;
-        $this->updatedBy                = $license->updated_by              === null ? null : intval($license->updated_by);
+        $this->id                     = $license->id                      === null ? null : (int)$license->id;
+        $this->orderId                = $license->order_id                === null ? null : (int)$license->order_id;
+        $this->productId              = $license->product_id              === null ? null : (int)$license->product_id;
+        $this->userId                 = $license->user_id                 === null ? null : (int)$license->user_id;
+        $this->licenseKey             = $license->license_key;
+        $this->hash                   = $license->hash;
+        $this->expiresAt              = $license->expires_at;
+        $this->validFor               = $license->valid_for               === null ? null : (int)$license->valid_for;
+        $this->source                 = $license->source                  === null ? null : (int)$license->source;
+        $this->status                 = $license->status                  === null ? null : (int)$license->status;
+        $this->timesActivated         = $license->times_activated         === null ? null : (int)$license->times_activated;
+        $this->timesActivatedMax      = $license->times_activated_max     === null ? null : (int)$license->times_activated_max;
+        $this->timesActivatedOverall  = $license->times_activated_overall === null ? null : (int)$license->times_activated_overall;
+        $this->createdAt              = $license->created_at;
+        $this->createdBy              = $license->created_by              === null ? null : (int)$license->created_by;
+        $this->updatedAt              = $license->updated_at;
+        $this->updatedBy              = $license->updated_by              === null ? null : (int)$license->updated_by;
     }
 
     /**

@@ -94,10 +94,7 @@ class Order
             $abortEarly = apply_filters('lmfwc_maybe_skip_subscription_renewals', $orderId, $product->get_id());
 
             if ($abortEarly === true) {
-                error_log("LMFWC: (Order #{$orderId}, Product #{$product->get_id()}) Abort early is TRUE");
                 continue;
-            } else {
-                error_log("LMFWC: (Order #{$orderId}, Product #{$product->get_id()}) Abort early is FALSE");
             }
 
             $useStock = get_post_meta($product->get_id(), 'lmfwc_licensed_product_use_stock', true);
@@ -287,13 +284,11 @@ class Order
         }
 
         echo wc_get_template_html(
-            'myaccount/lmfwc-license-keys.php',
+            'myaccount/lmfwc-order-licenses.php',
             array(
-                'heading'       => apply_filters('lmfwc_license_keys_table_heading', null),
-                'valid_until'   => apply_filters('lmfwc_license_keys_table_valid_until', null),
-                'data'          => $customerLicenseKeys['data'],
-                'date_format'   => get_option('date_format'),
-                'args'          => apply_filters('lmfwc_template_args_myaccount_license_keys', array())
+                'order'       => $order,
+                'data'        => $customerLicenseKeys['data'],
+                'date_format' => get_option('date_format')
             ),
             '',
             LMFWC_TEMPLATES_DIR
@@ -355,7 +350,6 @@ class Order
         $html .= '<ul class="lmfwc-license-list">';
 
         if (!Settings::get('lmfwc_hide_license_keys')) {
-            /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
                 $html .= sprintf(
                     '<li></span> <code class="lmfwc-placeholder">%s</code></li>',
@@ -369,7 +363,6 @@ class Order
         }
 
         else {
-            /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
                 $html .= sprintf(
                     '<li><code class="lmfwc-placeholder empty" data-id="%d"></code></li>',

@@ -6,6 +6,7 @@
  */
 
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
+use LicenseManagerForWooCommerce\Settings;
 
 defined('ABSPATH') || exit;
 
@@ -89,6 +90,91 @@ function lmfwc_rand_hash()
 function lmfwc_camelize($input, $separator = '_')
 {
     return str_replace($separator, '', ucwords($input, $separator));
+}
+
+/**
+ * Provides a backwards-compatible solution for the array_key_first() method.
+ *
+ * @param array $array
+ * @return int|string|null
+ */
+function lmfwc_array_key_first($array)
+{
+    if (function_exists('array_key_first')) {
+        return array_key_first($array);
+    }
+
+    reset($array);
+
+    return key($array);
+}
+
+/**
+ * Converts valid_for into expires_at.
+ *
+ * @param string $validFor
+ * @param string $format
+ * @return null|string
+ */
+function lmfwc_convert_valid_for_to_expires_at($validFor, $format = 'Y-m-d H:i:s')
+{
+    if (!empty($validFor)) {
+        try {
+            $date = new DateTime('now', new DateTimeZone('GMT'));
+            $dateInterval = new DateInterval('P' . $validFor . 'D');
+        } catch (Exception $e) {
+            return null;
+        }
+
+        return $date->add($dateInterval)->format($format);
+    }
+
+    return null;
+}
+
+/**
+ * Updates the expiration of downloads in orders
+ * @param $expiresAt
+ * @param $orderId
+ */
+function lmfwc_update_order_downloads_expiration($expiresAt, $orderId)
+{
+    if (!empty($expiresAt) && !empty($orderId) && Settings::get('lmfwc_download_expires')) {
+        try {
+            $dataStore           = WC_Data_Store::load('customer-download');
+            $downloadPermissions = $dataStore->get_downloads(
+                array(
+                    'order_id' => $orderId
+                )
+            );
+        } catch (Exception $e) {
+            return;
+        }
+
+        // Validate expiresAt is given in the right format (time check) - otherwise add current GMT time
+        if (!DateTime::createFromFormat('Y-m-d H:i:s', $expiresAt) !== false) {
+            try {
+                $date  = new DateTime($expiresAt, new DateTimeZone('GMT'));
+                $now   = new DateTime('now', new DateTimeZone('GMT'));
+                $today = new DateTime(date('Y-m-d'), new DateTimeZone('GMT'));
+                $time  = $today->diff($now);
+
+                $date->add($time);
+
+                $expiresAt = $date->format('Y-m-d H:i:s');
+            } catch (Exception $e) {
+                return;
+            }
+        }
+
+        if ($downloadPermissions && count($downloadPermissions) > 0) {
+            foreach ($downloadPermissions as $download) {
+                $download = new WC_Customer_Download($download->get_id());
+                $download->set_access_expires($expiresAt);
+                $download->save();
+            }
+        }
+    }
 }
 
 /**
@@ -213,7 +299,7 @@ function lmfwc_get_subscription_renewal_custom_interval($productId) {
     $customerInterval = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true);
 
     if ($customerInterval && is_numeric($customerInterval)) {
-        return intval($customerInterval);
+        return (int)$customerInterval;
     }
 
     return 1;
@@ -235,4 +321,31 @@ function lmfwc_get_subscription_renewal_custom_period($productId) {
     }
 
     return 'day';
+}
+
+/**
+ * Inserts a new key/value after the key in the array.
+ *
+ * @param string $needle
+ * @param array  $haystack
+ * @param string $newKey
+ * @param string $newValue
+ * @return array
+ */
+function lmfwc_array_insert_after($needle, $haystack, $newKey, $newValue) {
+    if (array_key_exists($needle, $haystack)) {
+        $newArray = array();
+
+        foreach ($haystack as $key => $value) {
+            $newArray[$key] = $value;
+
+            if ($key === $needle) {
+                $newArray[$newKey] = $newValue;
+            }
+        }
+
+        return $newArray;
+    }
+
+    return $haystack;
 }

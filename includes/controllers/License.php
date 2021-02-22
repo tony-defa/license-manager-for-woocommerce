@@ -60,7 +60,7 @@ class License
             && $_POST['status']
             && in_array($_POST['status'], LicenseStatusEnum::$status)
         ) {
-            $status = intval($_POST['status']);
+            $status = (int)$_POST['status'];
         }
 
         if ($source === 'file') {
@@ -105,14 +105,14 @@ class License
         if ($result['failed'] == 0 && $result['added'] > 0) {
             // Update the stock
             if ($status === LicenseStatusEnum::ACTIVE) {
-                apply_filters('lmfwc_stock_increase', $productId, $result['added']);
+                lmfwc_stock_increase($productId, $result['added']);
             }
 
             // Display a success message
             AdminNotice::success(
                 sprintf(
                     __('%d license key(s) added successfully.', 'license-manager-for-woocommerce'),
-                    intval($result['added'])
+                    (int)$result['added']
                 )
             );
             wp_redirect(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE));
@@ -128,15 +128,15 @@ class License
         if ($result['failed'] > 0 && $result['added'] > 0) {
             // Update the stock
             if ($status === LicenseStatusEnum::ACTIVE) {
-                apply_filters('lmfwc_stock_increase', $productId, $result['added']);
+                lmfwc_stock_increase($productId, $result['added']);
             }
 
             // Display a warning message
             AdminNotice::warning(
                 sprintf(
                     __('%d key(s) have been imported, while %d key(s) were not imported.', 'license-manager-for-woocommerce'),
-                    intval($result['added']),
-                    intval($result['failed'])
+                    (int)$result['added'],
+                    (int)$result['failed']
                 )
             );
             wp_redirect(sprintf('admin.php?page=%s&action=import', AdminMenus::LICENSES_PAGE));
@@ -210,11 +210,17 @@ class License
 
         // Redirect with message
         if ($license) {
+            if (!$expiresAt && $validFor) {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at($validFor);
+            }
+
+            lmfwc_update_order_downloads_expiration($expiresAt, $orderId);
+
             AdminNotice::success(__('1 license key(s) added successfully.', 'license-manager-for-woocommerce'));
 
             // Update the stock
             if ($license->getStatus() == LicenseStatusEnum::ACTIVE) {
-                apply_filters('lmfwc_stock_increase', $productId);
+                lmfwc_stock_increase($productId);
             }
         }
 
@@ -283,7 +289,7 @@ class License
 
         // Update the stock
         if ($oldLicense->getProductId() !== null && $oldLicense->getStatus() === LicenseStatusEnum::ACTIVE) {
-            apply_filters('lmfwc_stock_decrease', $oldLicense->getProductId());
+            lmfwc_stock_decrease($oldLicense->getProductId());
         }
 
         /** @var LicenseResourceModel $license */
@@ -306,8 +312,14 @@ class License
         if ($license) {
             // Update the stock
             if ($license->getProductId() !== null && $license->getStatus() === LicenseStatusEnum::ACTIVE) {
-                apply_filters('lmfwc_stock_increase', $license->getProductId());
+                lmfwc_stock_increase($license->getProductId());
             }
+
+            if ( ! $expiresAt && $validFor ) {
+                $expiresAt = lmfwc_convert_valid_for_to_expires_at($validFor);
+            }
+
+            lmfwc_update_order_downloads_expiration( $expiresAt, $orderId );
 
             // Display a success message
             AdminNotice::success(__('Your license key has been updated successfully.', 'license-manager-for-woocommerce'));
