@@ -39,8 +39,8 @@ class LicenseMeta
             return;
         }
 
-        $this->metaId    = intval($licenseMeta->meta_id);
-        $this->licenseId = intval($licenseMeta->license_id);
+        $this->metaId    = (int)$licenseMeta->meta_id;
+        $this->licenseId = (int)$licenseMeta->license_id;
         $this->metaKey   = $licenseMeta->meta_key;
         $this->metaValue = maybe_unserialize($licenseMeta->meta_value);
     }

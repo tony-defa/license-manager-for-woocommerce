@@ -116,7 +116,7 @@ class GeneratorsList extends WP_List_Table
             );
         }
 
-        $actions['id'] = sprintf(__('ID: %d', 'license-manager-for-woocommerce'), intval($item['id']));
+        $actions['id'] = sprintf(__('ID: %d', 'license-manager-for-woocommerce'), (int)$item['id']);
 
         if (!apply_filters('lmfwc_get_assigned_products', $item['id'])) {
             $actions['delete'] = sprintf(

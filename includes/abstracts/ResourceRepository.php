@@ -52,7 +52,7 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
                 case ColumnTypeEnum::TINYINT:
                 case ColumnTypeEnum::BIGINT:
                     if ($data[$column] !== null) {
-                        $data[$column] = intval($value);
+                        $data[$column] = (int)$value;
                     }
                     break;
             }
@@ -172,11 +172,10 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
      *
      * @param array       $query
      * @param null|string $orderBy
-     * @param null|string $sort
      *
      * @return bool|ResourceModel[]
      */
-    public function findAllBy($query, $orderBy = null, $sort = null)
+    public function findAllBy($query, $orderBy = null)
     {
         if (!class_exists($this->model) || !$query || !is_array($query) || count($query) <= 0) {
             return false;
@@ -188,12 +187,15 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
         $sqlQuery = "SELECT * FROM {$this->table} WHERE 1=1 ";
         $sqlQuery .= $this->parseQueryConditions($query);
 
-        if ($orderBy && is_string($orderBy)) {
-            $sqlQuery .= "ORDER BY {$orderBy} ";
-        }
+        if ($orderBy !== null && is_array($orderBy)) {
+            $column = key($orderBy);
+            $sort = $orderBy[$column];
 
-        if ($sort && is_string($sort)) {
-            $sqlQuery .= "{$sort} ";
+            if (!in_array($sort, array('ASC', 'DESC'))) {
+                $sort = 'ASC';
+            }
+
+            $sqlQuery .= "ORDER BY {$column} {$sort}";
         }
 
         $sqlQuery .= ';';
@@ -337,7 +339,7 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
 
         $count = $wpdb->get_var("SELECT COUNT(*) FROM {$this->table};");
 
-        return intval($count);
+        return (int)$count;
     }
 
     /**
@@ -361,7 +363,7 @@ abstract class ResourceRepository extends Singleton implements RepositoryInterfa
 
         $count = $wpdb->get_var($sqlQuery);
 
-        return intval($count);
+        return (int)$count;
     }
 
     /**

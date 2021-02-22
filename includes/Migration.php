@@ -35,8 +35,8 @@ class Migration
 
                 global $wpdb;
 
-                if (intval($fileVersion) <= Setup::DB_VERSION
-                    && intval($fileVersion) > $oldDatabaseVersion
+                if ((int)$fileVersion <= Setup::DB_VERSION
+                    && (int)$fileVersion > $oldDatabaseVersion
                 ) {
                     require_once $fileName;
                 }
