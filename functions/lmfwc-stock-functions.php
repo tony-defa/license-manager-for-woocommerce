@@ -24,8 +24,8 @@ function lmfwc_stock_increase($product, $amount = 1) {
 /**
  * Decreases the available stock of a WooCommerce Product by $amount.
  *
- * @param WC_Product $product WooCommerce Product object
- * @param int        $amount  Decrement amount
+ * @param int|WC_Product $product WooCommerce Product object
+ * @param int            $amount  Decrement amount
  * @return bool|WC_Product
  */
 function lmfwc_stock_decrease($product, $amount = 1) {

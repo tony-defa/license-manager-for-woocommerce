@@ -1,7 +1,7 @@
 {
     "name": "drazenbebic/license-manager-for-woocommerce",
     "description": "Sell software license keys through your WooCommerce shop.",
-    "version": "2.2.1",
+    "version": "2.3.0",
     "homepage": "https://www.licensemanager.at",
     "type": "wordpress-plugin",
     "license": "GPL-3.0-or-later",
