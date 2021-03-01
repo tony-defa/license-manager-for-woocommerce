@@ -42,6 +42,7 @@ class ProductData
         $wrapperClass = array(
             'lmfwc_subscription_renewal_interval_type'   => '',
             'lmfwc_subscription_renewal_reset_action' => '',
+            'lmfwc_subscription_cost_per_activation_action' => '',
             'lmfwc_subscription_renewal_custom_interval' => '',
             'lmfwc_subscription_renewal_custom_period'   => ''
         );
@@ -93,6 +94,8 @@ class ProductData
         woocommerce_wp_select(
             array(
                 'id'      => 'lmfwc_subscription_cost_per_activation_action',
+                'class'      => 'lmfwc_subscription_cost_per_activation_action',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_cost_per_activation_action'],
                 'label'   => __('Price per activation', 'license-manager-for-woocommerce'),
                 'options' => array(
                     'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined in the general section', 'license-manager-for-woocommerce'),
@@ -245,6 +248,7 @@ class ProductData
 
         $wrapperClass = array(
             'lmfwc_subscription_renewal_reset_action'   => 'form-row form-row-full',
+            'lmfwc_subscription_cost_per_activation_action'   => 'form-row form-row-full',
             'lmfwc_subscription_renewal_interval_type'   => 'form-row form-row-full',
             'lmfwc_subscription_renewal_custom_interval' => 'form-field form-row form-row-first',
             'lmfwc_subscription_renewal_custom_period'   => 'form-field form-row form-row-last'
@@ -299,10 +303,12 @@ class ProductData
         // Dropdown "lmfwc_subscription_cost_per_activation_action"
         woocommerce_wp_select(
             array(
-                'id'      => sprintf('lmfwc_subscription_cost_per_activation_action_%d', $loop),
-                'name'    => sprintf('lmfwc_subscription_cost_per_activation_action[%d]', $loop),
-                'label'   => __('Price per activation', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'id'            => sprintf('lmfwc_subscription_cost_per_activation_action_%d', $loop),
+                'class'         => 'lmfwc_subscription_cost_per_activation_action',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_cost_per_activation_action'],
+                'name'          => sprintf('lmfwc_subscription_cost_per_activation_action[%d]', $loop),
+                'label'         => __('Price per activation', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined in the general section', 'license-manager-for-woocommerce'),
                     'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period', 'license-manager-for-woocommerce')
                 ),
