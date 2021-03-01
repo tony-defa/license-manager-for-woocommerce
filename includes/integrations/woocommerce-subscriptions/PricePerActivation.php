@@ -236,20 +236,34 @@ class PricePerActivation
             $licenseCount = count($licenses);
             error_log("LMFWC: License count is: {$licenseCount}");
 
-            $newQuantity = 0;
+            $minimumCost = (float) lmfwc_get_subscription_minimum_period_cost_action($productId);
+            error_log("LMFWC: Minimum cost is: {$minimumCost}");
+
+            $activationCount = 0;
 
             /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
-                $newQuantity += $license->getTimesActivated();
+                $activationCount += $license->getTimesActivated();
                 error_log("LMFWC: License activated {$license->getTimesActivated()} times.");
             }
 
-            $itemNewTotal = strval($newQuantity * floatval($item->get_subtotal()));
+            $itemNewTotal = $activationCount * floatval($item->get_subtotal());
+            $newQuantity = $activationCount;
+            if ($itemNewTotal < $minimumCost) {
+                error_log("LMFWC: Activation cost less than minimum cost {$itemNewTotal}. Setting new total to {$minimumCost}.");
+                $itemNewTotal = $minimumCost;
+                $newQuantity = 1;
+            }
+            $itemNewTotal = strval($itemNewTotal);
+        
             $item->set_quantity($newQuantity);
             $item->set_total($itemNewTotal);
-            if (!$newQuantity)
+            if (!$activationCount)
                 $item->set_subtotal($itemNewTotal);
-
+// echo '<pre>';
+// print_r($item);
+// echo '</pre>';
+// die;
             $item->save();
 
             error_log("LMFWC: The new total of the item #{$item->get_id()} is {$itemNewTotal}.");

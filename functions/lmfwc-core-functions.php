@@ -272,6 +272,23 @@ function lmfwc_get_subscription_cost_per_activation_action($productId) {
 }
 
 /**
+ * Returns the configured minimum cost per period value on the given product 
+ * in case of a WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return string
+ */
+function lmfwc_get_subscription_minimum_period_cost_action($productId) {
+    $action = get_post_meta($productId, 'lmfwc_subscription_minimum_period_cost_action', true);
+
+    if ($action && is_string($action)) {
+        return $action;
+    }
+
+    return false;
+}
+
+/**
  * Returns the configured interval for the given product in case of a
  * WooCommerce Subscriptions renewal order.
  *
