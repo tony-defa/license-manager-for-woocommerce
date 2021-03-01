@@ -98,7 +98,6 @@ class ProductData
                     'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined in the general section', 'license-manager-for-woocommerce'),
                     'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period', 'license-manager-for-woocommerce')
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalCostPerActivation
             )
         );
@@ -307,7 +306,6 @@ class ProductData
                     'cost_per_subscription_period'   => __('The reoccurring price is the subscription price defined in the general section', 'license-manager-for-woocommerce'),
                     'cost_per_activation'  => __('The subscription price defined above will be multiplied by the license activations in the given subscription period', 'license-manager-for-woocommerce')
                 ),
-                'custom_attributes' => $disableOnRenewalActionNewLicense,
                 'value' => $renewalCostPerActivation
             )
         );
