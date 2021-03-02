@@ -255,37 +255,37 @@ function lmfwc_get_subscription_renewal_reset_action($productId) {
 }
 
 /**
- * Returns the configured cost per activation action to perform on the given product 
+ * Returns the configured invoice per activation action to perform on the given product 
  * in case of a WooCommerce Subscriptions renewal order.
  *
  * @param int $productId
  * @return string
  */
-function lmfwc_get_subscription_cost_per_activation_action($productId) {
-    $action = get_post_meta($productId, 'lmfwc_subscription_cost_per_activation_action', true);
+function lmfwc_get_subscription_model_type($productId) {
+    $action = get_post_meta($productId, 'lmfwc_subscription_model_type', true);
 
     if ($action && is_string($action)) {
         return $action;
     }
 
-    return 'cost_per_subscription_period';
+    return 'fixed_usage_type';
 }
 
 /**
- * Returns the configured minimum cost per period value on the given product 
+ * Returns the configured maximum included activations per period on the given product 
  * in case of a WooCommerce Subscriptions renewal order.
  *
  * @param int $productId
  * @return string
  */
-function lmfwc_get_subscription_minimum_period_cost_action($productId) {
-    $action = get_post_meta($productId, 'lmfwc_subscription_minimum_period_cost_action', true);
+function lmfwc_get_maximum_included_activations($productId) {
+    $action = get_post_meta($productId, 'lmfwc_maximum_included_activations', true);
 
     if ($action && is_string($action)) {
         return $action;
     }
 
-    return false;
+    return '1';
 }
 
 /**
@@ -338,6 +338,20 @@ function lmfwc_get_subscription_renewal_custom_period($productId) {
     }
 
     return 'day';
+}
+
+/**
+ * Returns true if the product id (variation id) is configured to be a variable subscription model in case of a
+ * WooCommerce Subscriptions renewal order.
+ *
+ * @param int $productId
+ * @return boolean
+ */
+function lmfwc_is_variable_subscription_model($productId) {
+    return lmfwc_is_licensed_product($productId)
+                && lmfwc_get_subscription_model_type($productId) === 'variable_usage_type'
+                && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license'
+                && lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal';
 }
 
 /**

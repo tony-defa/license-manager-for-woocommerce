@@ -71,7 +71,7 @@ class PricePerActivation
             $productId = $minMaxVarData['min']['variation_id'];
         }
 
-        if (!$this->isCostPerActivationProduct($productId)) {
+        if (!lmfwc_is_variable_subscription_model($productId)) {
             return $subscriptionString;
         }
 
@@ -117,7 +117,7 @@ class PricePerActivation
      */
     function maybeCreateSubscriptionPriceString($subscriptionString, $subscriptionDetails) 
     {
-        if (!isset($subscriptionDetails['use_cost_per_activation']) || $subscriptionDetails['use_cost_per_activation'] === false) {
+        if (!isset($subscriptionDetails['use_variable_usage_type']) || $subscriptionDetails['use_variable_usage_type'] === false) {
             return $subscriptionString;
         } 
 
@@ -141,7 +141,7 @@ class PricePerActivation
 
     /**
      * Adds a boolean to the $subscriptionDetails array if the cart contains a 
-     * subscription product that is setup with 'cost_per_activation' meta. The 
+     * subscription product that is setup with 'variable_usage_type' meta. The 
      * boolean is added to use on the 'woocommerce_subscription_price_string'
      * hook.
      * This is executed on the following pages: cart, checkout
@@ -186,7 +186,7 @@ class PricePerActivation
 
     /**
      * Changes the quantity and recalculates totals based on license activations, if the items 
-     * contained in the order are setup with the 'cost_per_activation' meta.
+     * contained in the order are setup with the 'variable_usage_type' meta.
      *
      * @param WC_Order $newOrder                the newly created order
      * @param WC_Subscription $subscription     the subscription of the created order
@@ -215,7 +215,7 @@ class PricePerActivation
                 $productId = $item->get_product_id();
             }
 
-            if (!$this->isCostPerActivationProduct($productId)) {
+            if (!lmfwc_is_variable_subscription_model($productId)) {
                 error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset {$this->activationName} count on renewal.");
                 continue;
             }
@@ -236,8 +236,11 @@ class PricePerActivation
             $licenseCount = count($licenses);
             error_log("LMFWC: License count is: {$licenseCount}");
 
-            $minimumCost = (float) lmfwc_get_subscription_minimum_period_cost_action($productId);
-            error_log("LMFWC: Minimum cost is: {$minimumCost}");
+            $subscriptionPrice = (float) $item->get_subtotal();
+            error_log("LMFWC: Subscription cost is: {$subscriptionPrice}");
+
+            $includedActivations = (int) lmfwc_get_maximum_included_activations($productId);
+            error_log("LMFWC: Amount of included activations: {$includedActivations}");
 
             $activationCount = 0;
 
@@ -247,26 +250,19 @@ class PricePerActivation
                 error_log("LMFWC: License activated {$license->getTimesActivated()} times.");
             }
 
-            $itemNewTotal = $activationCount * floatval($item->get_subtotal());
-            $newQuantity = $activationCount;
-            if ($itemNewTotal < $minimumCost) {
-                error_log("LMFWC: Activation cost less than minimum cost {$itemNewTotal}. Setting new total to {$minimumCost}.");
-                $itemNewTotal = $minimumCost;
-                $newQuantity = 1;
-            }
-            $itemNewTotal = strval($itemNewTotal);
-        
-            $item->set_quantity($newQuantity);
-            $item->set_total($itemNewTotal);
-            if (!$activationCount)
-                $item->set_subtotal($itemNewTotal);
-// echo '<pre>';
-// print_r($item);
-// echo '</pre>';
-// die;
-            $item->save();
+            if ($activationCount > $includedActivations) {
+                $item->set_quantity($activationCount);
 
-            error_log("LMFWC: The new total of the item #{$item->get_id()} is {$itemNewTotal}.");
+                $newTotal = ($subscriptionPrice / $includedActivations) * $activationCount;
+                $item->set_subtotal($newTotal);
+                $item->set_total($newTotal);
+
+                $item->save();
+
+                error_log("LMFWC: The new total of the item #{$item->get_id()} is {$newTotal}.");
+            } else {
+                error_log("LMFWC: The total of the item #{$item->get_id()} is not changed.");
+            }
         }
 
         $newOrder->calculate_totals();
@@ -304,7 +300,7 @@ class PricePerActivation
                 $productId = $item['product_id'];
             }
 
-            if (!$this->isCostPerActivationProduct($productId)) {
+            if (!lmfwc_is_variable_subscription_model($productId)) {
                 error_log("LMFWC: Skipped product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
                 continue;
             }
@@ -316,14 +312,7 @@ class PricePerActivation
             }
         }
 
-        $subscriptionDetails['use_cost_per_activation'] = $useCostPerActivation;
+        $subscriptionDetails['use_variable_usage_type'] = $useCostPerActivation;
         return $subscriptionDetails;
-    }
-
-    private function isCostPerActivationProduct($productId) {
-        return lmfwc_is_licensed_product($productId)
-                    && lmfwc_get_subscription_cost_per_activation_action($productId) === 'cost_per_activation'
-                    && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license'
-                    && lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal';
     }
 }

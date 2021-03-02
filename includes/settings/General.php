@@ -434,7 +434,7 @@ class General
         $html .= '</label>';
         $html .= sprintf(
             '<p class="description">%s</p>',
-            __('How an activation should be called in the front end (for customers). Used on subscription products were the cost is multiplied by the activations count.', 'license-manager-for-woocommerce')
+            __('How an activation should be called in the front end (for customers). Used on variable subscription model products were the cost is multiplied by the activation count.', 'license-manager-for-woocommerce')
         );
         $html .= '</fieldset>';
 
