@@ -2,8 +2,6 @@
 
 namespace LicenseManagerForWooCommerce\Settings;
 
-use LicenseManagerForWooCommerce\Integrations\WooCommerceSubscriptions\PricePerActivation as PPA;
-
 defined('ABSPATH') || exit;
 
 class General
@@ -134,14 +132,6 @@ class General
             'lmfwc_enable_stock_manager',
             __('Stock management', 'license-manager-for-woocommerce'),
             array($this, 'fieldEnableStockManager'),
-            'lmfwc_license_keys',
-            'license_keys_section'
-        );
-
-        add_settings_field(
-            'lmfwc_activation_name_string',
-            __('Activation name', 'license-manager-for-woocommerce'),
-            array($this, 'fieldActivationNameString'),
             'lmfwc_license_keys',
             'license_keys_section'
         );
@@ -407,36 +397,6 @@ class General
                 </p>
             </fieldset>
         ';
-
-        echo $html;
-    }
-
-    /**
-     * Callback for the "lmfwc_activation_name_string" field.
-     *
-     * @return void
-     */
-    public function fieldActivationNameString()
-    {
-        $field = 'lmfwc_activation_name_string';
-        (array_key_exists($field, $this->settings)) ? $value = $this->settings[$field] : $value = PPA::DEFAULT_ACTIVATION_NAME;
-
-        $value = __("" . $value, 'license-manager-for-woocommerce');
-
-        $html = '<fieldset>';
-        $html .= sprintf('<label for="%s">', $field);
-        $html .= sprintf(
-            '<input id="%s" type="text" name="lmfwc_settings_general[%s]" value="%s" />',
-            $field,
-            $field,
-            $value
-        );
-        $html .= '</label>';
-        $html .= sprintf(
-            '<p class="description">%s</p>',
-            __('How an activation should be called in the front end (for customers). Used on variable subscription model products were the cost is multiplied by the activation count.', 'license-manager-for-woocommerce')
-        );
-        $html .= '</fieldset>';
 
         echo $html;
     }

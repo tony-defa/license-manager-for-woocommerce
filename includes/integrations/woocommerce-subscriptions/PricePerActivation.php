@@ -11,6 +11,7 @@ use WC_Stripe_Helper;
 use WC_Order_Item_Product;
 use WC_Subscriptions_Product;
 use LicenseManagerForWooCommerce\Settings;
+use LicenseManagerForWooCommerce\Settings\Subscription;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 
 defined('ABSPATH') || exit;
@@ -26,24 +27,11 @@ defined('ABSPATH') || exit;
  */
 class PricePerActivation
 {
-
-    /**
-     * @var string
-     */
-    public const DEFAULT_ACTIVATION_NAME = 'activation';
-
-    /**
-     * @var string
-     */
-    public $activationName;
-
     /**
      * PricePerActivation constructor.
      */
     public function __construct()
     {
-        $this->activationName = Settings::get('lmfwc_activation_name_string') ?: self::DEFAULT_ACTIVATION_NAME;
-
         add_filter('woocommerce_subscriptions_product_price_string_inclusions', array($this, 'maybeAddIncludeOptions'), 10, 2);             // modify include array for 'woocommerce_subscriptions_product_price_string' hook
         add_filter('woocommerce_subscriptions_product_price_string', array($this, 'maybeCreateSubscriptionsProductPriceString'), 10, 3);    // shop, product, cart, checkout
         add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received
@@ -58,12 +46,15 @@ class PricePerActivation
             return $displayOptions;
         }
 
-        $displayOptions['display_included_activations'] = true;
-        $displayOptions['display_single_activation_price'] = true;
+        $displayOptions['display_included_activations'] = Settings::get(Subscription::SHOW_MAXIMUM_INCLUDED_ACTIVATIONS_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
+        $displayOptions['display_single_activation_price'] = Settings::get(Subscription::SHOW_SINGLE_ACTIVATION_PRICE_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
         $displayOptions['trial_length'] = false;
 
         $displayOptions['max_activations'] = lmfwc_get_maximum_included_activations($productId);
-        $displayOptions['price_per_activation'] = wc_price(WC_Subscriptions_Product::get_price($product) / $displayOptions['max_activations'], array('decimals' => 4)); // TODO setting for decimals 
+        $displayOptions['price_per_activation'] = wc_price(
+            WC_Subscriptions_Product::get_price($product) / $displayOptions['max_activations'], 
+            array('decimals' => lmfwc_get_activation_price_decimals())
+        );
 
 // echo '<pre>'; // TODO delete
 // print_r($displayOptions);
@@ -115,11 +106,11 @@ class PricePerActivation
                     : '';
         /* translators: 1: included activations 2: activation name (example: "with 10000 activations included") */
         $includedActivations = $maxActivations > 1 && $include['display_included_activations']
-                    ? sprintf(_x('with %1$s %2$s included', 'How many activations are included', 'license-manager-for-woocommerce'), $maxActivations, $this->activationName) // TODO plural
+                    ? sprintf(_x('with %1$s %2$s included', 'How many activations are included', 'license-manager-for-woocommerce'), $maxActivations, lmfwc_get_activation_name_string($maxActivations))
                     : '';
         /* translators: 1: amount to pay per activation 2: activation name (example: "+ € 0,003 per additional activation") */
         $singleActivationPrice = $include['display_single_activation_price']
-                    ? sprintf(_x('+ %1$s per additional %2$s', 'Cost of additional activations', 'license-manager-for-woocommerce'), $pricePerActivation, $this->activationName) // TODO singular
+                    ? sprintf(_x('+ %1$s per additional %2$s', 'Cost of additional activations', 'license-manager-for-woocommerce'), $pricePerActivation, lmfwc_get_activation_name_string())
                     : '';
         /* translators: %s: subscription period (example: "for a month" or "for 3 months") */
         $length = $include['subscription_length'] && $subscriptionLength != 0 
@@ -251,7 +242,7 @@ class PricePerActivation
             }
 
             if (!lmfwc_is_variable_subscription_model($productId)) {
-                error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset {$this->activationName} count on renewal.");
+                error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
                 continue;
             }
 
@@ -293,8 +284,8 @@ class PricePerActivation
                 $item->set_total($newTotal);
 
                 $activationDelta = $activationCount - $includedActivations;
-                /* translators: 1: number of additional activations used 2: activation name (example: "with %1$s additional %2$s") */
-                $nameAddition = sprintf(_x('+ %1$s additional %2$s consumed.', 'Name appendage for additional activations', 'license-manager-for-woocommerce'), $activationDelta, $this->activationName);
+                /* translators: 1: number of additional activations used 2: activation name (example: "+ 3 additional activations") */
+                $nameAddition = sprintf(_x('+ %1$s additional %2$s consumed.', 'Name appendage for additional activations', 'license-manager-for-woocommerce'), $activationDelta, lmfwc_get_activation_name_string($activationDelta));
                 $item->set_name($item->get_name() . '<br>' . $nameAddition);
 
                 $item->save();

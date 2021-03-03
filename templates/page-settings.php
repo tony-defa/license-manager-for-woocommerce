@@ -10,6 +10,7 @@ defined('ABSPATH') || exit;
  * @var string $urlOrderStatus
  * @var string $urlRestApi
  * @var string $urlTools
+ * @var string $urlSubscription
  */
 
 ?>
@@ -30,6 +31,9 @@ defined('ABSPATH') || exit;
         </a>
         <a href="<?php echo esc_url($urlTools); ?>" class="nav-tab <?=$tab === 'tools' ? 'nav-tab-active' : '';?>">
             <span><?php esc_html_e('Tools', 'license-manager-for-woocommerce');?></span>
+        </a>
+        <a href="<?php echo esc_url($urlSubscription); ?>" class="nav-tab <?=$tab === 'subscription' ? 'nav-tab-active' : '';?>">
+            <span><?php esc_html_e('Subscription', 'license-manager-for-woocommerce');?></span>
         </a>
     </nav>
 
@@ -72,6 +76,15 @@ defined('ABSPATH') || exit;
         <form action="<?php echo admin_url('options.php'); ?>" method="POST">
             <?php settings_fields('lmfwc_settings_group_tools'); ?>
             <?php do_settings_sections('lmfwc_export'); ?>
+            <?php submit_button(); ?>
+        </form>
+
+
+    <?php elseif ($tab === 'subscription'): ?>
+
+        <form action="<?php echo admin_url('options.php'); ?>" method="POST">
+            <?php settings_fields('lmfwc_settings_group_subscription'); ?>
+            <?php do_settings_sections('lmfwc_variable_usage_model_type'); ?>
             <?php submit_button(); ?>
         </form>
 

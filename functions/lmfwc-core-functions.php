@@ -7,6 +7,7 @@
 
 use LicenseManagerForWooCommerce\Repositories\Resources\License as LicenseResourceRepository;
 use LicenseManagerForWooCommerce\Settings;
+use LicenseManagerForWooCommerce\Settings\Subscription;
 
 defined('ABSPATH') || exit;
 
@@ -352,6 +353,31 @@ function lmfwc_is_variable_subscription_model($productId) {
                 && lmfwc_get_subscription_model_type($productId) === 'variable_usage_type'
                 && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license'
                 && lmfwc_get_subscription_renewal_reset_action($productId) === 'reset_license_on_renewal';
+}
+
+/**
+ * Returns the name of the activation. Depending on the given number a singular or plural version is returned.
+ *
+ * @param integer $number (default = 1)
+ * @return string
+ */
+function lmfwc_get_activation_name_string($number = 1) {
+    if ($number === 1) {
+        $string = Settings::get(Subscription::ACTIVATION_NAME_FIELD_NAME . '_singular', Settings::SECTION_SUBSCRIPTION);
+        return (!empty($string)) ? $string : Subscription::DEFAULT_ACTIVATION_NAME_SINGULAR;
+    }
+
+    $string = Settings::get(Subscription::ACTIVATION_NAME_FIELD_NAME . '_plural', Settings::SECTION_SUBSCRIPTION);
+    return (!empty($string)) ? $string : Subscription::DEFAULT_ACTIVATION_NAME_PLURAL;
+}
+
+function lmfwc_get_activation_price_decimals() {
+    $decimals = Settings::get(Subscription::ACTIVATION_PRICE_DECIMALS_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
+
+    if (empty($decimals))
+        return wc_get_price_decimals();
+
+    return $decimals;
 }
 
 /**
