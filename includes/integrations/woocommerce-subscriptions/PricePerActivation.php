@@ -44,11 +44,32 @@ class PricePerActivation
     {
         $this->activationName = Settings::get('lmfwc_activation_name_string') ?: self::DEFAULT_ACTIVATION_NAME;
 
+        add_filter('woocommerce_subscriptions_product_price_string_inclusions', array($this, 'maybeAddIncludeOptions'), 10, 2);             // modify include array for 'woocommerce_subscriptions_product_price_string' hook
         add_filter('woocommerce_subscriptions_product_price_string', array($this, 'maybeCreateSubscriptionsProductPriceString'), 10, 3);    // shop, product, cart, checkout
         add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received
         add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailFromCart'), 10, 2);              // cart, checkout
         add_filter('woocommerce_subscription_price_string_details', array($this, 'maybeAddSubscriptionDetailFromSubscription'), 10, 2);     // subscriptions (admin), order received, email?
         add_filter('wcs_new_order_created', array($this, 'maybeChangeSubscriptionOrderQuantities'), 10, 3);                                 // intercepts the newly created order
+    }
+
+    function maybeAddIncludeOptions($displayOptions, $product) {
+        $productId = $this->getProductOrVariationId($product);
+        if (!lmfwc_is_variable_subscription_model($productId)) {
+            return $displayOptions;
+        }
+
+        $displayOptions['display_included_activations'] = true;
+        $displayOptions['display_single_activation_price'] = true;
+        $displayOptions['trial_length'] = false;
+
+        $displayOptions['max_activations'] = lmfwc_get_maximum_included_activations($productId);
+        $displayOptions['price_per_activation'] = wc_price(WC_Subscriptions_Product::get_price($product) / $displayOptions['max_activations'], array('decimals' => 4)); // TODO setting for decimals 
+
+// echo '<pre>'; // TODO delete
+// print_r($displayOptions);
+// echo '</pre>';
+
+        return $displayOptions;
     }
 
     /**
@@ -62,19 +83,12 @@ class PricePerActivation
      */
     function maybeCreateSubscriptionsProductPriceString($subscriptionString, $product, $include)
     {
-        $productId = $product->get_id(); // product id or variation id
-        $productString = $product->get_parent_id() === 0;
-
-        // get the variation id with the lowest price in case this is called for product with variations
-        if ($productString && strpos($subscriptionString, '<span class="from">') !== false) {
-            $minMaxVarData = get_post_meta($productId, '_min_max_variation_data', true);
-            $productId = $minMaxVarData['min']['variation_id'];
-        }
-
+        $productId = $this->getProductOrVariationId($product);
         if (!lmfwc_is_variable_subscription_model($productId)) {
             return $subscriptionString;
         }
 
+        $price              = WC_Subscriptions_Product::get_price( $product );
         $signUpFee          = WC_Subscriptions_Product::get_sign_up_fee( $product );
 		$billingInterval    = WC_Subscriptions_Product::get_interval( $product );
 		$billingPeriod      = WC_Subscriptions_Product::get_period( $product );
@@ -82,10 +96,30 @@ class PricePerActivation
 		$trialLength        = WC_Subscriptions_Product::get_trial_length( $product );
         $trialPeriod        = WC_Subscriptions_Product::get_trial_period( $product );
 
-        $price = $include['price'];
-        /* translators: 1: amount to pay per 2: activation name 3: subscription period (example: "9,95€ / activation, billed each month" or "19,95€ / activation, billed every 3 months") */
-        $period = $include['subscription_price'] && $include['subscription_period'] 
-                    ? sprintf(_nx('%1$s / %2$s, billed each %3$s', '%1$s / %2$s, billed every %3$s', $billingInterval, 'Contains price per activation and billing period', 'license-manager-for-woocommerce'), $price, $this->activationName, wcs_get_subscription_period_strings($billingInterval, $billingPeriod)) 
+        $priceString = $include['price'];
+        
+        try {
+            $totalPriceString = substr($priceString, strpos($priceString, '</span>') + 7);
+            $quantity = (int) ((float) str_replace(',', '.', $totalPriceString) / $price);
+        } catch(\Exception $e) {
+            $quantity = 1;
+            error_log("Warning: (LMFWC) Could not determine quantity from total price string.");
+        }
+
+        $maxActivations = $include['max_activations'] * $quantity;
+        $pricePerActivation = $include['price_per_activation'];
+
+        /* translators: 1: amount to pay per period 2: subscription period (example: "9,95€ / month" or "19,95€ every 3 months") */
+        $pricePerPeriod = $include['subscription_price'] && $include['subscription_period'] 
+                    ? sprintf(_nx('%1$s / %2$s', '%1$s every %2$s', $billingInterval, 'Contains price per billing period', 'license-manager-for-woocommerce'), $priceString, wcs_get_subscription_period_strings($billingInterval, $billingPeriod)) 
+                    : '';
+        /* translators: 1: included activations 2: activation name (example: "with 10000 activations included") */
+        $includedActivations = $maxActivations > 1 && $include['display_included_activations']
+                    ? sprintf(_x('with %1$s %2$s included', 'How many activations are included', 'license-manager-for-woocommerce'), $maxActivations, $this->activationName) // TODO plural
+                    : '';
+        /* translators: 1: amount to pay per activation 2: activation name (example: "+ € 0,003 per additional activation") */
+        $singleActivationPrice = $include['display_single_activation_price']
+                    ? sprintf(_x('+ %1$s per additional %2$s', 'Cost of additional activations', 'license-manager-for-woocommerce'), $pricePerActivation, $this->activationName) // TODO singular
                     : '';
         /* translators: %s: subscription period (example: "for a month" or "for 3 months") */
         $length = $include['subscription_length'] && $subscriptionLength != 0 
@@ -100,7 +134,7 @@ class PricePerActivation
                     ? sprintf(_x('and a %s sign-up fee', 'The sign up fee pricing', 'license-manager-for-woocommerce'),  wc_price($signUpFee)) 
                     : '';
 
-        $subscriptionString = sprintf('%s %s %s %s', $period, $length, $trial, $fee);
+        $subscriptionString = sprintf('%s %s %s %s %s %s', $pricePerPeriod, $includedActivations, $singleActivationPrice, $length, $trial, $fee);
         $subscriptionString = trim(str_replace('  ', ' ', $subscriptionString));
 
         return $subscriptionString;
@@ -126,14 +160,14 @@ class PricePerActivation
         $period = $subscriptionDetails['subscription_period'];
         $length = $subscriptionDetails['subscription_length'];
 
-        /* translators: 1: amount to pay per 2: activation name 3: subscription period (example: "9,95€ / activation, billed each month" or "19,95€ / activation, billed every 3 months") */
-        $interval = sprintf(_nx('%1$s / %2$s, billed each %3$s', '%1$s / %2$s, billed every %3$s', $interval, 'Contains price per activation and billing period', 'license-manager-for-woocommerce'), $amount, $this->activationName, wcs_get_subscription_period_strings($interval, $period));
+        /* translators: 1: amount to pay per period 2: subscription period (example: "9,95€ / month" or "19,95€ every 3 months") */
+        $pricePerPeriod = sprintf(_nx('%1$s / %2$s', '%1$s every %2$s', $interval, 'Contains price per billing period', 'license-manager-for-woocommerce'), $amount, wcs_get_subscription_period_strings($interval, $period));
         /* translators: %s: subscription period (example: "for a month" or "for 3 months") */
         $length = $length != 0 
                     ? sprintf(_nx('for a %s', 'for %s', $length, 'The length of the subscription', 'license-manager-for-woocommerce'), wcs_get_subscription_period_strings($length, $period)) 
                     : '';
 
-        $subscriptionString = sprintf('%s %s', $interval, $length);
+        $subscriptionString = sprintf('%s %s', $pricePerPeriod, $length);
         $subscriptionString = trim(str_replace('  ', ' ', $subscriptionString));
 
         return $subscriptionString;
@@ -152,7 +186,7 @@ class PricePerActivation
      */
     function maybeAddSubscriptionDetailFromCart($subscriptionDetails, $cart) 
     {
-        /** @var array $cartItem */
+        /** @var array $cartItems */
         $cartItems = $cart->get_cart();
 
         if (!$cartItems) {
@@ -203,11 +237,12 @@ class PricePerActivation
         /** @var int $parentOrderId */
         $parentOrderId = $subscription->get_parent_id();
 
+        /** @var WC_Order_Item[] $items */
         $items = $newOrder->get_items();
         if (!$items) {
             error_log("LMFWC: Skipped order #{$newOrder->get_id()} because no items are contained.");
         }
-        
+
         foreach ($items as $item) {
 
             /** @var int $productId */
@@ -239,7 +274,7 @@ class PricePerActivation
             $subscriptionPrice = (float) $item->get_subtotal();
             error_log("LMFWC: Subscription cost is: {$subscriptionPrice}");
 
-            $includedActivations = (int) lmfwc_get_maximum_included_activations($productId);
+            $includedActivations = (int) lmfwc_get_maximum_included_activations($productId) * $item->get_quantity();
             error_log("LMFWC: Amount of included activations: {$includedActivations}");
 
             $activationCount = 0;
@@ -251,11 +286,16 @@ class PricePerActivation
             }
 
             if ($activationCount > $includedActivations) {
-                $item->set_quantity($activationCount);
+                // $item->set_quantity($activationCount); // TODO decide if the quantity should be the number of consumed credits
 
                 $newTotal = ($subscriptionPrice / $includedActivations) * $activationCount;
                 $item->set_subtotal($newTotal);
                 $item->set_total($newTotal);
+
+                $activationDelta = $activationCount - $includedActivations;
+                /* translators: 1: number of additional activations used 2: activation name (example: "with %1$s additional %2$s") */
+                $nameAddition = sprintf(_x('+ %1$s additional %2$s consumed.', 'Name appendage for additional activations', 'license-manager-for-woocommerce'), $activationDelta, $this->activationName);
+                $item->set_name($item->get_name() . '<br>' . $nameAddition);
 
                 $item->save();
 
@@ -307,12 +347,30 @@ class PricePerActivation
 
             error_log("LMFWC: Product with id #{$productId} has cost per activation.");
             $useCostPerActivation = true;
-            if ($useCostPerActivation) {
-                break;
-            }
+            break;
         }
 
         $subscriptionDetails['use_variable_usage_type'] = $useCostPerActivation;
-        return $subscriptionDetails;
+
+        return apply_filters('woocommerce_subscriptions_product_price_string_inclusions', $subscriptionDetails, wc_get_product($productId));
+    }
+
+    /**
+     * Returns the productId or the variationId of the variation with the lowest price.
+     *
+     * @param WC_Product $product
+     * @return int the ID of the product or variation
+     */
+    private function getProductOrVariationId($product) {
+        $productId = $product->get_id(); // product id or variation id
+        $hasParent = $product->get_parent_id() !== 0;
+
+        // get the variation id with the lowest price in case this is called for product with variations
+        if ($hasParent === true) {
+            $minMaxVarData = get_post_meta($product->get_parent_id(), '_min_max_variation_data', true);
+            $productId = $minMaxVarData['min']['variation_id'];
+        }
+
+        return $productId;
     }
 }
