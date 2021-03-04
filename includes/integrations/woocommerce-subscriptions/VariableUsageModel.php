@@ -26,10 +26,10 @@ defined('ABSPATH') || exit;
  * first order (parent order). To avoid this behaviour a trail period could be set on 
  * the product.
  */
-class PricePerActivation
+class VariableUsageModel
 {
     /**
-     * PricePerActivation constructor.
+     * VariableUsageModel constructor.
      */
     public function __construct()
     {
