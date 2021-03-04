@@ -366,7 +366,7 @@ class PricePerActivation
             $dom = new \DOMDocument;
             // To get rid of "DOMDocument::loadHTML(): Tag bdi invalid in Entity" warning.
             libxml_use_internal_errors(true); 
-            $dom->loadHTML($string);
+            $dom->loadHTML(str_replace('&nbsp;', '', $string));
             // clear errors
             libxml_clear_errors();
 
@@ -374,7 +374,13 @@ class PricePerActivation
             if ($nodes->length == 0)
                 throw new Exception();
 
-            $p = $nodes->item($nodes->length - 1)->lastChild->data;
+            $p = null;
+            foreach ($nodes->item($nodes->length - 1)->childNodes as $node) {
+                if ($node->nodeName !== '#text')
+                    continue;
+
+                $p = trim($node->data);
+            }
 
             if (empty($p))
                 throw new Exception();
