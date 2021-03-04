@@ -5,6 +5,7 @@ namespace LicenseManagerForWooCommerce\Integrations\WooCommerceSubscriptions;
 
 use WC_Cart;
 use WC_Order;
+use Exception;
 use WC_Product;
 use WC_Subscription;
 use WC_Stripe_Helper;
@@ -385,7 +386,7 @@ class PricePerActivation
             $p = (float) $integer . '.' . $fraction;
 
             return (int) ($p / $price) ?: 1;
-        } catch(\Exception $e) {
+        } catch(Exception $e) {
             return 1;
             error_log("Warning: (LMFWC) Could not determine quantity from total price string.");
         }
