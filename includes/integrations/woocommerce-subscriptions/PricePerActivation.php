@@ -40,25 +40,32 @@ class PricePerActivation
         add_filter('wcs_new_order_created', array($this, 'maybeChangeSubscriptionOrderQuantities'), 10, 3);                                 // intercepts the newly created order
     }
 
-    function maybeAddIncludeOptions($displayOptions, $product) {
-        $productId = $this->getProductOrVariationId($product);
-        if (!lmfwc_is_variable_subscription_model($productId)) {
+    function maybeAddIncludeOptions($displayOptions, $product) 
+    {
+        $productId = $product->get_id();
+        if (!lmfwc_is_variable_usage_model($productId)) {
             return $displayOptions;
         }
 
-        $displayOptions['display_included_activations'] = Settings::get(Subscription::SHOW_MAXIMUM_INCLUDED_ACTIVATIONS_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
-        $displayOptions['display_single_activation_price'] = Settings::get(Subscription::SHOW_SINGLE_ACTIVATION_PRICE_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
+        $displayOptions['display_included_activations'] = (bool) Settings::get(Subscription::SHOW_MAXIMUM_INCLUDED_ACTIVATIONS_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
+        $displayOptions['display_single_activation_price'] = (bool) Settings::get(Subscription::SHOW_SINGLE_ACTIVATION_PRICE_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
         $displayOptions['trial_length'] = false;
 
         $displayOptions['max_activations'] = lmfwc_get_maximum_included_activations($productId);
+
+        // Calculate the price per activation
         $displayOptions['price_per_activation'] = wc_price(
             WC_Subscriptions_Product::get_price($product) / $displayOptions['max_activations'], 
             array('decimals' => lmfwc_get_activation_price_decimals())
         );
 
-// echo '<pre>'; // TODO delete
-// print_r($displayOptions);
-// echo '</pre>';
+        // If on sale, calculate the regular price per activation
+        if (WC_Subscriptions_Product::get_price( $product ) < WC_Subscriptions_Product::get_regular_price( $product )) {
+            $displayOptions['regular_price_per_activation'] = '<del>' . wc_price(
+                WC_Subscriptions_Product::get_regular_price($product) / $displayOptions['max_activations'], 
+                array('decimals' => lmfwc_get_activation_price_decimals())
+            ) . '</del>';
+        }
 
         return $displayOptions;
     }
@@ -74,8 +81,18 @@ class PricePerActivation
      */
     function maybeCreateSubscriptionsProductPriceString($subscriptionString, $product, $include)
     {
-        $productId = $this->getProductOrVariationId($product);
-        if (!lmfwc_is_variable_subscription_model($productId)) {
+        $productId = $product->get_id(); // product id or variation id
+        $isMinimalVariation = $product->get_parent_id() === 0 && strpos($subscriptionString, '<span class="from">') !== false;
+
+        // get the variation id with the lowest price in case this is called for product with variations
+        // and a "From: subscription string is shown"
+        if ($isMinimalVariation) {
+            $minMaxVarData = get_post_meta($productId, '_min_max_variation_data', true);
+            $productId = $minMaxVarData['min']['variation_id'];
+            $include = apply_filters( 'woocommerce_subscriptions_product_price_string_inclusions', $include, wc_get_product($productId) );
+        }
+        
+        if (!lmfwc_is_variable_usage_model($productId)) {
             return $subscriptionString;
         }
 
@@ -88,17 +105,11 @@ class PricePerActivation
         $trialPeriod        = WC_Subscriptions_Product::get_trial_period( $product );
 
         $priceString = $include['price'];
-        
-        try {
-            $totalPriceString = substr($priceString, strpos($priceString, '</span>') + 7);
-            $quantity = (int) ((float) str_replace(',', '.', $totalPriceString) / $price);
-        } catch(\Exception $e) {
-            $quantity = 1;
-            error_log("Warning: (LMFWC) Could not determine quantity from total price string.");
-        }
-
-        $maxActivations = $include['max_activations'] * $quantity;
-        $pricePerActivation = $include['price_per_activation'];
+        $maxActivations = $include['max_activations'] * $this->getQuantityFromPriceString($priceString, $price);
+        $maxActivationsString = number_format($maxActivations, 0, wc_get_price_decimal_separator(), wc_get_price_thousand_separator());
+        $pricePerActivation = isset($include['regular_price_per_activation']) 
+                ? $include['regular_price_per_activation'] . ' ' . $include['price_per_activation'] 
+                : $include['price_per_activation'];
 
         /* translators: 1: amount to pay per period 2: subscription period (example: "9,95€ / month" or "19,95€ every 3 months") */
         $pricePerPeriod = $include['subscription_price'] && $include['subscription_period'] 
@@ -106,7 +117,7 @@ class PricePerActivation
                     : '';
         /* translators: 1: included activations 2: activation name (example: "with 10000 activations included") */
         $includedActivations = $maxActivations > 1 && $include['display_included_activations']
-                    ? sprintf(_x('with %1$s %2$s included', 'How many activations are included', 'license-manager-for-woocommerce'), $maxActivations, lmfwc_get_activation_name_string($maxActivations))
+                    ? sprintf(_x('with %1$s %2$s included', 'How many activations are included', 'license-manager-for-woocommerce'), $maxActivationsString, lmfwc_get_activation_name_string($maxActivations))
                     : '';
         /* translators: 1: amount to pay per activation 2: activation name (example: "+ € 0,003 per additional activation") */
         $singleActivationPrice = $include['display_single_activation_price']
@@ -144,7 +155,7 @@ class PricePerActivation
     {
         if (!isset($subscriptionDetails['use_variable_usage_type']) || $subscriptionDetails['use_variable_usage_type'] === false) {
             return $subscriptionString;
-        } 
+        }
 
         $amount = $subscriptionDetails['recurring_amount'];
         $interval = $subscriptionDetails['subscription_interval'];
@@ -241,7 +252,7 @@ class PricePerActivation
                 $productId = $item->get_product_id();
             }
 
-            if (!lmfwc_is_variable_subscription_model($productId)) {
+            if (!lmfwc_is_variable_usage_model($productId)) {
                 error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
                 continue;
             }
@@ -331,7 +342,7 @@ class PricePerActivation
                 $productId = $item['product_id'];
             }
 
-            if (!lmfwc_is_variable_subscription_model($productId)) {
+            if (!lmfwc_is_variable_usage_model($productId)) {
                 error_log("LMFWC: Skipped product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
                 continue;
             }
@@ -346,22 +357,37 @@ class PricePerActivation
         return apply_filters('woocommerce_subscriptions_product_price_string_inclusions', $subscriptionDetails, wc_get_product($productId));
     }
 
-    /**
-     * Returns the productId or the variationId of the variation with the lowest price.
-     *
-     * @param WC_Product $product
-     * @return int the ID of the product or variation
-     */
-    private function getProductOrVariationId($product) {
-        $productId = $product->get_id(); // product id or variation id
-        $hasParent = $product->get_parent_id() !== 0;
+    private function getQuantityFromPriceString($string, $price) 
+    {
+        try {
+            $decimals = wc_get_price_decimals();
 
-        // get the variation id with the lowest price in case this is called for product with variations
-        if ($hasParent === true) {
-            $minMaxVarData = get_post_meta($product->get_parent_id(), '_min_max_variation_data', true);
-            $productId = $minMaxVarData['min']['variation_id'];
+            $dom = new \DOMDocument;
+            // To get rid of "DOMDocument::loadHTML(): Tag bdi invalid in Entity" warning.
+            libxml_use_internal_errors(true); 
+            $dom->loadHTML($string);
+            // clear errors
+            libxml_clear_errors();
+
+            $nodes = $dom->getElementsByTagName('bdi');
+            if ($nodes->length == 0)
+                throw new Exception();
+
+            $p = $nodes->item($nodes->length - 1)->lastChild->data;
+
+            if (empty($p))
+                throw new Exception();
+
+            $fraction = substr($p, -$decimals);
+            $integer = substr($p, 0, -$decimals);
+            $integer = str_replace(',', '', $integer);
+            $integer = str_replace('.', '', $integer);
+            $p = (float) $integer . '.' . $fraction;
+
+            return (int) ($p / $price) ?: 1;
+        } catch(\Exception $e) {
+            return 1;
+            error_log("Warning: (LMFWC) Could not determine quantity from total price string.");
         }
-
-        return $productId;
     }
 }

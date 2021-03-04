@@ -342,13 +342,13 @@ function lmfwc_get_subscription_renewal_custom_period($productId) {
 }
 
 /**
- * Returns true if the product id (variation id) is configured to be a variable subscription model in case of a
+ * Returns true if the product id (variation id) is configured to be a variable usage model in case of a
  * WooCommerce Subscriptions renewal order.
  *
  * @param int $productId
  * @return boolean
  */
-function lmfwc_is_variable_subscription_model($productId) {
+function lmfwc_is_variable_usage_model($productId) {
     return lmfwc_is_licensed_product($productId)
                 && lmfwc_get_subscription_model_type($productId) === 'variable_usage_type'
                 && lmfwc_get_subscription_renewal_action($productId) === 'extend_existing_license'
