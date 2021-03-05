@@ -1,7 +1,7 @@
-jQuery(function($) {
-	'use strict';
+jQuery( function ( $ ) {
+    'use strict';
 
-	const selectUser = $('select#user');
+    const selectUser = $( 'select#user' );
 
-	if (selectUser) selectUser.select2();
-});
+    if (selectUser) selectUser.select2();
+} );

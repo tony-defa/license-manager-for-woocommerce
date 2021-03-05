@@ -1,8 +1,8 @@
-jQuery(function($) {
+jQuery( function ( $ ) {
     'use strict';
 
-    let generateLicenseKeysProduct = $('select#generate__product');
-    let generateLicenseKeysOrder   = $('select#generate__order');
+    let generateLicenseKeysProduct = $( 'select#generate__product' );
+    let generateLicenseKeysOrder   = $( 'select#generate__order' );
 
     const productDropdownSearchConfig = {
         ajax: {
@@ -11,20 +11,20 @@ jQuery(function($) {
             url: ajaxurl,
             method: 'GET',
             dataType: 'json',
-            data: function(params) {
+            data: function ( params ) {
                 return {
                     action: 'woocommerce_json_search_products_and_variations',
                     security: security.productSearch,
                     term: params.term
                 };
             },
-            processResults: function(data) {
+            processResults: function ( data ) {
                 let terms = [];
 
                 if (data) {
-                    $.each(data, function(id, text) {
-                        terms.push({ id: id, text: text });
-                    });
+                    $.each( data, function ( id, text ) {
+                        terms.push( {id: id, text: text} );
+                    } );
                 }
 
                 return {
@@ -36,14 +36,14 @@ jQuery(function($) {
         minimumInputLength: 1,
         allowClear: true
     };
-    const orderDropdownSearchConfig = {
+    const orderDropdownSearchConfig   = {
         ajax: {
             cache: true,
             delay: 500,
             url: ajaxurl,
             method: 'POST',
             dataType: 'json',
-            data: function(params) {
+            data: function ( params ) {
                 return {
                     action: 'lmfwc_dropdown_order_search',
                     security: security.orderSearch,
@@ -51,7 +51,7 @@ jQuery(function($) {
                     page: params.page
                 };
             },
-            processResults: function(data, params) {
+            processResults: function ( data, params ) {
                 params.page = params.page || 1;
 
                 return {
@@ -68,10 +68,10 @@ jQuery(function($) {
     };
 
     if (generateLicenseKeysProduct) {
-        generateLicenseKeysProduct.select2(productDropdownSearchConfig);
+        generateLicenseKeysProduct.select2( productDropdownSearchConfig );
     }
 
     if (generateLicenseKeysOrder) {
-        generateLicenseKeysOrder.select2(orderDropdownSearchConfig);
+        generateLicenseKeysOrder.select2( orderDropdownSearchConfig );
     }
-});
+} );

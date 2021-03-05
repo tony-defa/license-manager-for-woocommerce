@@ -2,26 +2,24 @@
 
 namespace LicenseManagerForWooCommerce\Abstracts;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
-abstract class Singleton
-{
-    /**
-     * @var $this[]
-     */
-    protected static $instance = array();
+abstract class Singleton {
+	/**
+	 * @var $this []
+	 */
+	protected static $instance = array();
 
-    /**
-     * @return $this
-     */
-    public static function instance()
-    {
-        $class = get_called_class();
+	/**
+	 * @return $this
+	 */
+	public static function instance() {
+		$class = get_called_class();
 
-        if (!array_key_exists($class, self::$instance)) {
-            self::$instance[$class] = new $class();
-        }
+		if ( ! array_key_exists( $class, self::$instance ) ) {
+			self::$instance[ $class ] = new $class();
+		}
 
-        return self::$instance[$class];
-    }
+		return self::$instance[ $class ];
+	}
 }

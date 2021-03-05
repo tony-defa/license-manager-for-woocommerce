@@ -1,6 +1,6 @@
 <?php
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @var string $migrationMode
@@ -12,13 +12,13 @@ use LicenseManagerForWooCommerce\Setup;
 /**
  * Upgrade
  */
-if ($migrationMode === Migration::MODE_UP) {
-    Setup::createRoles();
+if ( $migrationMode === Migration::MODE_UP ) {
+	Setup::createRoles();
 }
 
 /**
  * Downgrade
  */
-if ($migrationMode === Migration::MODE_DOWN) {
-    Setup::removeRoles();
+if ( $migrationMode === Migration::MODE_DOWN ) {
+	Setup::removeRoles();
 }

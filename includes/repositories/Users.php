@@ -2,30 +2,27 @@
 
 namespace LicenseManagerForWooCommerce\Repositories;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
-class Users
-{
-    /**
-     * Adds all filters for interaction with the database table.
-     */
-    public function __construct()
-    {
-        // SELECT
-        add_filter('lmfwc_get_users', array($this, 'getUsers'), 10, 0);
-    }
+class Users {
+	/**
+	 * Adds all filters for interaction with the database table.
+	 */
+	public function __construct() {
+		// SELECT
+		add_filter( 'lmfwc_get_users', array( $this, 'getUsers' ), 10, 0 );
+	}
 
-    /**
-     * Retrieve assigned products for a specific generator.
-     *
-     * @return array
-     */
-    public function getUsers()
-    {
-        global $wpdb;
+	/**
+	 * Retrieve assigned products for a specific generator.
+	 *
+	 * @return array
+	 */
+	public function getUsers() {
+		global $wpdb;
 
-        return $wpdb->get_results( 
-            "
+		return $wpdb->get_results(
+			"
                 SELECT
                     ID
                     , user_login
@@ -33,8 +30,8 @@ class Users
                 FROM
                     {$wpdb->users}
             ",
-            OBJECT
-        );
-    }
+			OBJECT
+		);
+	}
 
 }

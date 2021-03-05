@@ -1,26 +1,26 @@
 <?php
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @var string $migrationMode
  */
 
-use LicenseManagerForWooCommerce\Setup;
 use LicenseManagerForWooCommerce\Migration;
+use LicenseManagerForWooCommerce\Setup;
 
 $tableLicenseMeta = $wpdb->prefix . Setup::LICENSE_META_TABLE_NAME;
 
 /**
  * Upgrade
  */
-if ($migrationMode === Migration::MODE_UP) {
+if ( $migrationMode === Migration::MODE_UP ) {
 
-    if (!function_exists('dbDelta')) {
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-    }
+	if ( ! function_exists( 'dbDelta' ) ) {
+		require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );
+	}
 
-    dbDelta("
+	dbDelta( "
         CREATE TABLE IF NOT EXISTS $tableLicenseMeta (
             `meta_id` BIGINT(20) UNSIGNED AUTO_INCREMENT,
             `license_id` BIGINT(20) UNSIGNED DEFAULT 0 NOT NULL,
@@ -32,26 +32,26 @@ if ($migrationMode === Migration::MODE_UP) {
             `updated_by` BIGINT(20) NULL DEFAULT NULL,
             PRIMARY KEY (`meta_id`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8
-    ");
+    " );
 
-    $settingsGeneral = get_option('lmfwc_settings');
+	$settingsGeneral = get_option( 'lmfwc_settings' );
 
-    if ($settingsGeneral) {
-        add_option('lmfwc_settings_general', $settingsGeneral);
-        delete_option('lmfwc_settings');
-    }
+	if ( $settingsGeneral ) {
+		add_option( 'lmfwc_settings_general', $settingsGeneral );
+		delete_option( 'lmfwc_settings' );
+	}
 }
 
 /**
  * Downgrade
  */
-if ($migrationMode === Migration::MODE_DOWN) {
-    $wpdb->query("DROP TABLE IF EXISTS {$tableLicenseMeta}");
+if ( $migrationMode === Migration::MODE_DOWN ) {
+	$wpdb->query( "DROP TABLE IF EXISTS {$tableLicenseMeta}" );
 
-    $settingsGeneral = get_option('lmfwc_settings_general');
+	$settingsGeneral = get_option( 'lmfwc_settings_general' );
 
-    if ($settingsGeneral) {
-        add_option('lmfwc_settings', $settingsGeneral);
-        delete_option('lmfwc_settings_general');
-    }
+	if ( $settingsGeneral ) {
+		add_option( 'lmfwc_settings', $settingsGeneral );
+		delete_option( 'lmfwc_settings_general' );
+	}
 }

@@ -13,41 +13,41 @@
  * happen. When this occurs the version of the template file will be bumped and
  * the readme will list any important changes.
  *
- * @var string   $email_heading The email's heading, as defined in the settings
- * @var WC_Order $order         The WooCommerce order object
- * @var bool     $sent_to_admin True if email was sent to admin as well
- * @var bool     $plain_text    True if email is plain text
- * @var WC_Email $email         The WooCommerce email object
+ * @var string $email_heading The email's heading, as defined in the settings
+ * @var WC_Order $order The WooCommerce order object
+ * @var bool $sent_to_admin True if email was sent to admin as well
+ * @var bool $plain_text True if email is plain text
+ * @var WC_Email $email The WooCommerce email object
  *
  * @version 2.3.0
  */
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @hooked WC_Emails::email_header() Output the email header
  */
-do_action('woocommerce_email_header', $email_heading, $email);
+do_action( 'woocommerce_email_header', $email_heading, $email );
 
 /**
  * Adds the ordered license keys table.
  */
-do_action('lmfwc_email_order_licenses', $order, $sent_to_admin, $plain_text, $email);
+do_action( 'lmfwc_email_order_licenses', $order, $sent_to_admin, $plain_text, $email );
 
 /**
  * @hooked WC_Emails::customer_details() Shows customer details
  * @hooked WC_Emails::email_address() Shows email address
  */
-do_action('woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email);
+do_action( 'woocommerce_email_customer_details', $order, $sent_to_admin, $plain_text, $email );
 
 /**
  * Show user-defined additional content - this is set in each email's settings.
  */
-if ($email->settings['additional_content']) {
-    echo wp_kses_post(wpautop(wptexturize($email->settings['additional_content'])));
+if ( $email->settings['additional_content'] ) {
+	echo wp_kses_post( wpautop( wptexturize( $email->settings['additional_content'] ) ) );
 }
 
 /**
  * @hooked WC_Emails::email_footer() Output the email footer
  */
-do_action('woocommerce_email_footer', $email);
+do_action( 'woocommerce_email_footer', $email );
