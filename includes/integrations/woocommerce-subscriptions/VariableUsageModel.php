@@ -3,6 +3,7 @@
 
 namespace LicenseManagerForWooCommerce\Integrations\WooCommerceSubscriptions;
 
+use WC_Tax;
 use WC_Cart;
 use WC_Order;
 use Exception;
@@ -38,7 +39,7 @@ class VariableUsageModel
         add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received
         add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailFromCart'), 10, 2);              // cart, checkout
         add_filter('woocommerce_subscription_price_string_details', array($this, 'maybeAddSubscriptionDetailFromSubscription'), 10, 2);     // subscriptions (admin), order received, email?
-        add_filter('wcs_new_order_created', array($this, 'maybeChangeSubscriptionOrderQuantities'), 10, 3);                                 // intercepts the newly created order
+        add_filter('wcs_renewal_order_items', array($this, 'maybeAddNewOrderItem'), 10, 3);                                                 // intercepts all items just before they are converted to order items
     }
 
     function maybeAddIncludeOptions($displayOptions, $product) 
@@ -52,18 +53,36 @@ class VariableUsageModel
         $displayOptions['display_single_activation_price'] = (bool) Settings::get(Subscription::SHOW_SINGLE_ACTIVATION_PRICE_FIELD_NAME, Settings::SECTION_SUBSCRIPTION);
         $displayOptions['trial_length'] = false;
 
+        if (isset($displayOptions['price']))
+            $displayOptions['price_string'] = $displayOptions['price'];
+
+        $displayOptions['tax_calculation'] = isset($displayOptions['tax_calculation']) 
+            ? $displayOptions['tax_calculation'] 
+            : get_option( 'woocommerce_tax_display_shop' );
+
+        if ($displayOptions['tax_calculation'] !== 'excl') {
+            $displayOptions['price'] = WC_Subscriptions_Product::get_price($product);
+            $displayOptions['regular_price'] = WC_Subscriptions_Product::get_regular_price($product);
+        } else {
+            $displayOptions['price'] = wcs_get_price_excluding_tax($product);
+            $displayOptions['regular_price'] = wcs_get_price_excluding_tax(
+                $product,
+                array('price' => WC_Subscriptions_Product::get_regular_price($product))
+            );
+        }
+
         $displayOptions['max_activations'] = lmfwc_get_maximum_included_activations($productId);
 
         // Calculate the price per activation
         $displayOptions['price_per_activation'] = wc_price(
-            WC_Subscriptions_Product::get_price($product) / $displayOptions['max_activations'], 
+            $displayOptions['price'] / $displayOptions['max_activations'], 
             array('decimals' => lmfwc_get_activation_price_decimals())
         );
 
         // If on sale, calculate the regular price per activation
-        if (WC_Subscriptions_Product::get_price( $product ) < WC_Subscriptions_Product::get_regular_price( $product )) {
+        if ($displayOptions['price'] < $displayOptions['regular_price']) {
             $displayOptions['regular_price_per_activation'] = '<del>' . wc_price(
-                WC_Subscriptions_Product::get_regular_price($product) / $displayOptions['max_activations'], 
+                $displayOptions['regular_price'] / $displayOptions['max_activations'], 
                 array('decimals' => lmfwc_get_activation_price_decimals())
             ) . '</del>';
         }
@@ -97,7 +116,6 @@ class VariableUsageModel
             return $subscriptionString;
         }
 
-        $price              = WC_Subscriptions_Product::get_price( $product );
         $signUpFee          = WC_Subscriptions_Product::get_sign_up_fee( $product );
 		$billingInterval    = WC_Subscriptions_Product::get_interval( $product );
 		$billingPeriod      = WC_Subscriptions_Product::get_period( $product );
@@ -105,7 +123,8 @@ class VariableUsageModel
 		$trialLength        = WC_Subscriptions_Product::get_trial_length( $product );
         $trialPeriod        = WC_Subscriptions_Product::get_trial_period( $product );
 
-        $priceString = $include['price'];
+        $price = $include['price'];
+        $priceString = $include['price_string'];
         $maxActivations = $include['max_activations'] * $this->getQuantityFromPriceString($priceString, $price);
         $maxActivationsString = number_format($maxActivations, 0, wc_get_price_decimal_separator(), wc_get_price_thousand_separator());
         $pricePerActivation = isset($include['regular_price_per_activation']) 
@@ -222,17 +241,17 @@ class VariableUsageModel
     }
 
     /**
-     * Changes the quantity and recalculates totals based on license activations, if the items 
+     * Add additional activation item based on license activations, if the items 
      * contained in the order are setup with the 'variable_usage_type' meta.
      *
+     * @param WC_Order_Item[] $items            a list of order items from the parent order
      * @param WC_Order $newOrder                the newly created order
      * @param WC_Subscription $subscription     the subscription of the created order
-     * @param string $type                      a string of order type, should be 'renewal_order'
-     * @return WC_Order                         the modified order
+     * @return WC_Order_Item[]                  a list of order items that will be integrated in the new order
      */
-    public function maybeChangeSubscriptionOrderQuantities($newOrder, $subscription, $type)
+    public function maybeAddNewOrderItem($items, $newOrder, $subscription)
     {
-        if ($type !== 'renewal_order' || !wcs_is_subscription($subscription)) {
+        if (!wcs_is_subscription($subscription)) {
             error_log("LMFWC: Skipped because is not valid subscription renewal order.");
             return $newOrder;
         }
@@ -240,13 +259,14 @@ class VariableUsageModel
         /** @var int $parentOrderId */
         $parentOrderId = $subscription->get_parent_id();
 
-        /** @var WC_Order_Item[] $items */
-        $items = $newOrder->get_items();
         if (!$items) {
             error_log("LMFWC: Skipped order #{$newOrder->get_id()} because no items are contained.");
+            return $items;
         }
-
+        
         foreach ($items as $item) {
+            if (!$item->is_type('line_item'))
+                continue;
 
             /** @var int $productId */
             if (!$productId = $item->get_variation_id()) {
@@ -288,49 +308,82 @@ class VariableUsageModel
                 error_log("LMFWC: License activated {$license->getTimesActivated()} times.");
             }
 
-            if ($activationCount > $includedActivations) {
-                // $item->set_quantity($activationCount); // TODO decide if the quantity should be the number of consumed credits
-
-                $newTotal = ($subscriptionPrice / $includedActivations) * $activationCount;
-                $item->set_subtotal($newTotal);
-                $item->set_total($newTotal);
-
-                $activationDelta = $activationCount - $includedActivations;
-                /* translators: 1: number of additional activations used 2: activation name (example: "+ 3 additional activations") */
-                $nameAddition = sprintf(_x('+ %1$s additional %2$s consumed.', 'Name appendage for additional activations', 'license-manager-for-woocommerce'), $activationDelta, lmfwc_get_activation_name_string($activationDelta));
-                $item->set_name($item->get_name() . '<br>' . $nameAddition);
-
-                $item->save();
-
-                error_log("LMFWC: The new total of the item #{$item->get_id()} is {$newTotal}.");
-            } else {
-                error_log("LMFWC: The total of the item #{$item->get_id()} is not changed.");
+            if ($activationCount <= $includedActivations) {
+                error_log("LMFWC: Skipped because activation count is less or equal to the included activations.");
+                continue;
             }
-        }
 
-        $newOrder->calculate_totals();
+            $activationDelta = $activationCount - $includedActivations;
+            $activationPrice = $subscriptionPrice / $includedActivations;
+            $newTotal = $activationPrice * $activationDelta;
+            /* translators: 1: activation name (example: "Additional activations") */
+            $nameAddition = sprintf(_x('Additional %1$s consumed', 'Name appendage for additional activations', 'license-manager-for-woocommerce'), lmfwc_get_activation_name_string($activationDelta));
 
-        // TODO: figure out what to do with orders where the total is below the minimum excepted expenditure but not 0 € (e.g. stripe minimum 0.50 €)
-        if ($newOrder->get_total() > 0) {
+            if (!$newOrder->meta_exists('_has_additional_activation_item'))
+                $newOrder->add_meta_data('_has_additional_activation_item', true);
+
+            // create a new item with additional activation
+            $newItem = new WC_Order_Item_Product();
+            $newItem->set_order_id($item->get_order_id());
+            $newItem->set_product_id($item->get_product_id());
+            $newItem->set_variation_id($item->get_variation_id());
+            $newItem->set_tax_class($item->get_tax_class());
+            $newItem->set_quantity($activationDelta);
+            $newItem->set_name($nameAddition);
+            $newItem->set_subtotal($newTotal);
+            $newItem->set_total($newTotal);
+            $newItem->add_meta_data('_is_additional_activation_item', true);
+
+            // calculate taxes if necessary
+            if ( '0' !== $item->get_tax_class() && $item->get_tax_status() === 'taxable' && wc_tax_enabled()) {
+                $rates = WC_Tax::get_rates($item->get_tax_class());
+                $taxes['total'] = WC_Tax::calc_tax($newItem->get_total(), $rates);
+                $taxes['subtotal'] = WC_Tax::calc_tax($newItem->get_subtotal(), $rates);
+                $newItem->set_taxes($taxes);
+            }
             
-            /** @var false|WC_Order $parentOrder */
-            $parentOrder = wc_get_order($parentOrderId);
+            $items[] = $newItem;
 
-            $gateway = $parentOrder->get_payment_method();
-            switch ($gateway) {
-                case 'stripe':
-                    if ($newOrder->get_total() * 100 < WC_Stripe_Helper::get_minimum_amount()) { // multiply by 100 because WC_Stripe_Helper cent values
-                        // payment is below minimum amount
-                        error_log("LMFWC: stripe error: Total order amount lower than minimum allowed amount from stripe");
+            error_log("LMFWC: The new total of the item #{$item->get_id()} is {$newTotal}.");
+        }
+
+        $lineItems = array_filter($items, function($it) {
+            return $it->is_type('line_item');
+        });
+
+        $taxItems = array_filter($items, function($it) {
+            return $it->is_type('tax');
+        });
+
+        $lineItemTotals = 0;
+        $lineItemTotalsTax = 0;
+        foreach ($lineItems as $item) {
+            $lineItemTotals += $item->get_total();
+
+            // calculate taxes if necessary
+            if ('0' !== $item->get_tax_class() && $item->get_tax_status() === 'taxable' && wc_tax_enabled()) {
+                $lineItemTotals += $item->get_total_tax();
+                $lineItemTotalsTax += $item->get_total_tax();
+
+                // add the tax totals to the corresponding tax order items
+                if ($item->get_meta('_is_additional_activation_item')) {
+                    $rates = WC_Tax::get_rates($item->get_tax_class());
+                    foreach ($rates as $rateId => $ignore) {
+                        foreach ($taxItems as $taxItem) {
+                            if ($taxItem->get_rate_id() === $rateId) {
+                                $tax = (float) $taxItem->get_tax_total();
+                                $taxItem->set_tax_total($tax + $item->get_total_tax());
+                            }
+                        }
                     }
-                    break;
-                
-                default:
-                    break;
+                }
             }
         }
 
-        return $newOrder;
+        $newOrder->set_total($lineItemTotals);
+        $newOrder->set_cart_tax($lineItemTotalsTax);
+
+        return $items;
     }
 
     private function addDetailBasedOnItems($subscriptionDetails, $items) {
