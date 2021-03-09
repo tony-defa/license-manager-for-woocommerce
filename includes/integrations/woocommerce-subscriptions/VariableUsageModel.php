@@ -316,8 +316,16 @@ class VariableUsageModel
             $activationDelta = $activationCount - $includedActivations;
             $activationPrice = $subscriptionPrice / $includedActivations;
             $newTotal = $activationPrice * $activationDelta;
-            /* translators: 1: activation name (example: "Additional activations") */
-            $nameAddition = sprintf(_x('Additional %1$s consumed', 'Name appendage for additional activations', 'license-manager-for-woocommerce'), lmfwc_get_activation_name_string($activationDelta));
+
+            if ((bool) Settings::get(Subscription::DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME, Settings::SECTION_SUBSCRIPTION)) {
+                $newQuantity = 1;
+                /* translators: 1: additional activation count 2: activation name (example: "123 additional activations consumed") */
+                $nameAddition = sprintf(_x('%1$s additional %2$s consumed', 'Line item name for additional activations with count', 'license-manager-for-woocommerce'), $activationDelta, lmfwc_get_activation_name_string($activationDelta));
+            } else {
+                $newQuantity = $activationDelta;
+                /* translators: 1: activation name (example: "Additional activations consumed") */
+                $nameAddition = sprintf(_x('Additional %1$s consumed', 'Line item name for additional activations', 'license-manager-for-woocommerce'), lmfwc_get_activation_name_string($activationDelta));
+            }
 
             if (!$newOrder->meta_exists('_has_additional_activation_item'))
                 $newOrder->add_meta_data('_has_additional_activation_item', true);
@@ -328,7 +336,7 @@ class VariableUsageModel
             $newItem->set_product_id($item->get_product_id());
             $newItem->set_variation_id($item->get_variation_id());
             $newItem->set_tax_class($item->get_tax_class());
-            $newItem->set_quantity($activationDelta);
+            $newItem->set_quantity($newQuantity);
             $newItem->set_name($nameAddition);
             $newItem->set_subtotal($newTotal);
             $newItem->set_total($newTotal);

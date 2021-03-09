@@ -40,6 +40,11 @@ class Subscription
     public const ACTIVATION_PRICE_DECIMALS_FIELD_NAME = 'lmfwc_activation_price_decimals';
 
     /**
+     * @var string
+     */
+    public const DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME = 'lmfwc_display_additional_activations_unit';
+
+    /**
      * @var array
      */
     private $settings;
@@ -85,7 +90,7 @@ class Subscription
      * @return void
      */
     private function initSectionVariableUsage()
-    {        
+    {
         add_settings_section(
             'variable_usage_section',
             __('Variable Usage Model', 'license-manager-for-woocommerce'),
@@ -113,6 +118,14 @@ class Subscription
             self::SHOW_SINGLE_ACTIVATION_PRICE_FIELD_NAME,
             __('Display activation price', 'license-manager-for-woocommerce'),
             array($this, 'fieldDisplayActivationPrice'),
+            'lmfwc_variable_usage_model_type',
+            'variable_usage_section'
+        );
+
+        add_settings_field(
+            self::DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME,
+            __('Display activation quantities', 'license-manager-for-woocommerce'),
+            array($this, 'fieldDisplayAdditionalActivationUnit'),
             'lmfwc_variable_usage_model_type',
             'variable_usage_section'
         );
@@ -219,7 +232,36 @@ class Subscription
         $html .= '</label>';
         $html .= sprintf(
             '<p class="description">%s</p>',
-            __('Displays the cost of a single in the price string on the product page and cart.', 'license-manager-for-woocommerce')
+            __('Displays the cost of a single activation in the price string on the product page and cart.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</fieldset>';
+
+        echo $html;
+    }
+
+    /**
+     * Callback for the "lmfwc_display_additional_activations_unit" field.
+     *
+     * @return void
+     */
+    public function fieldDisplayAdditionalActivationUnit()
+    {
+        $field = self::DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME;
+        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
+
+        $html = '<fieldset>';
+        $html .= sprintf('<label for="%s">', $field);
+        $html .= sprintf(
+            '<input id="%s" type="checkbox" name="'.Settings::SECTION_SUBSCRIPTION.'[%s]" value="1" %s/>',
+            $field,
+            $field,
+            checked(true, $value, false)
+        );
+        $html .= sprintf('<span>%s</span>', __('Show additional activations as 1.', 'license-manager-for-woocommerce'));
+        $html .= '</label>';
+        $html .= sprintf(
+            '<p class="description">%s</p>',
+            __('Displays the quantity count as 1, in the customer receipt for a renewal order, instead of the real activation quantities. Useful for when the activation price is lower than the number of decimals set by WooCommerce.', 'license-manager-for-woocommerce')
         );
         $html .= '</fieldset>';
 
