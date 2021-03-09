@@ -316,6 +316,7 @@ class VariableUsageModel
             $activationDelta = $activationCount - $includedActivations;
             $activationPrice = $subscriptionPrice / $includedActivations;
             $newTotal = $activationPrice * $activationDelta;
+            $newTotal = round($newTotal, wc_get_price_decimals());
 
             if ((bool) Settings::get(Subscription::DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME, Settings::SECTION_SUBSCRIPTION)) {
                 $newQuantity = 1;
