@@ -39,7 +39,7 @@ class VariableUsageModel
         add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // cart, checkout, order received
         add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailFromCart'), 10, 2);              // cart, checkout
         add_filter('woocommerce_subscription_price_string_details', array($this, 'maybeAddSubscriptionDetailFromSubscription'), 10, 2);     // subscriptions (admin), order received, email?
-        add_filter('wcs_renewal_order_items', array($this, 'maybeAddNewOrderItem'), 10, 3);                                                 // intercepts all items just before they are converted to order items
+        add_filter('wcs_renewal_order_items', array($this, 'maybeAddNewLineItem'), 10, 3);                                                 // intercepts all items just before they are converted to order items
     }
 
     function maybeAddIncludeOptions($displayOptions, $product) 
@@ -249,7 +249,7 @@ class VariableUsageModel
      * @param WC_Subscription $subscription     the subscription of the created order
      * @return WC_Order_Item[]                  a list of order items that will be integrated in the new order
      */
-    public function maybeAddNewOrderItem($items, $newOrder, $subscription)
+    public function maybeAddNewLineItem($items, $newOrder, $subscription)
     {
         if (!wcs_is_subscription($subscription)) {
             error_log("LMFWC: Skipped because is not valid subscription renewal order.");
