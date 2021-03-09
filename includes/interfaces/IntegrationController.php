@@ -2,8 +2,7 @@
 
 namespace LicenseManagerForWooCommerce\Interfaces;
 
-defined('ABSPATH') || exit();
+defined( 'ABSPATH' ) || exit();
 
-interface IntegrationController
-{
+interface IntegrationController {
 }

@@ -4,39 +4,36 @@ namespace LicenseManagerForWooCommerce\Repositories;
 
 use Exception;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
-class PostMeta
-{
-    /**
-     * Adds all filters for interaction with the database table.
-     */
-    public function __construct()
-    {
-        add_filter('lmfwc_get_assigned_products', array($this, 'getAssignedProducts'), 10, 1);
-    }
+class PostMeta {
+	/**
+	 * Adds all filters for interaction with the database table.
+	 */
+	public function __construct() {
+		add_filter( 'lmfwc_get_assigned_products', array( $this, 'getAssignedProducts' ), 10, 1 );
+	}
 
-    /**
-     * Retrieve assigned products for a specific generator.
-     *
-     * @param int $generatorId
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function getAssignedProducts($generatorId)
-    {
-        $cleanGeneratorId = $generatorId ? absint($generatorId) : null;
+	/**
+	 * Retrieve assigned products for a specific generator.
+	 *
+	 * @param int $generatorId
+	 *
+	 * @return array
+	 * @throws Exception
+	 */
+	public function getAssignedProducts( $generatorId ) {
+		$cleanGeneratorId = $generatorId ? absint( $generatorId ) : null;
 
-        if (!$cleanGeneratorId) {
-            throw new Exception('Generator ID is invalid.');
-        }
+		if ( ! $cleanGeneratorId ) {
+			throw new Exception( 'Generator ID is invalid.' );
+		}
 
-        global $wpdb;
+		global $wpdb;
 
-        $results = $wpdb->get_results(
-            $wpdb->prepare(
-                "
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"
                     SELECT
                         post_id
                     FROM
@@ -46,27 +43,27 @@ class PostMeta
                         AND meta_key = %s
                         AND meta_value = %d
                 ",
-                'lmfwc_licensed_product_assigned_generator',
-                $cleanGeneratorId
-            ),
-            OBJECT
-        );
+				'lmfwc_licensed_product_assigned_generator',
+				$cleanGeneratorId
+			),
+			OBJECT
+		);
 
-        if ($results) {
-            $products = [];
+		if ( $results ) {
+			$products = [];
 
-            foreach ($results as $row) {
-                if (!$product = wc_get_product($row->post_id)) {
-                    continue;
-                }
+			foreach ( $results as $row ) {
+				if ( ! $product = wc_get_product( $row->post_id ) ) {
+					continue;
+				}
 
-                $products[] = $product;
-            }
-        } else {
-            $products = [];
-        }
+				$products[] = $product;
+			}
+		} else {
+			$products = [];
+		}
 
-        return $products;
-    }
+		return $products;
+	}
 
 }
