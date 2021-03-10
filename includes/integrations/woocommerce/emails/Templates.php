@@ -5,7 +5,7 @@ namespace LicenseManagerForWooCommerce\Integrations\WooCommerce\Emails;
 use WC_Email;
 use WC_Order;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 class Templates
 {
@@ -18,22 +18,21 @@ class Templates
         add_action('lmfwc_email_consumption_details',  array($this, 'addConsumptionDetails'),   10, 6);
     }
 
-    /**
-     * Adds basic order info to the email body.
-     *
-     * @param WC_Order $order       WooCommerce Order
-     * @param bool     $sentToAdmin Determines if the email is sent to the admin
-     * @param bool     $plainText   Determines if a plain text or HTML email will be sent
-     * @param WC_Email $email       WooCommerce Email
-     */
-    public function orderLicenses($order, $sentToAdmin, $plainText, $email)
-    {
-        $args = array(
-            'order' => $order,
-            'data'  => null
-        );
+	/**
+	 * Adds basic order info to the email body.
+	 *
+	 * @param WC_Order $order WooCommerce Order
+	 * @param bool $sentToAdmin Determines if the email is sent to the admin
+	 * @param bool $plainText Determines if a plain text or HTML email will be sent
+	 * @param WC_Email $email WooCommerce Email
+	 */
+	public function orderLicenses( $order, $sentToAdmin, $plainText, $email ) {
+		$args = array(
+			'order' => $order,
+			'data'  => null
+		);
 
-        $customerLicenseKeys = apply_filters('lmfwc_get_customer_license_keys', $args);
+		$customerLicenseKeys = apply_filters( 'lmfwc_get_customer_license_keys', $args );
 
         if ($plainText) {
             echo wc_get_template(

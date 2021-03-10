@@ -1,30 +1,30 @@
 <?php
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @var string $migrationMode
  */
 
-use LicenseManagerForWooCommerce\Setup;
 use LicenseManagerForWooCommerce\Migration;
+use LicenseManagerForWooCommerce\Setup;
 
-$tableLicenses = $wpdb->prefix . Setup::LICENSES_TABLE_NAME;
+$tableLicenses   = $wpdb->prefix . Setup::LICENSES_TABLE_NAME;
 $tableGenerators = $wpdb->prefix . Setup::GENERATORS_TABLE_NAME;
 
-if ($wpdb->get_var("SHOW TABLES LIKE '{$tableLicenses}'") != $tableLicenses) {
-    return;
+if ( $wpdb->get_var( "SHOW TABLES LIKE '{$tableLicenses}'" ) != $tableLicenses ) {
+	return;
 }
 
-if ($wpdb->get_var("SHOW TABLES LIKE '{$tableGenerators}'") != $tableGenerators) {
-    return;
+if ( $wpdb->get_var( "SHOW TABLES LIKE '{$tableGenerators}'" ) != $tableGenerators ) {
+	return;
 }
 
 /**
  * Upgrade
  */
-if ($migrationMode === Migration::MODE_UP) {
-    $sql = "
+if ( $migrationMode === Migration::MODE_UP ) {
+	$sql = "
         ALTER TABLE {$tableLicenses}
             CHANGE COLUMN `license_key` `license_key` LONGTEXT NOT NULL COMMENT 'Encrypted License Key' AFTER `product_id`,
             CHANGE COLUMN `hash` `hash` LONGTEXT NOT NULL COMMENT 'Hashed License Key ID' AFTER `license_key`,
@@ -36,21 +36,21 @@ if ($migrationMode === Migration::MODE_UP) {
             ADD COLUMN `updated_by` BIGINT(20) NULL DEFAULT NULL COMMENT 'Update user' AFTER `updated_at`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql ="
+	$sql = "
         ALTER TABLE {$tableGenerators}
             ADD COLUMN `times_activated_max` INT(10) NULL DEFAULT NULL COMMENT 'Maximum number of activations' AFTER `chunk_length`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 }
 
 /**
  * Downgrade
  */
-if ($migrationMode === Migration::MODE_DOWN) {
-    $sql = "
+if ( $migrationMode === Migration::MODE_DOWN ) {
+	$sql = "
         ALTER TABLE {$tableLicenses}
             CHANGE COLUMN `license_key` `license_key` VARCHAR(4000) NOT NULL COMMENT 'Encrypted License Key' AFTER `product_id`,
             CHANGE COLUMN `created_at` `created_at` DATETIME NOT NULL COMMENT 'Creation timestamp' AFTER `hash`,
@@ -61,12 +61,12 @@ if ($migrationMode === Migration::MODE_DOWN) {
             DROP COLUMN `updated_by`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableGenerators}
             DROP COLUMN `times_activated_max`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 }

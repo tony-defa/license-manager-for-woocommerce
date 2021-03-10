@@ -399,9 +399,9 @@ class General
                 <button class="button button-secondary"
                         type="submit"
                         name="lmfwc_stock_synchronize"
-                        value="1">' . __('Synchronize', 'license-manager-for-woocommerce') . '</button>
+                        value="1">' . __( 'Synchronize', 'license-manager-for-woocommerce' ) . '</button>
                 <p class="description" style="margin-top: 1em;">
-                    ' . __('The "Synchronize" button can be used to manually synchronize the product stock.', 'license-manager-for-woocommerce') . '
+                    ' . __( 'The "Synchronize" button can be used to manually synchronize the product stock.', 'license-manager-for-woocommerce' ) . '
                 </p>
             </fieldset>
         ';

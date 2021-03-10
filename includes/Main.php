@@ -19,7 +19,7 @@ use LicenseManagerForWooCommerce\Controllers\License as LicenseController;
 use LicenseManagerForWooCommerce\Schedules\NotifySchedule;
 use LicenseManagerForWooCommerce\Enums\LicenseStatus;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * LicenseManagerForWooCommerce

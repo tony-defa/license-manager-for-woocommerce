@@ -2,12 +2,11 @@
 
 namespace LicenseManagerForWooCommerce\Interfaces;
 
-defined('ABSPATH') || exit();
+defined( 'ABSPATH' ) || exit();
 
-interface Model
-{
-    /**
-     * @return array
-     */
-    public function toArray();
+interface Model {
+	/**
+	 * @return array
+	 */
+	public function toArray();
 }
