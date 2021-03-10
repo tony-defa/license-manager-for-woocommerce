@@ -2,8 +2,7 @@
 
 namespace LicenseManagerForWooCommerce\Abstracts;
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
-abstract class IntegrationController
-{
+abstract class IntegrationController {
 }

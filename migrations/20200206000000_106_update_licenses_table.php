@@ -1,36 +1,36 @@
 <?php
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @var string $migrationMode
  */
 
-use LicenseManagerForWooCommerce\Setup;
 use LicenseManagerForWooCommerce\Migration;
+use LicenseManagerForWooCommerce\Setup;
 
 $tableApiKeys      = $wpdb->prefix . Setup::API_KEYS_TABLE_NAME;
 $tableGenerators   = $wpdb->prefix . Setup::GENERATORS_TABLE_NAME;
 $tableLicenses     = $wpdb->prefix . Setup::LICENSES_TABLE_NAME;
 $tableLicensesMeta = $wpdb->prefix . Setup::LICENSE_META_TABLE_NAME;
 
-if ($wpdb->get_var("SHOW TABLES LIKE '{$tableLicenses}'") != $tableLicenses) {
-    return;
+if ( $wpdb->get_var( "SHOW TABLES LIKE '{$tableLicenses}'" ) != $tableLicenses ) {
+	return;
 }
 
 /**
  * Upgrade
  */
-if ($migrationMode === Migration::MODE_UP) {
-    $sql = "
+if ( $migrationMode === Migration::MODE_UP ) {
+	$sql = "
         ALTER TABLE {$tableApiKeys}
             CHANGE `created_by` `created_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
             CHANGE `updated_by` `updated_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableGenerators}
             CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
             CHANGE `chunks` `chunks` INT(10) UNSIGNED NOT NULL,
@@ -41,9 +41,9 @@ if ($migrationMode === Migration::MODE_UP) {
             CHANGE `updated_by` `updated_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableLicenses}
             ADD COLUMN `user_id` BIGINT(20) UNSIGNED NULL DEFAULT NULL AFTER `product_id`,
             CHANGE `id` `id` BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -58,30 +58,30 @@ if ($migrationMode === Migration::MODE_UP) {
             CHANGE `updated_by` `updated_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableLicensesMeta}
             CHANGE `created_by` `created_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL,
             CHANGE `updated_by` `updated_by` BIGINT(20) UNSIGNED NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 }
 
 /**
  * Downgrade
  */
-if ($migrationMode === Migration::MODE_DOWN) {
-    $sql = "
+if ( $migrationMode === Migration::MODE_DOWN ) {
+	$sql = "
         ALTER TABLE {$tableApiKeys}
             CHANGE `created_by` `created_by` BIGINT(20) NULL DEFAULT NULL,
             CHANGE `updated_by` `updated_by` BIGINT(20) NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableGenerators}
             CHANGE `id` `id` INT(20) NOT NULL AUTO_INCREMENT,
             CHANGE `chunks` `chunks` INT(10) NOT NULL,
@@ -92,9 +92,9 @@ if ($migrationMode === Migration::MODE_DOWN) {
             CHANGE `updated_by` `updated_by` BIGINT(20) NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableLicenses}
             DROP COLUMN `user_id`,
             CHANGE `id` `id` BIGINT(20) NOT NULL AUTO_INCREMENT,
@@ -108,13 +108,13 @@ if ($migrationMode === Migration::MODE_DOWN) {
             CHANGE `updated_by` `updated_by` BIGINT(20) NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableLicensesMeta}
             CHANGE `created_by` `created_by` BIGINT(20) NULL DEFAULT NULL,
             CHANGE `updated_by` `updated_by` BIGINT(20) NULL DEFAULT NULL;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 }
