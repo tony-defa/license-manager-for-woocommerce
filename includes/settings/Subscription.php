@@ -37,12 +37,12 @@ class Subscription
     /**
      * @var string
      */
-    public const ACTIVATION_PRICE_DECIMALS_FIELD_NAME = 'lmfwc_activation_price_decimals';
+    public const DISPLAY_ADDITIONAL_ACTIVATION_COUNT_FIELD_NAME = 'lmfwc_display_additional_activations_count';
 
     /**
      * @var string
      */
-    public const DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME = 'lmfwc_display_additional_activations_unit';
+    public const ACTIVATION_PRICE_DECIMALS_FIELD_NAME = 'lmfwc_activation_price_decimals';
 
     /**
      * @var array
@@ -123,9 +123,9 @@ class Subscription
         );
 
         add_settings_field(
-            self::DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME,
+            self::DISPLAY_ADDITIONAL_ACTIVATION_COUNT_FIELD_NAME,
             __('Display activation quantities', 'license-manager-for-woocommerce'),
-            array($this, 'fieldDisplayAdditionalActivationUnit'),
+            array($this, 'fieldDisplayAdditionalActivationCount'),
             'lmfwc_variable_usage_model_type',
             'variable_usage_section'
         );
@@ -240,13 +240,13 @@ class Subscription
     }
 
     /**
-     * Callback for the "lmfwc_display_additional_activations_unit" field.
+     * Callback for the "lmfwc_display_additional_activations_count" field.
      *
      * @return void
      */
-    public function fieldDisplayAdditionalActivationUnit()
+    public function fieldDisplayAdditionalActivationCount()
     {
-        $field = self::DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME;
+        $field = self::DISPLAY_ADDITIONAL_ACTIVATION_COUNT_FIELD_NAME;
         (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
 
         $html = '<fieldset>';

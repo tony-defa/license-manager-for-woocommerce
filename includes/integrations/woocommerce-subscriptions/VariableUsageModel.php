@@ -318,10 +318,15 @@ class VariableUsageModel
             $newTotal = $activationPrice * $activationDelta;
             $newTotal = round($newTotal, wc_get_price_decimals());
 
-            if ((bool) Settings::get(Subscription::DISPLAY_ADDITIONAL_ACTIVATION_UNIT_FIELD_NAME, Settings::SECTION_SUBSCRIPTION)) {
+            if ((bool) Settings::get(Subscription::DISPLAY_ADDITIONAL_ACTIVATION_COUNT_FIELD_NAME, Settings::SECTION_SUBSCRIPTION)) {
                 $newQuantity = 1;
-                /* translators: 1: additional activation count 2: activation name (example: "123 additional activations consumed") */
-                $nameAddition = sprintf(_x('%1$s additional %2$s consumed', 'Line item name for additional activations with count', 'license-manager-for-woocommerce'), $activationDelta, lmfwc_get_activation_name_string($activationDelta));
+                /* translators: 1: additional activation count 2: activation name (example: "123 additional activations consumed at € 0,09/activation") */
+                $nameAddition = sprintf(
+                    _x('%1$s additional %2$s consumed at %3$s/%4$s', 'Line item name for additional activations with count', 'license-manager-for-woocommerce'), 
+                    $activationDelta, 
+                    lmfwc_get_activation_name_string($activationDelta),
+                    wc_price($activationPrice, array('decimals' => lmfwc_get_activation_price_decimals())), 
+                    lmfwc_get_activation_name_string());
             } else {
                 $newQuantity = $activationDelta;
                 /* translators: 1: activation name (example: "Additional activations consumed") */
