@@ -35,7 +35,7 @@ class Generators extends LMFWC_REST_Controller {
 	 * Generators constructor.
 	 */
 	public function __construct() {
-		$this->settings = (array) get_option( 'lmfwc_settings_general' );
+		$this->settings = get_option( 'lmfwc_settings_general', array() );
 	}
 
 	/**

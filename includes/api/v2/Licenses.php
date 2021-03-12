@@ -37,7 +37,7 @@ class Licenses extends LMFWC_REST_Controller {
 	 * Licenses constructor.
 	 */
 	public function __construct() {
-		$this->settings = (array) get_option( 'lmfwc_settings_general' );
+		$this->settings = get_option( 'lmfwc_settings_general', array() );
 	}
 
 	/**
