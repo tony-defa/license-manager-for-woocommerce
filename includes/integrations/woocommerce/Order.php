@@ -270,7 +270,7 @@ class Order {
 
 		// Add missing style.
 		if ( ! wp_style_is( 'lmfwc_admin_css', 'enqueued' ) ) {
-			wp_enqueue_style( 'lmfwc_admin_css', LMFWC_CSS_URL . 'main.css' );
+			wp_enqueue_style( 'lmfwc_admin_css', LMFWC_CSS_URL . 'lmfwc-admin.css' );
 		}
 
 		echo wc_get_template_html(

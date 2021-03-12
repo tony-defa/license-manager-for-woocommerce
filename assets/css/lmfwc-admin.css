@@ -1,0 +1,194 @@
+.text-primary {
+  color: #007BFF; }
+
+.text-secondary {
+  color: #6C757D; }
+
+.text-success {
+  color: #28A745; }
+
+.text-danger {
+  color: #DC3545; }
+
+.text-warning {
+  color: #FFC107; }
+
+.text-info {
+  color: #17A2B8; }
+
+.text-light {
+  color: #F8F9FA; }
+
+.text-dark {
+  color: #343A40; }
+
+#lmfwc-license-table .wp-list-table,
+#lmfwc-generators-table .wp-list-table {
+  table-layout: auto !important; }
+
+#lmfwc-license-table .wp-list-table td.column-status {
+  vertical-align: middle;
+  text-align: left; }
+
+#lmfwc-license-table .wp-list-table .lmfwc-license-key-show,
+#lmfwc-license-table .wp-list-table .lmfwc-license-key-hide {
+  cursor: pointer; }
+
+#lmfwc-license-table .wp-list-table .lmfwc-status {
+  display: inline-block;
+  padding: 3px 6px;
+  position: relative;
+  font-weight: 600;
+  border-radius: 3px;
+  cursor: default;
+  border: 2px solid transparent;
+  color: #6F6F6F;
+  min-width: 100px; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status .lmfwc-icons {
+    width: 20px;
+    height: 20px;
+    display: inline-block; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status .lmfwc-icons:before {
+      font-family: woocommerce, sans-serif;
+      text-align: center;
+      display: inline-block;
+      width: 100%;
+      position: relative;
+      top: 1px; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status .lmfwc-icons.delivered:before {
+      content: "\e01a"; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status.sold {
+    border-color: #17A2B8;
+    color: #17A2B8; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status.sold > span.dashicons {
+      color: #17A2B8; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status.delivered {
+    border-color: #28A745;
+    color: #28A745; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status.delivered > span.dashicons {
+      color: #28A745; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status.active {
+    border-color: #007BFF;
+    color: #007BFF; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status.active > span.dashicons {
+      color: #007BFF; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status.inactive {
+    border-color: #E1E1E1;
+    color: #E1E1E1; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status.inactive > span.dashicons {
+      color: #E1E1E1; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status.expired {
+    border-color: #DC3545;
+    color: #DC3545; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status.expired > span.dashicons {
+      color: #DC3545; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status.disabled {
+    border-color: #FFC107;
+    color: #FFC107; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status.disabled > span.dashicons {
+      color: #FFC107; }
+  #lmfwc-license-table .wp-list-table .lmfwc-status.activation.done {
+    color: #17A2B8; }
+    #lmfwc-license-table .wp-list-table .lmfwc-status.activation.done > span.dashicons {
+      color: #17A2B8; }
+
+#lmfwc-generators-table .wp-list-table .lmfwc-badge {
+  display: inline-block;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  line-height: 15px;
+  text-align: center;
+  margin-left: .5em;
+  cursor: default;
+  font-size: 10px; }
+  #lmfwc-generators-table .wp-list-table .lmfwc-badge.info {
+    background-color: #17A2B8;
+    color: #FFFFFF; }
+
+.lmfwc-placeholder {
+  display: inline-block;
+  font-family: Consolas, monospace;
+  font-weight: 400;
+  min-width: 150px;
+  min-height: 20px;
+  text-align: center;
+  position: relative;
+  line-height: 20px;
+  padding: 3px 10px 2px;
+  margin-left: 25px;
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  cursor: pointer; }
+  .lmfwc-placeholder:hover {
+    background-image: linear-gradient(to right, #C0C0C0, #8C8C8C);
+    color: #ffffff; }
+  .lmfwc-placeholder:before {
+    font-family: 'dashicons', sans-serif;
+    content: "\f112";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: -25px;
+    width: 25px;
+    background-color: #c0c0c0;
+    color: #ffffff;
+    line-height: 25px;
+    border-top-left-radius: 3px;
+    border-bottom-left-radius: 3px; }
+  .lmfwc-placeholder.empty:after {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    content: 'XXXX-XXXX-XXXX-XXXX';
+    color: rgba(0, 0, 0, 0.4);
+    line-height: 25px; }
+  .lmfwc-placeholder.empty:hover:after {
+    color: #FFFFFF; }
+
+.lmfwc-spinner {
+  opacity: 0;
+  margin-left: 5px; }
+
+.lmfwc-clipboard {
+  font-family: Consolas, monospace;
+  background-color: #f0f0f0;
+  color: #334;
+  padding: 7px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+  opacity: 1;
+  -webkit-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.1);
+  -moz-box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.1);
+  box-shadow: 2px 3px 5px rgba(0, 0, 0, 0.1);
+  -webkit-transition: all 0.5s ease-out;
+  -o-transition: all 0.5s ease-out;
+  transition: all 0.5s ease-out; }
+
+#license_manager_product_data .form-field.lmfwc_licensed_product_changelog {
+  padding: 5px 12px 5px 162px;
+  position: relative;
+  margin: 9px 0; }
+  #license_manager_product_data .form-field.lmfwc_licensed_product_changelog label {
+    position: absolute;
+    left: 0;
+    margin: 0 12px;
+    line-height: 24px;
+    font-size: 12px; }
+
+.button.lmfwc-license-keys-show-all {
+  margin-right: 5px; }
+
+@media only screen and (max-width: 500px) {
+  #license_manager_product_data .form-field.lmfwc_licensed_product_changelog {
+    padding: 5px 20px; } }
+
+@media only screen and (max-width: 1280px) {
+  #license_manager_product_data .form-field.lmfwc_licensed_product_changelog {
+    padding: 5px 12px 5px 12px;
+    clear: both; }
+    #license_manager_product_data .form-field.lmfwc_licensed_product_changelog label {
+      position: static;
+      margin: 0; } }

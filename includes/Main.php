@@ -33,7 +33,7 @@ final class Main extends Singleton {
 	/**
 	 * @var string
 	 */
-	public $version = '2.2.0';
+	public $version = '2.3.0';
 
 	/**
 	 * Main constructor.
@@ -95,13 +95,10 @@ final class Main extends Singleton {
 			'lmfwc_select2_cdn',
 			'https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js'
 		);
-		wp_register_style(
-			'lmfwc_select2',
-			LMFWC_CSS_URL . 'select2.css'
-		);
+		wp_register_style( 'lmfwc_select2', LMFWC_CSS_URL . 'select2.css' );
 
 		// CSS
-		wp_enqueue_style( 'lmfwc_admin_css', LMFWC_CSS_URL . 'main.css', array(), $this->version );
+		wp_enqueue_style( 'lmfwc_admin_css', LMFWC_CSS_URL . 'lmfwc-admin.css', array(), $this->version );
 
 		// JavaScript
 		wp_enqueue_script(
