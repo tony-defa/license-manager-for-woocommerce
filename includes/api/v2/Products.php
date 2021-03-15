@@ -17,12 +17,12 @@ class Products extends LMFWC_REST_Controller {
 	/**
 	 * @var string
 	 */
-	protected string $namespace = 'lmfwc/v2';
+	protected $namespace = 'lmfwc/v2';
 
 	/**
 	 * @var string
 	 */
-	protected string $rest_base = '/products';
+	protected $rest_base = '/products';
 
 	/**
 	 * @var array
