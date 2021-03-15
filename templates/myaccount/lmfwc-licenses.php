@@ -32,7 +32,7 @@ defined( 'ABSPATH' ) || exit; ?>
 		<?php $order_id = $customer_license['orderId']; ?>
 		<?php $licenses = $customer_license['licenses']; ?>
 
-        <h3 class="lmfwc-myaccount-order">
+        <h3 class="order">
 			<?php if ( $order ): ?>
                 <a href="<?php echo esc_url( get_edit_post_link( $order_id ) ); ?>">
                     <span><?php _e( 'Order', 'license-manager-for-woocommerce' ); ?></span>
@@ -43,11 +43,11 @@ defined( 'ABSPATH' ) || exit; ?>
 			<?php endif; ?>
         </h3>
 
-        <table class="my_account_licenses my_account_orders woocommerce-orders-table woocommerce-MyAccount-licenses shop_table shop_table_responsive woocommerce-orders-table--licenses">
+        <table class="my_account_licenses woocommerce-MyAccount-licenses shop_table shop_table_responsive">
             <thead>
             <tr>
                 <th class="license-key"><?php _e( 'License key', 'license-manager-for-woocommerce' ); ?></th>
-                <th class="license-key"><?php _e( 'Product', 'license-manager-for-woocommerce' ); ?></th>
+                <th class="product"><?php _e( 'Product', 'license-manager-for-woocommerce' ); ?></th>
                 <th class="activation"><?php _e( 'Activation status', 'license-manager-for-woocommerce' ); ?></th>
                 <th class="valid-until"><?php _e( 'Valid until', 'license-manager-for-woocommerce' ); ?></th>
 				<?php if ( $can_activate || $can_deactivate ): ?>
@@ -66,11 +66,11 @@ defined( 'ABSPATH' ) || exit; ?>
 				$product = wc_get_product( $license->getProductId() );
 				?>
                 <tr>
-                    <td class="lmfwc-myaccount-license-key"
+                    <td class="license-key"
                         data-title="<?php esc_attr_e( 'License key', 'license-manager-for-woocommerce' ); ?>">
-                        <span><?php echo $license->getDecryptedLicenseKey(); ?></span>
+						<?php echo $license->getDecryptedLicenseKey(); ?>
                     </td>
-                    <td class="lmfwc-myaccount-product-name"
+                    <td class="product-name"
                         data-title="<?php esc_attr_e( 'Product', 'license-manager-for-woocommerce' ); ?>">
 						<?php if ( $product ): ?>
                             <a href="<?php echo esc_url( get_permalink( $product->get_id() ) ); ?>">
@@ -80,13 +80,13 @@ defined( 'ABSPATH' ) || exit; ?>
                             <span><?php _e( 'Unknown product', 'license-manager-for-woocommerce' ); ?></span>
 						<?php endif; ?>
                     </td>
-                    <td class="lmfwc-myaccount-activation-status"
+                    <td class="activation-status"
                         data-title="<?php esc_attr_e( 'Activation status', 'license-manager-for-woocommerce' ); ?>">
                         <span><?php echo esc_html( $times_activated ); ?></span>
                         <span>/</span>
                         <span><?php echo esc_html( $times_activated_max ); ?></span>
                     </td>
-                    <td class="lmfwc-myaccount-valid-until"
+                    <td class="valid-until"
                         data-title="<?php esc_attr_e( 'Valid until', 'license-manager-for-woocommerce' ); ?>">
 						<?php
 						if ( $license->getExpiresAt() ) {
@@ -99,7 +99,7 @@ defined( 'ABSPATH' ) || exit; ?>
 						?>
                     </td>
 					<?php if ( $can_activate || $can_deactivate ): ?>
-                        <td class="lmfwc-myaccount-actions">
+                        <td class="actions">
 							<?php if ( $can_activate ): ?>
                                 <form method="post">
                                     <input type="hidden"

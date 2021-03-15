@@ -8,7 +8,7 @@
 </h1>
 <hr class="wp-header-end">
 
-<form method="post">
+<form method="post" id="lmfwc-api-keys-list">
 	<?php
 	$keys->prepare_items();
 	$keys->views();

@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
 </p>
 <hr class="wp-header-end">
 
-<form method="post">
+<form method="post" id="lmfwc-generators-table">
 	<?php
 	$generators->prepare_items();
 	$generators->display();

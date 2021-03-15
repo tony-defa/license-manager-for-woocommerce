@@ -104,7 +104,7 @@ class MyAccount {
 			}
 		}
 
-		wp_enqueue_style( 'lmfwc_admin_css', LMFWC_CSS_URL . 'main.css' );
+		wp_enqueue_style( 'lmfwc_css', LMFWC_CSS_URL . 'lmfwc.css' );
 
 		echo wc_get_template_html(
 			'myaccount/lmfwc-licenses.php',
