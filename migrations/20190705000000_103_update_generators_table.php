@@ -1,6 +1,6 @@
 <?php
 
-defined('ABSPATH') || exit;
+defined( 'ABSPATH' ) || exit;
 
 /**
  * @var string $migrationMode
@@ -12,19 +12,19 @@ use LicenseManagerForWooCommerce\Migration;
 $tableGenerators = $wpdb->prefix . Setup::GENERATORS_TABLE_NAME;
 $tableApiKeys    = $wpdb->prefix . Setup::API_KEYS_TABLE_NAME;
 
-if ($wpdb->get_var("SHOW TABLES LIKE '{$tableGenerators}'") != $tableGenerators) {
-    return;
+if ( $wpdb->get_var( "SHOW TABLES LIKE '{$tableGenerators}'" ) != $tableGenerators ) {
+	return;
 }
 
-if ($wpdb->get_var("SHOW TABLES LIKE '{$tableApiKeys}'") != $tableApiKeys) {
-    return;
+if ( $wpdb->get_var( "SHOW TABLES LIKE '{$tableApiKeys}'" ) != $tableApiKeys ) {
+	return;
 }
 
 /**
  * Upgrade
  */
-if ($migrationMode === Migration::MODE_UP) {
-    $sql ="
+if ( $migrationMode === Migration::MODE_UP ) {
+	$sql = "
         ALTER TABLE {$tableGenerators}
             ADD COLUMN `created_at` DATETIME NULL COMMENT 'Creation Date' AFTER `expires_in`,
             ADD COLUMN `created_by` BIGINT(20) NULL COMMENT 'WP User ID' AFTER `created_at`,
@@ -32,9 +32,9 @@ if ($migrationMode === Migration::MODE_UP) {
             ADD COLUMN `updated_by` BIGINT(20) NULL COMMENT 'WP User ID' AFTER `updated_at`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql ="
+	$sql = "
         ALTER TABLE {$tableApiKeys}
             ADD COLUMN `created_at` DATETIME NULL COMMENT 'Creation Date' AFTER `last_access`,
             ADD COLUMN `created_by` BIGINT(20) NULL COMMENT 'WP User ID' AFTER `created_at`,
@@ -42,14 +42,14 @@ if ($migrationMode === Migration::MODE_UP) {
             ADD COLUMN `updated_by` BIGINT(20) NULL COMMENT 'WP User ID' AFTER `updated_at`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 }
 
 /**
  * Downgrade
  */
-if ($migrationMode === Migration::MODE_DOWN) {
-    $sql = "
+if ( $migrationMode === Migration::MODE_DOWN ) {
+	$sql = "
         ALTER TABLE {$tableGenerators}
             DROP COLUMN `created_at`,
             DROP COLUMN `created_by`,
@@ -57,9 +57,9 @@ if ($migrationMode === Migration::MODE_DOWN) {
             DROP COLUMN `updated_by`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 
-    $sql = "
+	$sql = "
         ALTER TABLE {$tableApiKeys}
             DROP COLUMN `created_at`,
             DROP COLUMN `created_by`,
@@ -67,5 +67,5 @@ if ($migrationMode === Migration::MODE_DOWN) {
             DROP COLUMN `updated_by`;
     ";
 
-    $wpdb->query($sql);
+	$wpdb->query( $sql );
 }

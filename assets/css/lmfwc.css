@@ -1,0 +1,11 @@
+.woocommerce_account_licenses table.my_account_licenses {
+  font-size: .875em; }
+  .woocommerce_account_licenses table.my_account_licenses td.license-key {
+    font-family: Consolas, monospace;
+    font-size: 13px;
+    white-space: nowrap; }
+  .woocommerce_account_licenses table.my_account_licenses td.actions {
+    white-space: nowrap; }
+    .woocommerce_account_licenses table.my_account_licenses td.actions form {
+      margin: 0;
+      display: inline-block; }

@@ -23,115 +23,115 @@
 
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 
-defined('ABSPATH') || exit; ?>
+defined( 'ABSPATH' ) || exit; ?>
 
 <div class="woocommerce_account_licenses">
 
-    <?php foreach ($customer_licenses as $customer_license): ?>
-        <?php $order = $customer_license['order']; ?>
-        <?php $order_id = $customer_license['orderId']; ?>
-        <?php $licenses = $customer_license['licenses']; ?>
+	<?php foreach ( $customer_licenses as $customer_license ): ?>
+		<?php $order = $customer_license['order']; ?>
+		<?php $order_id = $customer_license['orderId']; ?>
+		<?php $licenses = $customer_license['licenses']; ?>
 
-        <h3 class="lmfwc-myaccount-order">
-            <?php if ($order): ?>
-                <a href="<?php echo esc_url(get_edit_post_link($order_id)); ?>">
-                    <span><?php _e('Order', 'license-manager-for-woocommerce'); ?></span>
-                    <span>#<?php echo esc_html($order_id); ?></span>
+        <h3 class="order">
+			<?php if ( $order ): ?>
+                <a href="<?php echo esc_url( get_edit_post_link( $order_id ) ); ?>">
+                    <span><?php _e( 'Order', 'license-manager-for-woocommerce' ); ?></span>
+                    <span>#<?php echo esc_html( $order_id ); ?></span>
                 </a>
-            <?php else: ?>
-                <span><?php echo __('Order', 'license-manager-for-woocommerce') . ' #' . $order; ?></span>
-            <?php endif; ?>
+			<?php else: ?>
+                <span><?php echo __( 'Order', 'license-manager-for-woocommerce' ) . ' #' . $order; ?></span>
+			<?php endif; ?>
         </h3>
 
-        <table class="my_account_licenses my_account_orders woocommerce-orders-table woocommerce-MyAccount-licenses shop_table shop_table_responsive woocommerce-orders-table--licenses">
+        <table class="my_account_licenses woocommerce-MyAccount-licenses shop_table shop_table_responsive">
             <thead>
             <tr>
-                <th class="license-key"><?php _e('License key', 'license-manager-for-woocommerce'); ?></th>
-                <th class="license-key"><?php _e('Product', 'license-manager-for-woocommerce'); ?></th>
-                <th class="activation"><?php _e('Activation status', 'license-manager-for-woocommerce'); ?></th>
-                <th class="valid-until"><?php _e('Valid until', 'license-manager-for-woocommerce'); ?></th>
-                <?php if ($can_activate || $can_deactivate): ?>
+                <th class="license-key"><?php _e( 'License key', 'license-manager-for-woocommerce' ); ?></th>
+                <th class="product"><?php _e( 'Product', 'license-manager-for-woocommerce' ); ?></th>
+                <th class="activation"><?php _e( 'Activation status', 'license-manager-for-woocommerce' ); ?></th>
+                <th class="valid-until"><?php _e( 'Valid until', 'license-manager-for-woocommerce' ); ?></th>
+				<?php if ( $can_activate || $can_deactivate ): ?>
                     <th class="actions"></th>
-                <?php endif; ?>
+				<?php endif; ?>
             </tr>
             </thead>
 
             <tbody>
 
-            <?php
-            /** @var LicenseResourceModel $license */
-            foreach ($licenses as $license):
-                $times_activated     = $license->getTimesActivated() ? $license->getTimesActivated() : '0';
-                $times_activated_max = $license->getTimesActivatedMax() ? $license->getTimesActivatedMax() : '&infin;';
-                $product             = wc_get_product($license->getProductId());
-                ?>
+			<?php
+			/** @var LicenseResourceModel $license */
+			foreach ( $licenses as $license ):
+				$times_activated = $license->getTimesActivated() ? $license->getTimesActivated() : '0';
+				$times_activated_max = $license->getTimesActivatedMax() ? $license->getTimesActivatedMax() : '&infin;';
+				$product = wc_get_product( $license->getProductId() );
+				?>
                 <tr>
-                    <td class="lmfwc-myaccount-license-key"
-                        data-title="<?php esc_attr_e('License key', 'license-manager-for-woocommerce'); ?>">
-                        <span><?php echo $license->getDecryptedLicenseKey(); ?></span>
+                    <td class="license-key"
+                        data-title="<?php esc_attr_e( 'License key', 'license-manager-for-woocommerce' ); ?>">
+						<?php echo $license->getDecryptedLicenseKey(); ?>
                     </td>
-                    <td class="lmfwc-myaccount-product-name"
-                        data-title="<?php esc_attr_e('Product', 'license-manager-for-woocommerce'); ?>">
-                        <?php if ($product): ?>
-                            <a href="<?php echo esc_url(get_permalink($product->get_id())); ?>">
+                    <td class="product-name"
+                        data-title="<?php esc_attr_e( 'Product', 'license-manager-for-woocommerce' ); ?>">
+						<?php if ( $product ): ?>
+                            <a href="<?php echo esc_url( get_permalink( $product->get_id() ) ); ?>">
                                 <span><?php echo $product->get_name(); ?></span>
                             </a>
-                        <?php else: ?>
-                            <span><?php _e('Unknown product', 'license-manager-for-woocommerce'); ?></span>
-                        <?php endif; ?>
+						<?php else: ?>
+                            <span><?php _e( 'Unknown product', 'license-manager-for-woocommerce' ); ?></span>
+						<?php endif; ?>
                     </td>
-                    <td class="lmfwc-myaccount-activation-status"
-                        data-title="<?php esc_attr_e('Activation status', 'license-manager-for-woocommerce'); ?>">
-                        <span><?php echo esc_html($times_activated); ?></span>
+                    <td class="activation-status"
+                        data-title="<?php esc_attr_e( 'Activation status', 'license-manager-for-woocommerce' ); ?>">
+                        <span><?php echo esc_html( $times_activated ); ?></span>
                         <span>/</span>
-                        <span><?php echo esc_html($times_activated_max); ?></span>
+                        <span><?php echo esc_html( $times_activated_max ); ?></span>
                     </td>
-                    <td class="lmfwc-myaccount-valid-until"
-                        data-title="<?php esc_attr_e('Valid until', 'license-manager-for-woocommerce'); ?>">
-                        <?php
-                        if ($license->getExpiresAt()) {
-                            try {
-                                printf('<b>%s</b>', (new DateTime($license->getExpiresAt()))->format($date_format));
-                            } catch (Exception $e) {
-                                echo esc_html($license->getExpiresAt());
-                            }
-                        }
-                        ?>
+                    <td class="valid-until"
+                        data-title="<?php esc_attr_e( 'Valid until', 'license-manager-for-woocommerce' ); ?>">
+						<?php
+						if ( $license->getExpiresAt() ) {
+							try {
+								printf( '<b>%s</b>', ( new DateTime( $license->getExpiresAt() ) )->format( $date_format ) );
+							} catch ( Exception $e ) {
+								echo esc_html( $license->getExpiresAt() );
+							}
+						}
+						?>
                     </td>
-                    <?php if ($can_activate || $can_deactivate): ?>
-                        <td class="lmfwc-myaccount-actions">
-                            <?php if ($can_activate): ?>
+					<?php if ( $can_activate || $can_deactivate ): ?>
+                        <td class="actions">
+							<?php if ( $can_activate ): ?>
                                 <form method="post">
                                     <input type="hidden"
                                            name="license"
-                                           value="<?php echo esc_attr($license->getDecryptedLicenseKey());?>"/>
+                                           value="<?php echo esc_attr( $license->getDecryptedLicenseKey() ); ?>"/>
                                     <input type="hidden" name="action" value="activate">
-                                    <?php wp_nonce_field('lmfwc_myaccount_activate_license'); ?>
+									<?php wp_nonce_field( 'lmfwc_myaccount_activate_license' ); ?>
                                     <button class="button" type="submit">
-                                        <?php _e('Activate', 'license-manager-for-woocommerce');?>
+										<?php _e( 'Activate', 'license-manager-for-woocommerce' ); ?>
                                     </button>
                                 </form>
-                            <?php endif; ?>
+							<?php endif; ?>
 
-                            <?php if ($can_deactivate): ?>
+							<?php if ( $can_deactivate ): ?>
                                 <form method="post">
                                     <input type="hidden"
                                            name="license"
-                                           value="<?php echo esc_attr($license->getDecryptedLicenseKey());?>"/>
+                                           value="<?php echo esc_attr( $license->getDecryptedLicenseKey() ); ?>"/>
                                     <input type="hidden" name="action" value="deactivate">
-                                    <?php wp_nonce_field('lmfwc_myaccount_deactivate_license'); ?>
+									<?php wp_nonce_field( 'lmfwc_myaccount_deactivate_license' ); ?>
                                     <button class="button" type="submit">
-                                        <?php _e('Deactivate', 'license-manager-for-woocommerce');?>
+										<?php _e( 'Deactivate', 'license-manager-for-woocommerce' ); ?>
                                     </button>
                                 </form>
-                            <?php endif; ?>
+							<?php endif; ?>
                         </td>
-                    <?php endif; ?>
+					<?php endif; ?>
                 </tr>
-            <?php endforeach; ?>
+			<?php endforeach; ?>
 
             </tbody>
         </table>
-    <?php endforeach; ?>
+	<?php endforeach; ?>
 
 </div>

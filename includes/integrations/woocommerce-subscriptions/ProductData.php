@@ -96,8 +96,8 @@ class ProductData
                 'wrapper_class' => $wrapperClass['lmfwc_subscription_renewal_reset_action'],
                 'label'   => __('Reset times activated', 'license-manager-for-woocommerce'),
                 'options' => array(
-                    'do_not_reset_on_renewal'   => __('Do no reset times activated on key with maximum activations', 'license-manager-for-woocommerce'),
-                    'reset_license_on_renewal'  => __('Reset times activated to 0 on keys that have a maximum activation count', 'license-manager-for-woocommerce')
+                    'do_not_reset_on_renewal'   => __('Do no reset times activated on license keys', 'license-manager-for-woocommerce'),
+                    'reset_license_on_renewal'  => __('Reset times activated to 0 on license keys', 'license-manager-for-woocommerce')
                 ),
                 'value' => $renewalResetAction
             )
@@ -352,8 +352,8 @@ class ProductData
                 'name'          => sprintf('lmfwc_subscription_renewal_reset_action[%d]', $loop),
                 'label'         => __('Reset times activated', 'license-manager-for-woocommerce'),
                 'options'       => array(
-                    'do_not_reset_on_renewal'   => __('Do no reset times activated on key with maximum activations', 'license-manager-for-woocommerce'),
-                    'reset_license_on_renewal'  => __('Reset times activated to 0 on keys that have a maximum activation count', 'license-manager-for-woocommerce')
+                    'do_not_reset_on_renewal'   => __('Do no reset times activated on license keys', 'license-manager-for-woocommerce'),
+                    'reset_license_on_renewal'  => __('Reset times activated to 0 on license keys', 'license-manager-for-woocommerce')
                 ),
                 'value' => $renewalResetAction
             )
