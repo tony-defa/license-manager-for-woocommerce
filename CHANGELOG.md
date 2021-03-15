@@ -1,4 +1,4 @@
-#### 2.3.0 - 2021-02-14
+#### 2.3.0 - 2021-04-01
 * Update - WordPress 5.6 compatibility
 * Update - WooCommerce 5.0 compatibility
 * Add - WooCommerce Subscriptions support. You can now extend existing licenses upon renewal for subscriptions.
@@ -19,6 +19,11 @@
 * Fix - PHP error when editing a generator who is assigned to a deleted WooCommerce product no longer appears.
 * Fix - User licenses now properly show inside "My account - Licenses"
 * Fix - `times_activated_max` is now properly set to `null` instead of `0` when generating a new license.
+
+##### 2.2.2 - 2020-02-19
+* Update - WordPress 5.6 compatibility
+* Update - WooCommerce 5.0 compatibility
+* Fix - The "Licenses" page no longer causes a blank page or PHP memory_limit error when a large amount of orders and licenses is present in the database.
 
 ##### 2.2.1 - 2020-10-03
 * Update - WordPress 5.5 compatibility

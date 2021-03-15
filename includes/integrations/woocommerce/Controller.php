@@ -487,7 +487,7 @@ class Controller extends AbstractIntegrationController implements IntegrationCon
 				$text = sprintf(
 				/* translators: $1: order id, $2: customer name, $3: customer email */
 					'#%1$s %2$s <%3$s>',
-					$order->get_id(),
+					$order->get_order_number(),
 					$order->get_formatted_billing_full_name(),
 					$order->get_billing_email()
 				);
