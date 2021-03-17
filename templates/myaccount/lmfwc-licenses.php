@@ -21,6 +21,8 @@
  * @version 2.3.0
  */
 
+use LicenseManagerForWooCommerce\Settings;
+use LicenseManagerForWooCommerce\Settings\Subscription;
 use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 
 defined( 'ABSPATH' ) || exit; ?>
@@ -83,8 +85,10 @@ defined( 'ABSPATH' ) || exit; ?>
                     <td class="activation-status"
                         data-title="<?php esc_attr_e( 'Activation status', 'license-manager-for-woocommerce' ); ?>">
                         <span><?php echo esc_html( $times_activated ); ?></span>
-                        <span>/</span>
-                        <span><?php echo esc_html( $times_activated_max ); ?></span>
+                        <?php if ( lmfwc_get_subscription_model_type( $product->get_id() ) !== 'variable_usage_type' || !(bool) Settings::get(Subscription::HIDE_MAXIMUM_ACTIVATIONS_IN_ACTIVATION_STATUS_PAGE_FIELD_NAME, Settings::SECTION_SUBSCRIPTION) ): ?>
+                            <span>/</span>
+                            <span><?php echo esc_html( $times_activated_max ); ?></span>
+                        <?php endif; ?>
                     </td>
                     <td class="valid-until"
                         data-title="<?php esc_attr_e( 'Valid until', 'license-manager-for-woocommerce' ); ?>">

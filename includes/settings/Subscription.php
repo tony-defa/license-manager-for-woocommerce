@@ -27,6 +27,11 @@ class Subscription
     /**
      * @var string
      */
+    public const HIDE_MAXIMUM_ACTIVATIONS_IN_ACTIVATION_STATUS_PAGE_FIELD_NAME = 'lmfwc_hide_activations_in_activation_status';
+
+    /**
+     * @var string
+     */
     public const SHOW_MAXIMUM_INCLUDED_ACTIVATIONS_FIELD_NAME = 'lmfwc_display_included_activations';
 
     /**
@@ -107,6 +112,14 @@ class Subscription
         );
 
         add_settings_field(
+            self::HIDE_MAXIMUM_ACTIVATIONS_IN_ACTIVATION_STATUS_PAGE_FIELD_NAME,
+            __('Hide maximum activations in activation status', 'license-manager-for-woocommerce'),
+            array($this, 'fieldHideMaximumActivationsInActivationStatus'),
+            'lmfwc_variable_usage_model_type',
+            'variable_usage_section'
+        );
+
+        add_settings_field(
             self::SHOW_MAXIMUM_INCLUDED_ACTIVATIONS_FIELD_NAME,
             __('Display included activations', 'license-manager-for-woocommerce'),
             array($this, 'fieldDisplayIncludedActivations'),
@@ -175,6 +188,35 @@ class Subscription
         $html .= sprintf(
             '<p class="description">%s</p>',
             __('How an activation should be called in the front end (for customers). Used on variable subscription model products were the cost is multiplied by the activation count.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</fieldset>';
+
+        echo $html;
+    }
+
+    /**
+     * Callback for the "lmfwc_hide_activations_in_activation_status" field.
+     *
+     * @return void
+     */
+    public function fieldHideMaximumActivationsInActivationStatus()
+    {
+        $field = self::HIDE_MAXIMUM_ACTIVATIONS_IN_ACTIVATION_STATUS_PAGE_FIELD_NAME;
+        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
+
+        $html = '<fieldset>';
+        $html .= sprintf('<label for="%s">', $field);
+        $html .= sprintf(
+            '<input id="%s" type="checkbox" name="'.Settings::SECTION_SUBSCRIPTION.'[%s]" value="1" %s/>',
+            $field,
+            $field,
+            checked(true, $value, false)
+        );
+        $html .= sprintf('<span>%s</span>', __('Hide maximum activations.', 'license-manager-for-woocommerce'));
+        $html .= '</label>';
+        $html .= sprintf(
+            '<p class="description">%s</p>',
+            __('Hides the maximum activations in the activation status on the my account page.', 'license-manager-for-woocommerce')
         );
         $html .= '</fieldset>';
 
