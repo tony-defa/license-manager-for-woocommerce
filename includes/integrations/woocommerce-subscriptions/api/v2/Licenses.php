@@ -36,8 +36,8 @@ class Licenses {
 			return $data;
 		}
 
-		switch ( $route ) {
-			case 'v2/licenses' && $requestMethod === 'GET':
+		switch ( true ) {
+			case $route === 'v2/licenses' && $requestMethod === 'GET':
 				// Pass by reference!
 				foreach ( $data as &$license ) {
 					$license['subscriptionIds'] = array();
@@ -49,12 +49,12 @@ class Licenses {
 					$license['subscriptionIds'] = $this->getOrderSubscriptionIds( (int) $license['orderId'] );
 				}
 				break;
-			case 'v2/licenses/{license_key}' && $requestMethod === 'GET':
-			case 'v2/licenses' && $requestMethod === 'POST':
-			case 'v2/licenses/{license_key}' && $requestMethod === 'PUT':
-			case 'v2/licenses/activate/{license_key}' && $requestMethod === 'GET':
-			case 'v2/licenses/deactivate/{license_key}' && $requestMethod === 'GET':
-			case 'v2/licenses/validate/{license_key}' && $requestMethod === 'GET':
+			case $route === 'v2/licenses/{license_key}' && $requestMethod === 'GET':
+			case $route === 'v2/licenses' && $requestMethod === 'POST':
+			case $route === 'v2/licenses/{license_key}' && $requestMethod === 'PUT':
+			case $route === 'v2/licenses/activate/{license_key}' && $requestMethod === 'GET':
+			case $route === 'v2/licenses/deactivate/{license_key}' && $requestMethod === 'GET':
+			case $route === 'v2/licenses/validate/{license_key}' && $requestMethod === 'GET':
 				$data['subscriptionIds'] = array();
 
 				if ( ! isset( $data['orderId'] ) ) {
