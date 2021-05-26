@@ -84,7 +84,7 @@ class ProductData
                     'issue_new_license'       => __('Issue a new license key on each subscription renewal', 'license-manager-for-woocommerce'),
                     'extend_existing_license' => __('Extend the existing license on each subscription renewal', 'license-manager-for-woocommerce')
                 ),
-                'value' => $renewalAction
+                'value'         => $renewalAction
             )
         );
 
@@ -94,35 +94,35 @@ class ProductData
                 'id'            => 'lmfwc_subscription_renewal_reset_action',
                 'class'         => 'lmfwc_subscription_renewal_reset_action',
                 'wrapper_class' => $wrapperClass['lmfwc_subscription_renewal_reset_action'],
-                'label'   => __('Reset times activated', 'license-manager-for-woocommerce'),
-                'options' => array(
+                'label'         => __('Reset times activated', 'license-manager-for-woocommerce'),
+                'options'       => array(
                     'do_not_reset_on_renewal'   => __('Do no reset times activated on license keys', 'license-manager-for-woocommerce'),
                     'reset_license_on_renewal'  => __('Reset times activated to 0 on license keys', 'license-manager-for-woocommerce')
                 ),
-                'value' => $renewalResetAction
+                'value'         => $renewalResetAction
             )
         );
 
         // Dropdown "lmfwc_subscription_model_type"
         woocommerce_wp_select(
             array(
-                'id'      => 'lmfwc_subscription_model_type',
-                'class'   => 'lmfwc_subscription_model_type',
+                'id'            => 'lmfwc_subscription_model_type',
+                'class'         => 'lmfwc_subscription_model_type',
                 'wrapper_class' => $wrapperClass['lmfwc_subscription_model_type'],
-                'label'   => __('Subscription model type', 'license-manager-for-woocommerce'),
-                'description'       => __(
+                'label'         => __('Subscription model type', 'license-manager-for-woocommerce'),
+                'description'   => __(
                     'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
                     '<br><br>'.
                     'With the <b>variable usage model</b> the price for each additional activation is added to the regular subscription price at the end of the subscription period. '.
                     'Use this in combination with a license key that allows more activations than the maximum included amount.',
                     'license-manager-for-woocommerce'
                 ),
-                'desc_tip' => true,
-                'options' => array(
+                'desc_tip'      => true,
+                'options'       => array(
                     'fixed_usage_type'   => __('Fixed usage model', 'license-manager-for-woocommerce'),
                     'variable_usage_type'  => __('Variable usage model', 'license-manager-for-woocommerce')
                 ),
-                'value' => $subscriptionModelType
+                'value'         => $subscriptionModelType
             )
         );
 
@@ -133,6 +133,11 @@ class ProductData
                 'class'             => 'lmfwc_maximum_included_activations',
                 'wrapper_class'     => $wrapperClass['lmfwc_maximum_included_activations'],
                 'label'             => __('Maximum included activations', 'license-manager-for-woocommerce'),
+                'description'       => __(
+                    'The number of activations that are included in the regular subscription price.',
+                    'license-manager-for-woocommerce'
+                ),
+				'desc_tip'          => true,
                 'value'             => ($maximumIncludedActivations) ? $maximumIncludedActivations : 1,
                 'type'              => 'number',
                 'custom_attributes' => array(
@@ -153,7 +158,7 @@ class ProductData
                     'subscription' => __('WooCommerce Subscription interval', 'license-manager-for-woocommerce'),
                     'custom'       => __('Custom interval', 'license-manager-for-woocommerce')
                 ),
-                'value' => $renewalIntervalType
+                'value'         => $renewalIntervalType
             )
         );
 
@@ -187,7 +192,7 @@ class ProductData
                     'month' => __('Month(s)', 'license-manager-for-woocommerce'),
                     'year'  => __('Year(s)', 'license-manager-for-woocommerce'),
                 ),
-                'value' => $customPeriod
+                'value'         => $customPeriod
             )
         );
     }
@@ -355,7 +360,7 @@ class ProductData
                     'do_not_reset_on_renewal'   => __('Do no reset times activated on license keys', 'license-manager-for-woocommerce'),
                     'reset_license_on_renewal'  => __('Reset times activated to 0 on license keys', 'license-manager-for-woocommerce')
                 ),
-                'value' => $renewalResetAction
+                'value'         => $renewalResetAction
             )
         );
 
@@ -367,19 +372,19 @@ class ProductData
                 'wrapper_class' => $wrapperClass['lmfwc_subscription_model_type'],
                 'name'          => sprintf('lmfwc_subscription_model_type[%d]', $loop),
                 'label'         => __('Subscription model type', 'license-manager-for-woocommerce'),
-                'description'       => __(
+                'description'   => __(
                     'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
                     '<br><br>'.
                     'With the <b>variable usage model</b> the price for each additional activation is added to the regular subscription price at the end of the subscription period. '.
                     'Use this in combination with a license key that allows more activations than the maximum included amount.',
                     'license-manager-for-woocommerce'
                 ),
-                'desc_tip' => true,
-                'options' => array(
+                'desc_tip'      => true,
+                'options'       => array(
                     'fixed_usage_type'   => __('Fixed usage model', 'license-manager-for-woocommerce'),
                     'variable_usage_type'  => __('Variable usage model', 'license-manager-for-woocommerce')
                 ),
-                'value' => $subscriptionModelType
+                'value'         => $subscriptionModelType
             )
         );
 
@@ -391,6 +396,11 @@ class ProductData
                 'wrapper_class'     => $wrapperClass['lmfwc_maximum_included_activations'],
                 'name'              => sprintf('lmfwc_maximum_included_activations[%d]', $loop),
                 'label'             => __('Maximum included activations', 'license-manager-for-woocommerce'),
+                'description'       => __(
+                    'The number of activations that are included in the regular subscription price.',
+                    'license-manager-for-woocommerce'
+                ),
+				'desc_tip'          => true,
                 'value'             => ($maximumIncludedActivations) ? $maximumIncludedActivations : 1,
                 'type'              => 'number',
                 'custom_attributes' => array(
@@ -412,7 +422,7 @@ class ProductData
                     'subscription' => __('WooCommerce Subscription interval', 'license-manager-for-woocommerce'),
                     'custom'       => __('Custom interval', 'license-manager-for-woocommerce')
                 ),
-                'value' => $renewalIntervalType
+                'value'         => $renewalIntervalType
             )
         );
 
@@ -450,7 +460,7 @@ class ProductData
                     'month' => __('Month(s)', 'license-manager-for-woocommerce'),
                     'year'  => __('Year(s)', 'license-manager-for-woocommerce'),
                 ),
-                'value' => $customPeriod
+                'value'         => $customPeriod
             )
         );
 
