@@ -32,26 +32,41 @@ class ProductData
             return;
         }
 
-        $renewalAction          = get_post_meta($post->ID, 'lmfwc_subscription_renewal_action', true);
-        $renewalResetAction     = get_post_meta($post->ID, 'lmfwc_subscription_renewal_reset_action', true);
-        $renewalIntervalType    = get_post_meta($post->ID, 'lmfwc_subscription_renewal_interval_type', true);
-        $customInterval         = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
-        $customPeriod           = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
+        $renewalAction              = get_post_meta($post->ID, 'lmfwc_subscription_renewal_action', true);
+        $renewalResetAction         = get_post_meta($post->ID, 'lmfwc_subscription_renewal_reset_action', true);
+        $subscriptionModelType      = get_post_meta($post->ID, 'lmfwc_subscription_model_type', true);
+        $maximumIncludedActivations = get_post_meta($post->ID, 'lmfwc_maximum_included_activations', true);
+        $renewalIntervalType        = get_post_meta($post->ID, 'lmfwc_subscription_renewal_interval_type', true);
+        $customInterval             = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
+        $customPeriod               = get_post_meta($post->ID, 'lmfwc_subscription_renewal_custom_period', true);
 
         $wrapperClass = array(
             'lmfwc_subscription_renewal_interval_type'   => '',
             'lmfwc_subscription_renewal_reset_action' => '',
+            'lmfwc_subscription_model_type' => '',
+            'lmfwc_maximum_included_activations' => '',
             'lmfwc_subscription_renewal_custom_interval' => '',
             'lmfwc_subscription_renewal_custom_period'   => ''
         );
 
         if ($renewalAction === 'extend_existing_license') {
+            if ($renewalResetAction === 'do_not_reset_on_renewal') {
+                $wrapperClass['lmfwc_subscription_model_type']      .= ' hidden';
+                $wrapperClass['lmfwc_maximum_included_activations'] .= ' hidden';
+            } else {
+                if ($subscriptionModelType === 'fixed_usage_type') {
+                    $wrapperClass['lmfwc_maximum_included_activations'] .= ' hidden';
+                }
+            }
+
             if ($renewalIntervalType === 'subscription') {
                 $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
                 $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
             }
         } else {
-            $wrapperClass['lmfwc_subscription_renewal_reset_action']   .= ' hidden';
+            $wrapperClass['lmfwc_subscription_renewal_reset_action']    .= ' hidden';
+            $wrapperClass['lmfwc_subscription_model_type']              .= ' hidden';
+            $wrapperClass['lmfwc_maximum_included_activations']         .= ' hidden';
             $wrapperClass['lmfwc_subscription_renewal_interval_type']   .= ' hidden';
             $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
             $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
@@ -76,8 +91,8 @@ class ProductData
         // Dropdown "lmfwc_subscription_renewal_reset_action"
         woocommerce_wp_select(
             array(
-                'id'      => 'lmfwc_subscription_renewal_reset_action',
-                'class'      => 'lmfwc_subscription_renewal_reset_action',
+                'id'            => 'lmfwc_subscription_renewal_reset_action',
+                'class'         => 'lmfwc_subscription_renewal_reset_action',
                 'wrapper_class' => $wrapperClass['lmfwc_subscription_renewal_reset_action'],
                 'label'   => __('Reset times activated', 'license-manager-for-woocommerce'),
                 'options' => array(
@@ -85,6 +100,45 @@ class ProductData
                     'reset_license_on_renewal'  => __('Reset times activated to 0 on license keys', 'license-manager-for-woocommerce')
                 ),
                 'value' => $renewalResetAction
+            )
+        );
+
+        // Dropdown "lmfwc_subscription_model_type"
+        woocommerce_wp_select(
+            array(
+                'id'      => 'lmfwc_subscription_model_type',
+                'class'   => 'lmfwc_subscription_model_type',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_model_type'],
+                'label'   => __('Subscription model type', 'license-manager-for-woocommerce'),
+                'description'       => __(
+                    'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
+                    '<br><br>'.
+                    'With the <b>variable usage model</b> the price for each additional activation is added to the regular subscription price at the end of the subscription period. '.
+                    'Use this in combination with a license key that allows more activations than the maximum included amount.',
+                    'license-manager-for-woocommerce'
+                ),
+                'desc_tip' => true,
+                'options' => array(
+                    'fixed_usage_type'   => __('Fixed usage model', 'license-manager-for-woocommerce'),
+                    'variable_usage_type'  => __('Variable usage model', 'license-manager-for-woocommerce')
+                ),
+                'value' => $subscriptionModelType
+            )
+        );
+
+        // Number "lmfwc_maximum_included_activations"
+        woocommerce_wp_text_input(
+            array(
+                'id'                => 'lmfwc_maximum_included_activations',
+                'class'             => 'lmfwc_maximum_included_activations',
+                'wrapper_class'     => $wrapperClass['lmfwc_maximum_included_activations'],
+                'label'             => __('Maximum included activations', 'license-manager-for-woocommerce'),
+                'value'             => ($maximumIncludedActivations) ? $maximumIncludedActivations : 1,
+                'type'              => 'number',
+                'custom_attributes' => array(
+                    'step' => 'any',
+                    'min'  => '1'
+                )
             )
         );
 
@@ -170,6 +224,24 @@ class ProductData
             );
         }
 
+        // Update the invoice per activation action
+        if (isset($_POST['lmfwc_subscription_model_type'])) {
+            update_post_meta(
+                $postId,
+                'lmfwc_subscription_model_type',
+                sanitize_text_field($_POST['lmfwc_subscription_model_type'])
+            );
+        }
+
+        // Update the minimum activations per subscription period
+        if (isset($_POST['lmfwc_maximum_included_activations'])) {
+            update_post_meta(
+                $postId,
+                'lmfwc_maximum_included_activations',
+                sanitize_text_field($_POST['lmfwc_maximum_included_activations'])
+            );
+        }
+
         // Update the subscription renewal interval type
         if (isset($_POST['lmfwc_subscription_renewal_interval_type'])) {
             update_post_meta(
@@ -213,26 +285,41 @@ class ProductData
             return;
         }
 
-        $renewalAction       = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
-        $renewalResetAction  = get_post_meta($productId, 'lmfwc_subscription_renewal_reset_action', true);
-        $renewalIntervalType = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
-        $customInterval      = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
-        $customPeriod        = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
+        $renewalAction              = get_post_meta($productId, 'lmfwc_subscription_renewal_action', true);
+        $renewalResetAction         = get_post_meta($productId, 'lmfwc_subscription_renewal_reset_action', true);
+        $subscriptionModelType      = get_post_meta($productId, 'lmfwc_subscription_model_type', true);
+        $maximumIncludedActivations = get_post_meta($productId, 'lmfwc_maximum_included_activations', true);
+        $renewalIntervalType        = get_post_meta($productId, 'lmfwc_subscription_renewal_interval_type', true);
+        $customInterval             = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_interval', true) ?: 1;
+        $customPeriod               = get_post_meta($productId, 'lmfwc_subscription_renewal_custom_period', true);
 
         $wrapperClass = array(
-            'lmfwc_subscription_renewal_reset_action'   => 'form-row form-row-full',
+            'lmfwc_subscription_renewal_reset_action'    => 'form-row form-row-full',
+            'lmfwc_subscription_model_type'              => 'form-row form-row-full',
+            'lmfwc_maximum_included_activations'         => 'form-row form-row-full',
             'lmfwc_subscription_renewal_interval_type'   => 'form-row form-row-full',
             'lmfwc_subscription_renewal_custom_interval' => 'form-field form-row form-row-first',
             'lmfwc_subscription_renewal_custom_period'   => 'form-field form-row form-row-last'
         );
 
         if ($renewalAction === 'extend_existing_license') {
+            if ($renewalResetAction === 'do_not_reset_on_renewal') {
+                $wrapperClass['lmfwc_subscription_model_type']      .= ' hidden';
+                $wrapperClass['lmfwc_maximum_included_activations'] .= ' hidden';
+            } else {
+                if ($subscriptionModelType === 'fixed_usage_type') {
+                    $wrapperClass['lmfwc_maximum_included_activations'] .= ' hidden';
+                }
+            }
+
             if ($renewalIntervalType === 'subscription') {
                 $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
                 $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
             }
         } else {
             $wrapperClass['lmfwc_subscription_renewal_reset_action']   .= ' hidden';
+            $wrapperClass['lmfwc_subscription_model_type']              .= ' hidden';
+            $wrapperClass['lmfwc_maximum_included_activations']         .= ' hidden';
             $wrapperClass['lmfwc_subscription_renewal_interval_type']   .= ' hidden';
             $wrapperClass['lmfwc_subscription_renewal_custom_interval'] .= ' hidden';
             $wrapperClass['lmfwc_subscription_renewal_custom_period']   .= ' hidden';
@@ -269,6 +356,47 @@ class ProductData
                     'reset_license_on_renewal'  => __('Reset times activated to 0 on license keys', 'license-manager-for-woocommerce')
                 ),
                 'value' => $renewalResetAction
+            )
+        );
+
+        // Dropdown "lmfwc_subscription_model_type"
+        woocommerce_wp_select(
+            array(
+                'id'            => sprintf('lmfwc_subscription_model_type_%d', $loop),
+                'class'         => 'lmfwc_subscription_model_type',
+                'wrapper_class' => $wrapperClass['lmfwc_subscription_model_type'],
+                'name'          => sprintf('lmfwc_subscription_model_type[%d]', $loop),
+                'label'         => __('Subscription model type', 'license-manager-for-woocommerce'),
+                'description'       => __(
+                    'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
+                    '<br><br>'.
+                    'With the <b>variable usage model</b> the price for each additional activation is added to the regular subscription price at the end of the subscription period. '.
+                    'Use this in combination with a license key that allows more activations than the maximum included amount.',
+                    'license-manager-for-woocommerce'
+                ),
+                'desc_tip' => true,
+                'options' => array(
+                    'fixed_usage_type'   => __('Fixed usage model', 'license-manager-for-woocommerce'),
+                    'variable_usage_type'  => __('Variable usage model', 'license-manager-for-woocommerce')
+                ),
+                'value' => $subscriptionModelType
+            )
+        );
+
+        // Number "lmfwc_maximum_included_activations"
+        woocommerce_wp_text_input(
+            array(
+                'id'                => sprintf('lmfwc_maximum_included_activations_%d', $loop),
+                'class'             => 'lmfwc_maximum_included_activations',
+                'wrapper_class'     => $wrapperClass['lmfwc_maximum_included_activations'],
+                'name'              => sprintf('lmfwc_maximum_included_activations[%d]', $loop),
+                'label'             => __('Maximum included activations', 'license-manager-for-woocommerce'),
+                'value'             => ($maximumIncludedActivations) ? $maximumIncludedActivations : 1,
+                'type'              => 'number',
+                'custom_attributes' => array(
+                    'step' => 'any',
+                    'min'  => '1'
+                )
             )
         );
 
@@ -352,6 +480,24 @@ class ProductData
                 $variationId,
                 'lmfwc_subscription_renewal_reset_action',
                 sanitize_text_field($_POST['lmfwc_subscription_renewal_reset_action'][$i])
+            );
+        }
+    
+        // Update the invoice per activation action
+        if (isset($_POST['lmfwc_subscription_model_type'][$i])) {
+            update_post_meta(
+                $variationId,
+                'lmfwc_subscription_model_type',
+                sanitize_text_field($_POST['lmfwc_subscription_model_type'][$i])
+            );
+        }
+
+        // Update the minimum activations per subscription period
+        if (isset($_POST['lmfwc_maximum_included_activations'][$i])) {
+            update_post_meta(
+                $variationId,
+                'lmfwc_maximum_included_activations',
+                sanitize_text_field($_POST['lmfwc_maximum_included_activations'][$i])
             );
         }
 

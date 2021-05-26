@@ -20,6 +20,11 @@ class Settings {
 	 */
 	const SECTION_TOOLS = 'lmfwc_settings_tools';
 
+    /**
+     * @var string
+     */
+    const SECTION_SUBSCRIPTION = 'lmfwc_settings_subscription';
+
 	/**
 	 * Settings Constructor.
 	 */
@@ -28,6 +33,7 @@ class Settings {
 		new Settings\General();
 		new Settings\OrderStatus();
 		new Settings\Tools();
+        new Settings\Subscription();
 	}
 
 	/**
