@@ -1,3 +1,10 @@
+#### 2.4.0 - 2021-05-26
+* Update - WordPress 5.7.2 compatibility
+* Update - WooCommerce 5.3 compatibility
+* Add - Several settings for subscription
+* Add - Ability to define subscription model (`fixed usage model` and `variable usage model`) for subscription products. 
+
+
 #### 2.3.0 - 2021-04-01
 * Update - WordPress 5.6 compatibility
 * Update - WooCommerce 5.0 compatibility
