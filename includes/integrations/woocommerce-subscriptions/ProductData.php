@@ -109,7 +109,7 @@ class ProductData
                 'id'      => 'lmfwc_subscription_model_type',
                 'class'   => 'lmfwc_subscription_model_type',
                 'wrapper_class' => $wrapperClass['lmfwc_subscription_model_type'],
-                'label'   => __('Price per activation', 'license-manager-for-woocommerce'),
+                'label'   => __('Subscription model type', 'license-manager-for-woocommerce'),
                 'description'       => __(
                     'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
                     '<br><br>'.
@@ -366,7 +366,7 @@ class ProductData
                 'class'         => 'lmfwc_subscription_model_type',
                 'wrapper_class' => $wrapperClass['lmfwc_subscription_model_type'],
                 'name'          => sprintf('lmfwc_subscription_model_type[%d]', $loop),
-                'label'         => __('Price per activation', 'license-manager-for-woocommerce'),
+                'label'         => __('Subscription model type', 'license-manager-for-woocommerce'),
                 'description'       => __(
                     'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
                     '<br><br>'.
