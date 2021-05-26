@@ -28,6 +28,7 @@
             "LicenseManagerForWooCommerce\\Models\\Resources\\": "includes/models/resources",
             "LicenseManagerForWooCommerce\\Repositories\\": "includes/repositories",
             "LicenseManagerForWooCommerce\\Repositories\\Resources\\": "includes/repositories/resources",
+            "LicenseManagerForWooCommerce\\Schedules\\": "includes/schedules",
             "LicenseManagerForWooCommerce\\Settings\\": "includes/settings"
         }
     },
