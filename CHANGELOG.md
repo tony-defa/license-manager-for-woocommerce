@@ -11,14 +11,20 @@
 * Add - composer.json file to the root of the project directory. Please note that the plugin was NOT added to the composer repository.
 * Add - Plain text email templates and support.
 * Add - `Disabled` license key status. When license keys are set as disabled, they can no longer be activated via the REST API.
+* Add - License keys associated with a subscription that has been `canceled` or put `on hold` will be set to the status `Disabled`.
+* Add - API routes `/licenses/activate` and `/licenses/deactivate` extended by optional parameter.
+* Add - Activation e-mail notification added when activation count has reached a certain percentage.
+* Add - Further options to manage the way a license key is issued in combination with a subscription product.
 * Tweak - Reworked "Licenses" endpoint in "My account".
 * Tweak - Reworked all email templates.
 * Tweak - Moved the "Licenses" endpoint settings into the WooCommerce endpoint settings.
 * Tweak - Major code refactoring.
 * Tweak - Changes to the `lmfwc_rest_api_pre_response` filter. Now the `data` parameter comes first, with a total of 3 parameters: `($data, $requestMethod, $route)`
+* Tweak - License key overview shows overall activations when the license key is for a subscription product and the activations are reset for the subscription period. 
 * Fix - PHP error when editing a generator who is assigned to a deleted WooCommerce product no longer appears.
 * Fix - User licenses now properly show inside "My account - Licenses"
 * Fix - `times_activated_max` is now properly set to `null` instead of `0` when generating a new license.
+* Fix - API route `/licenses/{license_key}` now no longer returns subscriptionId arrays on `null` objects.
 
 ##### 2.2.2 - 2020-02-19
 * Update - WordPress 5.6 compatibility
