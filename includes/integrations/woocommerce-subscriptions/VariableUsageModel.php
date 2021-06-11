@@ -458,7 +458,9 @@ class VariableUsageModel
             $integer = str_replace('.', '', $integer);
             $p = (float) $integer . '.' . $fraction;
 
-            return (int) ($p / $price) ?: 1;
+            if ($price > 0) // Avoid division by zero
+                return (int) ($p / $price) ?: 1;
+            return 1;
         } catch(Exception $e) {
             return 1;
             error_log("Warning: (LMFWC) Could not determine quantity from total price string.");
