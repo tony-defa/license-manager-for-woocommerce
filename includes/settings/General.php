@@ -143,6 +143,14 @@ class General
             'lmfwc_license_keys',
             'license_keys_section'
         );
+
+        add_settings_field(
+            'lmfwc_email_notification_bcc_to_admin',
+            __('Notify Admin', 'license-manager-for-woocommerce'),
+            array($this, 'fieldEmailNotificationConsumptionBcc'),
+            'lmfwc_license_keys',
+            'license_keys_section'
+        );
     }
 
     /**
@@ -441,6 +449,35 @@ class General
             '<p class="description">%s</p>',
             __('Notify customer when the given percentage of activations is reached. Remove value to disable notifications.', 'license-manager-for-woocommerce')
         );
+        $html .= '</fieldset>';
+
+        echo $html;
+    }
+
+    /**
+     * Callback for the "lmfwc_email_notification_bcc_to_admin" field.
+     *
+     * @return void
+     */
+    public function fieldEmailNotificationConsumptionBcc()
+    {
+        $field = 'lmfwc_email_notification_bcc_to_admin';
+        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
+
+        $html = '<fieldset>';
+        $html .= sprintf('<label for="%s">', $field);
+        $html .= sprintf(
+            '<input id="%s" type="checkbox" name="lmfwc_settings_general[%s]" value="1" %s/>',
+            $field,
+            $field,
+            checked(true, $value, false)
+        );
+        $html .= sprintf(
+            '<span>%s</span>',
+            __('Send Email notification to admin as BCC as well.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</label>';
+
         $html .= '</fieldset>';
 
         echo $html;
