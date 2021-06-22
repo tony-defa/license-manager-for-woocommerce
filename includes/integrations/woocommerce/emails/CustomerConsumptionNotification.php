@@ -4,6 +4,7 @@ namespace LicenseManagerForWooCommerce\Integrations\WooCommerce\Emails;
 
 use WC_Email;
 use WP_User;
+use LicenseManagerForWooCommerce\Settings;
 
 defined('ABSPATH') || exit;
 
@@ -114,11 +115,18 @@ class CustomerConsumptionNotification extends WC_Email
         }
 
         if ($this->is_enabled() && $this->get_recipient()) {
+            $headers = $this->get_headers();
+            
+            // modify headers to send bcc to admin e-mail if required
+            if (Settings::get('lmfwc_email_notification_bcc_to_admin')) {
+                $headers .= 'BCC: ' . get_bloginfo( 'name' ) . ' <' . get_option( 'admin_email' ) . '>' . "\r\n";
+            }
+
             $sent = $this->send(
                 $this->get_recipient(),
                 $this->get_subject(),
                 $this->get_content(),
-                $this->get_headers(),
+                $headers,
                 $this->get_attachments()
             );
         }
