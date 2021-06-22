@@ -5,10 +5,11 @@ namespace LicenseManagerForWooCommerce\Integrations\WooCommerceSubscriptions;
 
 use DateTime;
 use Exception;
-use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 use WC_Order;
 use WC_Subscription;
 use WC_Subscriptions_Product;
+use LicenseManagerForWooCommerce\Schedules\NotifySchedule;
+use LicenseManagerForWooCommerce\Models\Resources\License as LicenseResourceModel;
 
 defined('ABSPATH') || exit;
 
@@ -131,6 +132,9 @@ class Order
                 } catch (Exception $e) {
                     return false;
                 }
+
+                // additionally remove consumption notification meta if it exists
+                lmfwc_delete_license_meta($license->getId(), NotifySchedule::META_NAME, 1);
             }
         }
 

@@ -24,6 +24,11 @@ class NotifySchedule
     const HOOK_NAME = 'lmfwc_consumption_almost_reached_action';
 
     /**
+     * Name of the meta key to save the info with
+     */
+    const META_NAME = 'consumption_notification_already_send';
+
+    /**
      * The start time of the scheduled event
      */
     const START_TIME = 'now';
@@ -52,7 +57,6 @@ class NotifySchedule
     {
 
         $notifyThreshold = Settings::get('lmfwc_email_notification_consumption');
-        $metaKey = 'consumption_notification_already_send';
 
         /** @var bool|LicenseResourceModel[] $licenses */
         $licenses = lmfwc_get_licenses(array(
@@ -97,7 +101,7 @@ class NotifySchedule
             $licenseId = $license->getId();
 
             /** @var bool $metaValue */
-            $metaValue = boolval(lmfwc_get_license_meta($licenseId, $metaKey, true));
+            $metaValue = boolval(lmfwc_get_license_meta($licenseId, self::META_NAME, true));
             if ($metaValue) {
                 continue;
             }
@@ -132,8 +136,8 @@ class NotifySchedule
             if ($sent) {
                 foreach ($ids as $id) {
                     // update or add meta value
-                    if (!lmfwc_update_license_meta($id, $metaKey, intval(true))) {
-                        lmfwc_add_license_meta($id, $metaKey, intval(true));
+                    if (!lmfwc_update_license_meta($id, self::META_NAME, intval(true))) {
+                        lmfwc_add_license_meta($id, self::META_NAME, intval(true));
                     }
                 }
             }
