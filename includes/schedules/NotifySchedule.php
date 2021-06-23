@@ -36,7 +36,7 @@ class NotifySchedule
     /**
      * The recurrence of the event
      */
-    const RECURRENCE = 'daily';
+    const RECURRENCE = 'hourly';
 
     /**
      * NotifySchedule constructor.
