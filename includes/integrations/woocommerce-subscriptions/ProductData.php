@@ -114,7 +114,8 @@ class ProductData
                     'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
                     '<br><br>'.
                     'With the <b>variable usage model</b> the price for each additional activation is added to the regular subscription price at the end of the subscription period. '.
-                    'Use this in combination with a license key that allows more activations than the maximum included amount.',
+                    'Use this in combination with a license key that allows more activations than the maximum included amount. '.
+                    'This will automatically change the pre-paid subscription to a post-paid subscription.',
                     'license-manager-for-woocommerce'
                 ),
                 'desc_tip'      => true,
@@ -376,7 +377,8 @@ class ProductData
                     'In a <b>fixed usage model</b> the reoccurring price of the subscription is the subscription price defined in the general section (default WooCommerce behaviour).'.
                     '<br><br>'.
                     'With the <b>variable usage model</b> the price for each additional activation is added to the regular subscription price at the end of the subscription period. '.
-                    'Use this in combination with a license key that allows more activations than the maximum included amount.',
+                    'Use this in combination with a license key that allows more activations than the maximum included amount. '.
+                    'This will automatically change the pre-paid subscription to a post-paid subscription.',
                     'license-manager-for-woocommerce'
                 ),
                 'desc_tip'      => true,
