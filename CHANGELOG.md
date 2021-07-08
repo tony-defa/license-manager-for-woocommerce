@@ -1,3 +1,7 @@
+#### 2.4.1 - 2021-07-08
+* Tweak - Variable usage models now act like a post-paid (use first pay after) subscription. This ensures that each period is billed depending on usage, either with additional activations or without. 
+* Fix - The last subscription period (after cancellation by admin or customer) is now also billed as any other period.
+
 #### 2.4.0 - 2021-05-26
 * Update - WordPress 5.7.2 compatibility
 * Update - WooCommerce 5.3 compatibility
