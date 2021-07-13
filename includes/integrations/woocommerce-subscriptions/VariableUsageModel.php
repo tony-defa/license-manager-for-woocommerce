@@ -35,9 +35,9 @@ class VariableUsageModel
         add_filter('woocommerce_subscriptions_recurring_cart_key', array($this, 'maybeExtendRecurringCartKey'), 90, 2);                     // Change recurring cart key for variable usage model subscription
         add_filter('woocommerce_subscriptions_product_price_string_inclusions', array($this, 'maybeAddIncludeOptions'), 10, 2);             // modify include array for 'woocommerce_subscriptions_product_price_string' and 'woocommerce_subscription_price_string' hook
         add_filter('woocommerce_subscriptions_product_price_string', array($this, 'maybeCreateSubscriptionsProductPriceString'), 10, 3);    // Product Price: shop, product, cart, checkout
-        add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionPriceString'), 10, 2);                     // Recurring Price: cart, checkout, order received
+        add_filter('woocommerce_subscription_price_string', array($this, 'maybeCreateSubscriptionRecurringPriceString'), 10, 2);            // Recurring Price: cart, checkout, order received
         add_filter('woocommerce_cart_subscription_string_details', array($this, 'maybeAddSubscriptionDetailFromCart'), 10, 2);              // Recurring Price: cart, checkout
-        add_filter('woocommerce_subscription_price_string_details', array($this, 'maybeAddSubscriptionDetailFromSubscription'), 10, 2);     // Recurring Price: subscriptions (admin), order received, email?
+        add_filter('woocommerce_subscription_price_string_details', array($this, 'maybeAddSubscriptionDetailFromSubscription'), 10, 2);     // Recurring Price: subscriptions (admin), order received, email
 
         // actions to activate post-paid subscriptions
         add_action('woocommerce_can_subscription_be_updated_to_on-hold', array($this, 'maybeChangeSubscriptionStatusToOnHoldOrExpired'), 10, 2);
@@ -114,7 +114,7 @@ class VariableUsageModel
         $isOnSale = $displayOptions['price'] < $displayOptions['regular_price'];
 
         // Trying to find out if the recurring amount is the string for the tax line
-        if (isset($displayOptions['recurring_amount']) && $displayOptions['price'] != 0) {
+        if (isset($displayOptions['recurring_amount']) && $displayOptions['price'] != 0 && WC()->cart) {
             foreach(WC()->cart->cart_contents as $value) {
                 if ($value['product_id'] !== $productId)
                     continue;
@@ -251,7 +251,7 @@ class VariableUsageModel
      * @param array $subscriptionDetails    an array containing certain details of the subscription 
      * @return string                       the modified $subscriptionString
      */
-    function maybeCreateSubscriptionPriceString($subscriptionString, $subscriptionDetails) 
+    function maybeCreateSubscriptionRecurringPriceString($subscriptionString, $subscriptionDetails) 
     {
         if (!isset($subscriptionDetails['use_variable_usage_type']) || $subscriptionDetails['use_variable_usage_type'] === false) {
             return $subscriptionString;
