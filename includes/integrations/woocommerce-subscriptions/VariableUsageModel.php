@@ -85,19 +85,23 @@ class VariableUsageModel
         $displayOptions['trial_length'] = false;
         $displayOptions['initial_description'] = _x('at the end of the subscription period', 'initial payment on a subscription', 'license-manager-for-woocommerce');
 
-        // 'price' is missing, when displaying the recurring amounts. 
-        // So let us copy the 'price' index from 'recurring_amount'
-        if (isset($displayOptions['recurring_amount']))
-            $displayOptions['price'] = $displayOptions['recurring_amount'];
+        // Trying to find out if the recurring amount is the string for the tax line or the recurring total with tax
+        $extractedPrice = $this->extractFloatFromPriceString($displayOptions['recurring_amount']);
+        if (isset($displayOptions['recurring_amount']) && $extractedPrice != 0 && WC()->cart) {
+            foreach(WC()->cart->cart_contents as $value) {
+                if ($value['product_id'] !== $productId)
+                    continue;
+                $displayOptions['is_recurring_tax_line'] = $value['line_tax'] === $extractedPrice;
+                $displayOptions['is_recurring_price_including_tax'] = $value['line_total'] + $value['line_tax'] === $extractedPrice;
+            }
+        }
 
-        if (isset($displayOptions['price']))
-            $displayOptions['price_string'] = $displayOptions['price'];
+        // Get tax calculation setting if missing
+        if (!isset($displayOptions['tax_calculation']))
+            $displayOptions['tax_calculation'] = get_option($this->getTaxDisplayOptionName());
 
-        $displayOptions['tax_calculation'] = isset($displayOptions['tax_calculation']) 
-            ? $displayOptions['tax_calculation'] 
-            : get_option($this->getTaxDisplayOptionName());
-
-        if ($displayOptions['tax_calculation'] === 'excl') {
+        // Get prices
+        if ($displayOptions['tax_calculation'] === 'excl' && !$displayOptions['is_recurring_price_including_tax']) {
             $displayOptions['price'] = wcs_get_price_excluding_tax($product);
             $displayOptions['regular_price'] = wcs_get_price_excluding_tax(
                 $product,
@@ -111,16 +115,12 @@ class VariableUsageModel
             );
         }
 
+        // Generate price string. With sale price if on sale
         $isOnSale = $displayOptions['price'] < $displayOptions['regular_price'];
-
-        // Trying to find out if the recurring amount is the string for the tax line
-        if (isset($displayOptions['recurring_amount']) && $displayOptions['price'] != 0 && WC()->cart) {
-            foreach(WC()->cart->cart_contents as $value) {
-                if ($value['product_id'] !== $productId)
-                    continue;
-                $displayOptions['is_recurring_tax_line'] = $value['line_tax'] === $this->extractFloatFromPriceString($displayOptions['price_string']);
-            }
-        }
+        if ($isOnSale)
+            $displayOptions['price_string'] = wc_format_sale_price($displayOptions['regular_price'] * $displayOptions['quantity'], $displayOptions['price'] * $displayOptions['quantity']);
+        else
+            $displayOptions['price_string'] = wc_price($displayOptions['price']);
 
         // get quantity of cart content if we are in cart and the display string is for multiple quantities
         if ($displayOptions['quantity'] = $this->getQuantityFromPriceString($displayOptions['price_string'], $displayOptions['price']) === 1) {
@@ -132,10 +132,6 @@ class VariableUsageModel
                 $displayOptions['quantity'] = $value['quantity'];
             }
         }
-
-        // Generate price string with sale price
-        if ($isOnSale)
-            $displayOptions['price_string'] = wc_format_sale_price($displayOptions['regular_price'] * $displayOptions['quantity'], $displayOptions['price'] * $displayOptions['quantity']);
 
         // Get included activations from product
         $displayOptions['max_activations'] = lmfwc_get_maximum_included_activations($productId);
