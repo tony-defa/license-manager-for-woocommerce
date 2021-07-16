@@ -47,7 +47,7 @@ class VariableUsageModel
         add_filter('wcs_renewal_order_items', array($this, 'maybeAddNewLineItem'), 10, 3);  // intercepts all items just before they are converted to order items
 
         // FOR DEBUG PURPOSES
-        add_action('woocommerce_subscription_status_pending-cancel', array($this, 'fakeEarlyEndOfSubscription'), 1, 1); 
+        //add_action('woocommerce_subscription_status_pending-cancel', array($this, 'fakeEarlyEndOfSubscription'), 1, 1); 
     }
 
     /**
