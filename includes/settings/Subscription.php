@@ -22,6 +22,11 @@ class Subscription
     /**
      * @var string
      */
+    public const ACTIVATE_POST_PAID_SUBSCRIPTIONS = 'lmfwc_activate_post_paid_subscriptions';
+
+    /**
+     * @var string
+     */
     public const ACTIVATION_NAME_FIELD_NAME = 'lmfwc_activation_name_string';
 
     /**
@@ -104,6 +109,14 @@ class Subscription
         );
 
         add_settings_field(
+            self::ACTIVATE_POST_PAID_SUBSCRIPTIONS,
+            __('Post-paid', 'license-manager-for-woocommerce'),
+            array($this, 'fieldActivatePostPaidSubscriptions'),
+            'lmfwc_variable_usage_model_type',
+            'variable_usage_section'
+        );
+
+        add_settings_field(
             self::ACTIVATION_NAME_FIELD_NAME,
             __('Activation name', 'license-manager-for-woocommerce'),
             array($this, 'fieldActivationNameString'),
@@ -150,6 +163,35 @@ class Subscription
             'lmfwc_variable_usage_model_type',
             'variable_usage_section'
         );
+    }
+
+    /**
+     * Callback for the "lmfwc_activate_post_paid_subscriptions" field.
+     *
+     * @return void
+     */
+    public function fieldActivatePostPaidSubscriptions()
+    {
+        $field = self::ACTIVATE_POST_PAID_SUBSCRIPTIONS;
+        (array_key_exists($field, $this->settings)) ? $value = true : $value = false;
+
+        $html = '<fieldset>';
+        $html .= sprintf('<label for="%s">', $field);
+        $html .= sprintf(
+            '<input id="%s" type="checkbox" name="'.Settings::SECTION_SUBSCRIPTION.'[%s]" value="1" %s/>',
+            $field,
+            $field,
+            checked(true, $value, false)
+        );
+        $html .= sprintf('<span>%s</span>', __('Payment is due at the end of a subscription period.', 'license-manager-for-woocommerce'));
+        $html .= '</label>';
+        $html .= sprintf(
+            '<p class="description">%s</p>',
+            __('Activates payment of the subscription at the end of the period (except for first period). This will cause the additional activation to be charged with the subscription period in which they were consumed.', 'license-manager-for-woocommerce')
+        );
+        $html .= '</fieldset>';
+
+        echo $html;
     }
 
     /**

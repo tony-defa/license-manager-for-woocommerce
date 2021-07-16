@@ -22,7 +22,6 @@ defined('ABSPATH') || exit;
 /** 
  * Transforms a subscription into a variable usage model subscription. Meaning that a subscription 
  * has a fixed price per period, with an additional amount charged for each additional activation.
- * This will also change the subscription to a post-paid subscription.
  */
 class VariableUsageModel
 {
@@ -43,13 +42,12 @@ class VariableUsageModel
         add_action('woocommerce_can_subscription_be_updated_to_on-hold', array($this, 'maybeChangeSubscriptionStatusToOnHoldOrExpired'), 10, 2);
         add_action('woocommerce_can_subscription_be_updated_to_expired', array($this, 'maybeChangeSubscriptionStatusToOnHoldOrExpired'), 10, 2);
         add_action('woocommerce_scheduled_subscription_end_of_prepaid_term', array($this, 'maybeStartProcessRenewalAtEndOfSubscription'), 10, 1);
-        add_action('woocommerce_cart_calculate_fees', array($this, 'maybeAddUpfrontSavings'), 20, 1);
 
         // calculate the subscription period total, including an extra line for additional activations if necessary
         add_filter('wcs_renewal_order_items', array($this, 'maybeAddNewLineItem'), 10, 3);  // intercepts all items just before they are converted to order items
 
         // FOR DEBUG PURPOSES
-        //add_action('woocommerce_subscription_status_pending-cancel', array($this, 'fakeEarlyEndOfSubscription'), 1, 1); 
+        add_action('woocommerce_subscription_status_pending-cancel', array($this, 'fakeEarlyEndOfSubscription'), 1, 1); 
     }
 
     /**
@@ -85,14 +83,26 @@ class VariableUsageModel
         $displayOptions['trial_length'] = false;
         $displayOptions['initial_description'] = _x('at the end of the subscription period', 'initial payment on a subscription', 'license-manager-for-woocommerce');
 
+        // 'price' is missing, when displaying the recurring amounts. 
+        // So let us copy the 'price' index from 'recurring_amount'
+        // and also put this into the 'price_string' index, so that 
+        // we have a base to work with.
+        if (isset($displayOptions['recurring_amount']))
+            $displayOptions['price'] = $displayOptions['recurring_amount'];
+        if (isset($displayOptions['price']))
+            $displayOptions['price_string'] = $displayOptions['price'];
+
         // Trying to find out if the recurring amount is the string for the tax line or the recurring total with tax
-        $extractedPrice = $this->extractFloatFromPriceString($displayOptions['recurring_amount']);
-        if (isset($displayOptions['recurring_amount']) && $extractedPrice != 0 && WC()->cart) {
-            foreach(WC()->cart->cart_contents as $value) {
-                if ($value['product_id'] !== $productId)
-                    continue;
-                $displayOptions['is_recurring_tax_line'] = $value['line_tax'] === $extractedPrice;
-                $displayOptions['is_recurring_price_including_tax'] = $value['line_total'] + $value['line_tax'] === $extractedPrice;
+        if (isset($displayOptions['recurring_amount'])) {
+            $extractedPrice = $this->extractFloatFromPriceString($displayOptions['recurring_amount']);
+            if ($extractedPrice != 0 && WC()->cart) {
+                foreach (WC()->cart->cart_contents as $value) {
+                    if ($value['product_id'] !== $productId) {
+                        continue;
+                    }
+                    $displayOptions['is_recurring_tax_line'] = $value['line_tax'] === $extractedPrice;
+                    $displayOptions['is_recurring_price_including_tax'] = $value['line_total'] + $value['line_tax'] === $extractedPrice;
+                }
             }
         }
 
@@ -101,7 +111,7 @@ class VariableUsageModel
             $displayOptions['tax_calculation'] = get_option($this->getTaxDisplayOptionName());
 
         // Get prices
-        if ($displayOptions['tax_calculation'] === 'excl' && !$displayOptions['is_recurring_price_including_tax']) {
+        if ($displayOptions['tax_calculation'] === 'excl' && !(isset($displayOptions['is_recurring_price_including_tax']) && $displayOptions['is_recurring_price_including_tax'])) {
             $displayOptions['price'] = wcs_get_price_excluding_tax($product);
             $displayOptions['regular_price'] = wcs_get_price_excluding_tax(
                 $product,
@@ -115,13 +125,6 @@ class VariableUsageModel
             );
         }
 
-        // Generate price string. With sale price if on sale
-        $isOnSale = $displayOptions['price'] < $displayOptions['regular_price'];
-        if ($isOnSale)
-            $displayOptions['price_string'] = wc_format_sale_price($displayOptions['regular_price'] * $displayOptions['quantity'], $displayOptions['price'] * $displayOptions['quantity']);
-        else
-            $displayOptions['price_string'] = wc_price($displayOptions['price']);
-
         // get quantity of cart content if we are in cart and the display string is for multiple quantities
         if ($displayOptions['quantity'] = $this->getQuantityFromPriceString($displayOptions['price_string'], $displayOptions['price']) === 1) {
             ;
@@ -132,6 +135,13 @@ class VariableUsageModel
                 $displayOptions['quantity'] = $value['quantity'];
             }
         }
+
+        // Generate price string. With sale price if on sale
+        $isOnSale = $displayOptions['price'] < $displayOptions['regular_price'];
+        if ($isOnSale)
+            $displayOptions['price_string'] = wc_format_sale_price($displayOptions['regular_price'] * $displayOptions['quantity'], $displayOptions['price'] * $displayOptions['quantity']);
+        else
+            $displayOptions['price_string'] = wc_price($displayOptions['price'] * $displayOptions['quantity']);
 
         // Get included activations from product
         $displayOptions['max_activations'] = lmfwc_get_maximum_included_activations($productId);
@@ -355,17 +365,28 @@ class VariableUsageModel
             return $newOrder;
         }
 
-        /** @var int $parentOrderId */
-        $parentOrderId = $subscription->get_parent_id();
-
         if (!$items) {
             error_log("LMFWC: Skipped order #{$newOrder->get_id()} because no items are contained.");
             return $items;
         }
+
+        /** @var int $parentOrderId */
+        $parentOrderId = $subscription->get_parent_id();
+
+        /** @var bool $isFirstRenewal */
+        $isFirstRenewal = count($subscription->get_related_orders('ids', 'renewal')) === 0;
+
+        /** @var bool $subscriptionIsEnding */
+        $subscriptionIsEnding = $subscription->get_meta('_has_ended_with_order');
+
+        // Use this variable to check if any changes were made to the original items,
+        // if no changes were made, than there is no need to recalculate totals and taxes.
+        $itemChanged = false;
         
         foreach ($items as $item) {
-            if (!$item->is_type('line_item'))
+            if (!$item->is_type('line_item')) {
                 continue;
+            }
 
             /** @var int $productId */
             if (!$productId = $item->get_variation_id()) {
@@ -375,6 +396,14 @@ class VariableUsageModel
             if (!lmfwc_is_variable_usage_model($productId)) {
                 error_log("LMFWC: Skipped item #{$item->get_id()} because product with id #{$productId} is not a licensed product, does issue a new license or does not reset activation count on renewal.");
                 continue;
+            }
+
+            if (!$item->meta_exists('_payment_due_in_period')) {
+                $paymentDue = (bool) Settings::get(Subscription::ACTIVATE_POST_PAID_SUBSCRIPTIONS, Settings::SECTION_SUBSCRIPTION)
+                    ? 'post-paid'
+                    : 'pre-paid';
+                $item->add_meta_data('_payment_due_in_period', $paymentDue);
+                $item->save_meta_data();
             }
 
             /** @var false|LicenseResourceModel[] $licenses */
@@ -387,7 +416,7 @@ class VariableUsageModel
 
             if (!$licenses) {
                 error_log("LMFWC: Skipped parent Order #{$parentOrderId} because no licenses were found.");
-                return false;
+                continue;
             }
 
             $licenseCount = count($licenses);
@@ -403,14 +432,33 @@ class VariableUsageModel
 
             /** @var LicenseResourceModel $license */
             foreach ($licenses as $license) {
-                $activationCount += $license->getTimesActivated();
+                $activationCount += (int) $license->getTimesActivated();
                 error_log("LMFWC: License activated {$license->getTimesActivated()} times.");
+            }
+
+            $paymentDue = $item->get_meta('_payment_due_in_period');
+            if (($paymentDue === 'post-paid' && $isFirstRenewal) || ($paymentDue === 'pre-paid' && $subscriptionIsEnding)) {
+                // create a new item with a discount for the first renewal
+                $nameAddition = _x('(already billed)', 'Line item name for suffix for first renewal', 'license-manager-for-woocommerce');
+                $taxes['total'] = 0;
+                $taxes['subtotal'] = 0;
+                $item->set_taxes($taxes);
+                $item->set_name($item->get_name() . ' ' . $nameAddition);
+                $item->set_subtotal(0);
+                $item->set_total(0);
+
+                $itemChanged = true;
             }
 
             if ($activationCount <= $includedActivations) {
                 error_log("LMFWC: Skipped because activation count is less or equal to the included activations.");
                 continue;
             }
+
+            if (!$newOrder->meta_exists('_has_additional_activation_item'))
+                $newOrder->add_meta_data('_has_additional_activation_item', true);
+
+            $itemChanged = true;
 
             $activationDelta = $activationCount - $includedActivations;
             $activationPrice = $subscriptionPrice / $includedActivations;
@@ -431,9 +479,6 @@ class VariableUsageModel
                 /* translators: 1: activation name (example: "Additional activations consumed") */
                 $nameAddition = sprintf(_x('Additional %1$s consumed', 'Line item name for additional activations', 'license-manager-for-woocommerce'), lmfwc_get_activation_name_string($activationDelta));
             }
-
-            if (!$newOrder->meta_exists('_has_additional_activation_item'))
-                $newOrder->add_meta_data('_has_additional_activation_item', true);
 
             // create a new item with additional activation
             $newItem = new WC_Order_Item_Product();
@@ -460,12 +505,20 @@ class VariableUsageModel
             error_log("LMFWC: The new total of the item #{$item->get_id()} is {$newTotal}.");
         }
 
+        // Lets return the original items if nothing has changed
+        if (!$itemChanged)
+            return $items;
+
         $lineItems = array_filter($items, function($it) {
             return $it->is_type('line_item');
         });
 
         $taxItems = array_filter($items, function($it) {
-            return $it->is_type('tax');
+            if ($it->is_type('tax')) {
+                $it->set_tax_total(0);
+                return true;
+            }
+            return false;
         });
 
         $lineItemTotals = 0;
@@ -479,14 +532,12 @@ class VariableUsageModel
                 $lineItemTotalsTax += $item->get_total_tax();
 
                 // add the tax totals to the corresponding tax order items
-                if ($item->get_meta('_is_additional_activation_item')) {
+                foreach ($taxItems as $taxItem) {
                     $rates = WC_Tax::get_rates($item->get_tax_class());
                     foreach ($rates as $rateId => $ignore) {
-                        foreach ($taxItems as $taxItem) {
-                            if ($taxItem->get_rate_id() === $rateId) {
-                                $tax = (float) $taxItem->get_tax_total();
-                                $taxItem->set_tax_total($tax + $item->get_total_tax());
-                            }
+                        if ($taxItem->get_rate_id() === $rateId) {
+                            $tax = (float) $taxItem->get_tax_total();
+                            $taxItem->set_tax_total($tax + $item->get_total_tax());
                         }
                     }
                 }
@@ -533,7 +584,7 @@ class VariableUsageModel
 
         if (!$items) {
             error_log("LMFWC: Skipped because there is no item in the subscription.");
-            return $subscriptionDetails;
+            return;
         }
 
         $continue = false;
@@ -561,6 +612,7 @@ class VariableUsageModel
         $order_note = _x('Status changed due to post-paid subscription. Reached end of subscription:', 'used in order note as reason for why subscription status changed for post-paid subscriptions', 'woocommerce-subscriptions');
         
         // add a meta flag that we use to ignore the status during process renewal
+        $subscription->add_meta_data('_has_ended_with_order', true);
         $subscription->add_meta_data('_ignore_can_status_be_updated', true);
         $subscription->save();
         
@@ -578,40 +630,6 @@ class VariableUsageModel
         // delete the flag we set at the beginning, because it is no longer needed.
         $subscription->delete_meta_data('_ignore_can_status_be_updated');
         $subscription->save();
-    }
-
-    /**
-     * Since there is no functionality to make subscriptions post-paid, we will add a discount
-     * at first payment for the amount of the variable usage model subscription.
-     *
-     * @param WC_Cart $cart     the current cart 
-     * @return void
-     */
-    public function maybeAddUpfrontSavings($cart)
-    {
-        if (empty($cart->recurring_cart_key)) {
-            $upFrontDiscount = 0;
-            $taxable = false;
-            $taxClass = '';
-            
-            // Loop Through cart items
-            foreach ($cart->get_cart() as $key => $cartItem) {
-                /** @var int $productId */
-                if (!$productId = $cartItem['variation_id'])
-                    $productId = $cartItem['product_id'];
-
-                if (!lmfwc_is_variable_usage_model($productId))
-                    continue;
-
-                $upFrontDiscount += $cartItem['line_total'];
-                if (get_option('woocommerce_prices_include_tax') === 'yes')
-                    $upFrontDiscount += $cartItem['line_tax'];
-                $taxable = $cartItem['data']->get_tax_status() === 'taxable';
-                $taxClass = $cartItem['data']->get_tax_class();
-            }
-
-            $cart->add_fee(_x('Up front savings', 'license-manager-for-woocommerce'), -$upFrontDiscount, $taxable, $taxClass);
-        }
     }
 
     private function addDetailBasedOnItems($subscriptionDetails, $items) 
